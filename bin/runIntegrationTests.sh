@@ -6,7 +6,7 @@ export  BASE_DIR=$( dirname "${BASE_DIR}" )
 export  SOURCE_DIRECTORY="${BASE_DIR}/src/c/main"
 
 cd "${SOURCE_DIRECTORY}"
-gcc lexicalParser.c compiler.c -o compiler
+gcc escapeSequence.c lexicalParser.c compiler.c -o compiler
 cat lexicalParser.c | ./compiler
 rm -f compiler > /dev/null
 cd "${CURRENT_DIRECTORY}"

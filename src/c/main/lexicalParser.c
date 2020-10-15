@@ -6,49 +6,104 @@
 
 #include <stdio.h>
 
+#include "escapeSequence.h"
+
 void lexicalParser(FILE *_fileInput)
 {
-    unsigned char comment = 0;
-    unsigned char string = 0;
+    int inputByte;
+    unsigned char delimitedComment = 0;
+    unsigned char delimitedChar = 0;
+    unsigned char delimitedString = 0;
     unsigned char previousByte = 0;
     unsigned char byte;
     unsigned char token[4096];
     unsigned int i = 0;
+    unsigned int j = 0;
 
-    while (EOF != (byte = getc(_fileInput)))
+    while (EOF != (inputByte = getc(_fileInput)))
     {
+        byte = (unsigned char)inputByte;
+
         /*  check for comment delimiters and content */
-        if (0 == comment && '/' == previousByte && '*' == byte)
+        if (0 == delimitedComment && 0 == delimitedChar && 0 == delimitedString && '/' == previousByte && '*' == byte)
         {
-            comment = 1;
+            delimitedComment = 1;
             i = 0;
         }
-        else if (1 == comment && '*' == previousByte && '/' == byte)
+        else if (1 == delimitedComment && '*' == previousByte && '/' == byte)
         {
             token[i - 1] = '\0';
             fprintf(stdout, "[debug] comment: %s\n", token);
-            comment = 0;
+            delimitedComment = 0;
             i = 0;
         }
-        else if (1 == comment)
+        else if (1 == delimitedComment)
         {
             token[i++] = byte;
         }
 
-        /* check for string delimiters */
-        if (0 == comment && 0 == string && '\\' != previousByte && '"' == byte)
+        /* check for character delimiters */
+        if (0 == delimitedComment && 0 == delimitedChar && 0 == delimitedString && '\'' == byte)
         {
-            string = 1;
+            delimitedChar = 1;
+            i = j = 0;
+
+            fprintf(stdout, "[debug] token: '\n");
+            continue;
+        }
+        else if (1 == delimitedChar)
+        {
+            token[i++] = byte;
+            if (2 <= i - j)
+            {
+                int charAux = escapeSequenceParse(token + j);
+
+                if (0 <= charAux)
+                {
+                    token[j++] = (unsigned char)charAux;
+                    i--;
+                }
+                else
+                {
+                    /*  the last two bytes aren't a escape sequence and current byte is the character delimiter, means the end of it */
+                    if ('\'' == byte)
+                    {
+                        token[i - 1] = '\0';
+                        delimitedChar = 0;
+
+                        fprintf(stdout, "[debug] character: '%s'\n", token);
+                        fprintf(stdout, "[debug] token: '\n");
+                    }
+                    j++;
+                }
+            }
+            //  there's a more elegant way to implement this
+            else if ('\'' == byte)
+            {
+                token[i - 1] = '\0';
+                delimitedChar = 0;
+
+                fprintf(stdout, "[debug] character: '%s'\n", token);
+                fprintf(stdout, "[debug] token: '\n");
+            }
+
+            continue;
+        }
+
+        /* check for string delimiters */
+        if (0 == delimitedComment && 0 == delimitedChar && 0 == delimitedString && '"' == byte)
+        {
+            delimitedString = 1;
             i = 0;
         }
-        else if (0 == comment && 1 == string && '\\' != previousByte && '"' == byte)
+        else if (1 == delimitedString && '\\' != previousByte && '"' == byte)
         {
             token[i] = '\0';
             fprintf(stdout, "[debug] string: \"%s\"\n", token);
-            string = 0;
+            delimitedString = 0;
             i = 0;
         }
-        else if (1 == string)
+        else if (1 == delimitedString)
         {
             token[i++] = byte;
         }
