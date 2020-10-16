@@ -22,24 +22,27 @@ void lexicalParser(FILE *_fileInput)
 
     while (EOF != (inputByte = getc(_fileInput)))
     {
-        byte = (unsigned char)inputByte;
+        token[i++] = byte = (unsigned char)inputByte;
 
         /*  check for comment delimiters and content */
         if (0 == delimitedComment && 0 == delimitedChar && 0 == delimitedString && '/' == previousByte && '*' == byte)
         {
             delimitedComment = 1;
             i = 0;
-        }
-        else if (1 == delimitedComment && '*' == previousByte && '/' == byte)
-        {
-            token[i - 1] = '\0';
-            fprintf(stdout, "[debug] comment: %s\n", token);
-            delimitedComment = 0;
-            i = 0;
+            continue;
         }
         else if (1 == delimitedComment)
         {
-            token[i++] = byte;
+            if ('*' == previousByte && '/' == byte)
+            {
+                token[i - 2] = '\0';
+                delimitedComment = 0;
+                i = 0;
+                previousByte = 0;
+
+                fprintf(stdout, "[debug] comment: %s\n", token);
+                continue;
+            }
         }
 
         /* check for character delimiters */
@@ -53,40 +56,31 @@ void lexicalParser(FILE *_fileInput)
         }
         else if (1 == delimitedChar)
         {
-            token[i++] = byte;
             if (2 <= i - j)
             {
+                /*  check if the last two bytes are an escape sequence */
                 int charAux = escapeSequenceParse(token + j);
 
                 if (0 <= charAux)
                 {
                     token[j++] = (unsigned char)charAux;
                     i--;
+                    continue;
                 }
-                else
-                {
-                    /*  the last two bytes aren't a escape sequence and current byte is the character delimiter, means the end of it */
-                    if ('\'' == byte)
-                    {
-                        token[i - 1] = '\0';
-                        delimitedChar = 0;
 
-                        fprintf(stdout, "[debug] character: '%s'\n", token);
-                        fprintf(stdout, "[debug] token: '\n");
-                    }
-                    j++;
-                }
+                j++;
             }
-            //  there's a more elegant way to implement this
-            else if ('\'' == byte)
+
+            if ('\'' == byte)
             {
                 token[i - 1] = '\0';
                 delimitedChar = 0;
+                i = 0;
+                previousByte = 0;
 
                 fprintf(stdout, "[debug] character: '%s'\n", token);
                 fprintf(stdout, "[debug] token: '\n");
             }
-
             continue;
         }
 
@@ -94,20 +88,61 @@ void lexicalParser(FILE *_fileInput)
         if (0 == delimitedComment && 0 == delimitedChar && 0 == delimitedString && '"' == byte)
         {
             delimitedString = 1;
-            i = 0;
-        }
-        else if (1 == delimitedString && '\\' != previousByte && '"' == byte)
-        {
-            token[i] = '\0';
-            fprintf(stdout, "[debug] string: \"%s\"\n", token);
-            delimitedString = 0;
-            i = 0;
+            i = j = 0;
+
+            fprintf(stdout, "[debug] token: \"\n");
+            continue;
         }
         else if (1 == delimitedString)
         {
-            token[i++] = byte;
+            if (2 <= i - j)
+            {
+                /*  check if the last two bytes are an escape sequence */
+                int charAux = escapeSequenceParse(token + j);
+
+                if (0 <= charAux)
+                {
+                    token[j++] = (unsigned char)charAux;
+                    i--;
+                    continue;
+                }
+
+                j++;
+            }
+
+            if ('"' == byte)
+            {
+                token[i - 1] = '\0';
+                delimitedString = 0;
+                i = 0;
+                previousByte = 0;
+
+                fprintf(stdout, "[debug] string: \"%s\"\n", token);
+                fprintf(stdout, "[debug] token: \"\n");
+            }
+            continue;
         }
 
+        /*  check for token delimiters */
+        if (0 == delimitedComment && 0 == delimitedChar && 0 == delimitedString)
+        {
+            if (' ' == byte || '\t' == byte || '\n' == byte)
+            {
+                if (1 < i)
+                {
+                    token[i - 1] = '\0';
+                    previousByte = 0;
+                    i = 0;
+
+                    fprintf(stdout, "[debug] token: %s\n", token);
+                    continue;
+                }
+                else
+                {
+                    i--;
+                }
+            }
+        }
         previousByte = byte;
     }
 }

@@ -15,8 +15,8 @@ int escapeSequenceParse(char *_sequence)
         return '\\';
     if ('\'' == _sequence[1])
         return '\'';
-    if ('\"' == _sequence[1])
-        return '\"';
+    if ('"' == _sequence[1])
+        return '"';
     if ('n' == _sequence[1])
         return '\n';
     if ('t' == _sequence[1])
@@ -24,5 +24,6 @@ int escapeSequenceParse(char *_sequence)
     if ('0' == _sequence[1])
         return '\0';
 
+    /*  return -2 if it's an invalid escape sequence */
     return -2;
 }
