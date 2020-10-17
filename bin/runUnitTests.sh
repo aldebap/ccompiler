@@ -1,9 +1,12 @@
 #!  /usr/bin/ksh
 
 export  CURRENT_DIRECTORY="$( pwd )"
-export  BASE_DIR=$( dirname "$0" )
-export  TEST_DIRECTORY="${BASE_DIR}/src/c/test"
-export  SOURCE_DIRECTORY="${BASE_DIR}/src/c/main"
+export  BASE_DIR=$( dirname "${CURRENT_DIRECTORY}/$0" )
+export  BASE_DIR=$( dirname "${BASE_DIR}" )
+export  SOURCE_DIRECTORY="${BASE_DIR}/src/c/test"
 
-cd "${TEST_DIRECTORY}"
+cd "${SOURCE_DIRECTORY}"
+gcc -I../main test_escapeSequence.c ../main/escapeSequence.c -o test_escapeSequence -lcmocka
+./test_escapeSequence
+rm -f test_escapeSequence > /dev/null
 cd "${CURRENT_DIRECTORY}"
