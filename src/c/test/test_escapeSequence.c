@@ -71,7 +71,8 @@ int main()
         cmocka_unit_test(testCase_newLineEscapeSequence),
         cmocka_unit_test(testCase_tabEscapeSequence),
         cmocka_unit_test(testCase_terminatorEscapeSequence),
-        cmocka_unit_test(testCase_invalidEscapeSequence)};
+        cmocka_unit_test(testCase_invalidEscapeSequence),
+    };
 
     return cmocka_run_group_tests(testCases, NULL, NULL);
 }

@@ -8,13 +8,42 @@
 
 #include "lexicalParser.h"
 
-void main(int _argc, char *_argv[])
+int compiler(int _argc, char *_argv[])
 {
-    FILE *sourceFile;
+    char *fileNameList[_argc];
+    unsigned int fileNameListSize = 0;
+    unsigned int i = 1;
 
-    if (1 == _argc)
+    /*  parse the execution arguments */
+    for (; i < _argc; i++)
     {
-        sourceFile = stdin;
-        lexicalParser(sourceFile);
+        if ('-' == _argv[i][0])
+        {
+            //  TODO: implement the validation of the arguments
+            fprintf(stderr, "[debug] execution argument: %s\n", _argv[i] + 1);
+        }
+        else
+        {
+            fileNameList[fileNameListSize++] = _argv[i];
+        }
     }
+
+    /*  abort if there are no files to compile */
+    if (0 == fileNameListSize)
+    {
+        fprintf(stderr, "%s: fatal error: no input files\n", _argv[0]);
+        return -1;
+    }
+
+    /* compile each input files */
+    for (i = 0; i < fileNameListSize; i++)
+    {
+        FILE *sourceFile;
+
+        sourceFile = fopen(fileNameList[i], "r");
+        lexicalParser(sourceFile);
+        fclose(sourceFile);
+    }
+
+    return 0;
 }
