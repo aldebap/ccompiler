@@ -9,18 +9,12 @@ export CMOCKA_MESSAGE_OUTPUT=STDOUT
 
 cd "${SOURCE_DIRECTORY}"
 
-#   test compiler.c functions
-export  TEST_FILE='test_compiler'
+#   run all unit tests
+export  UNIT_TESTS_FILES='runAllTests.c test_compiler.c test_escapeSequence.c'
+export  SOURCE_FILES='../main/compiler.c ../main/lexicalParser.c ../main/escapeSequence.c'
 
-gcc -I../main "${TEST_FILE}.c" ../main/compiler.c ../main/lexicalParser.c ../main/escapeSequence.c -o "${TEST_FILE}" -lcmocka
-./"${TEST_FILE}"
-rm -f "${TEST_FILE}" > /dev/null
-
-#   test escapeSequence.c functions
-export  TEST_FILE='test_escapeSequence'
-
-gcc -I../main "${TEST_FILE}.c" ../main/escapeSequence.c -o "${TEST_FILE}" -lcmocka
-./"${TEST_FILE}"
-rm -f "${TEST_FILE}" > /dev/null
+gcc -I../main ${UNIT_TESTS_FILES} ${SOURCE_FILES} -o runAllTests -lcmocka
+./runAllTests
+rm -f runAllTests > /dev/null
 
 cd "${CURRENT_DIRECTORY}"

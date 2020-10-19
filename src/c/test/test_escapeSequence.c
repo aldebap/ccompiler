@@ -61,18 +61,18 @@ static void testCase_invalidEscapeSequence()
 }
 
 /*  entry function - run all test cases */
-int main()
+int runEscapeSequenceTests()
 {
     const struct CMUnitTest testCases[] = {
-        cmocka_unit_test(testCase_nonEscapeSequence),
-        cmocka_unit_test(testCase_backSlashEscapeSequence),
-        cmocka_unit_test(testCase_singleQuotesEscapeSequence),
-        cmocka_unit_test(testCase_doubleQuotesEscapeSequence),
-        cmocka_unit_test(testCase_newLineEscapeSequence),
-        cmocka_unit_test(testCase_tabEscapeSequence),
-        cmocka_unit_test(testCase_terminatorEscapeSequence),
-        cmocka_unit_test(testCase_invalidEscapeSequence),
+        {"test case 001 - non escaping sequence", testCase_nonEscapeSequence, NULL, NULL},
+        {"test case 002 - backslash escaping sequence", testCase_backSlashEscapeSequence, NULL, NULL},
+        {"test case 003 - single quotes escaping sequence", testCase_singleQuotesEscapeSequence, NULL, NULL},
+        {"test case 004 - double quotes escaping sequence", testCase_doubleQuotesEscapeSequence, NULL, NULL},
+        {"test case 005 - new line escaping sequence", testCase_newLineEscapeSequence, NULL, NULL},
+        {"test case 006 - tab escaping sequence", testCase_tabEscapeSequence, NULL, NULL},
+        {"test case 007 - terminator escaping sequence", testCase_terminatorEscapeSequence, NULL, NULL},
+        {"test case 008 - invalid escaping sequence", testCase_invalidEscapeSequence, NULL, NULL},
     };
 
-    return cmocka_run_group_tests(testCases, NULL, NULL);
+    return cmocka_run_group_tests_name("escapeSequence.c tests", testCases, NULL, NULL);
 }

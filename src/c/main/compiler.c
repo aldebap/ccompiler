@@ -1,23 +1,30 @@
 /*
-    Entry point for the C Compiler
+    Main function for the C Compiler
 
     13-oct-2020 by aldebap
 */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "lexicalParser.h"
+#include "preProcessor.h"
 
 int compiler(int _argc, char *_argv[])
 {
     char *fileNameList[_argc];
     unsigned int fileNameListSize = 0;
+    unsigned char trace = 0;
     unsigned int i = 1;
 
     /*  parse the execution arguments */
     for (; i < _argc; i++)
     {
-        if ('-' == _argv[i][0])
+        if (0 == strncmp("--trace", _argv[i], 8))
+        {
+            trace = 1;
+        }
+        else if ('-' == _argv[i][0])
         {
             //  TODO: implement the validation of the arguments
             fprintf(stderr, "[debug] execution argument: %s\n", _argv[i] + 1);
@@ -41,7 +48,7 @@ int compiler(int _argc, char *_argv[])
         FILE *sourceFile;
 
         sourceFile = fopen(fileNameList[i], "r");
-        lexicalParser(sourceFile);
+        lexicalParser(sourceFile, trace);
         fclose(sourceFile);
     }
 

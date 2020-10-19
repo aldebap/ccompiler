@@ -8,7 +8,7 @@
 
 #include "escapeSequence.h"
 
-void lexicalParser(FILE *_fileInput)
+void lexicalParser(FILE *_fileInput, unsigned char _trace)
 {
     int inputByte;
     unsigned char delimitedComment = 0;
@@ -40,7 +40,8 @@ void lexicalParser(FILE *_fileInput)
                 i = 0;
                 previousByte = 0;
 
-                fprintf(stdout, "[debug] comment: %s\n", token);
+                if (_trace)
+                    fprintf(stdout, "[trace] comment: %s\n", token);
                 continue;
             }
         }
@@ -51,7 +52,8 @@ void lexicalParser(FILE *_fileInput)
             delimitedChar = 1;
             i = j = 0;
 
-            fprintf(stdout, "[debug] token: '\n");
+            if (_trace)
+                fprintf(stdout, "[trace] token: '\n");
             continue;
         }
         else if (1 == delimitedChar)
@@ -78,8 +80,11 @@ void lexicalParser(FILE *_fileInput)
                 i = 0;
                 previousByte = 0;
 
-                fprintf(stdout, "[debug] character: '%s'\n", token);
-                fprintf(stdout, "[debug] token: '\n");
+                if (_trace)
+                {
+                    fprintf(stdout, "[trace] character: '%s'\n", token);
+                    fprintf(stdout, "[trace] token: '\n");
+                }
             }
             continue;
         }
@@ -90,7 +95,8 @@ void lexicalParser(FILE *_fileInput)
             delimitedString = 1;
             i = j = 0;
 
-            fprintf(stdout, "[debug] token: \"\n");
+            if (_trace)
+                fprintf(stdout, "[trace] token: \"\n");
             continue;
         }
         else if (1 == delimitedString)
@@ -117,8 +123,11 @@ void lexicalParser(FILE *_fileInput)
                 i = 0;
                 previousByte = 0;
 
-                fprintf(stdout, "[debug] string: \"%s\"\n", token);
-                fprintf(stdout, "[debug] token: \"\n");
+                if (_trace)
+                {
+                    fprintf(stdout, "[trace] string: \"%s\"\n", token);
+                    fprintf(stdout, "[trace] token: \"\n");
+                }
             }
             continue;
         }
@@ -134,7 +143,8 @@ void lexicalParser(FILE *_fileInput)
                     previousByte = 0;
                     i = 0;
 
-                    fprintf(stdout, "[debug] token: %s\n", token);
+                    if (_trace)
+                        fprintf(stdout, "[trace] token: %s\n", token);
                     continue;
                 }
                 else

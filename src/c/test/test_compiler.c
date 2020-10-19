@@ -9,6 +9,7 @@
 #include <setjmp.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <cmocka.h>
 
 #include "compiler.h"
@@ -17,8 +18,26 @@
 static void testCase_noFileNames()
 {
     char *argv[] = {"compiler"};
+    char redirectStderrFileName[] = "redirectStderr";
+    FILE *stderrFile;
 
+    /*  redirect stderr to a file and call compiler() function */
+    stderrFile = fopen(redirectStderrFileName, "w");
+    dup2(fileno(stderrFile), fileno(stderr));
     assert_int_equal(compiler(1, argv), -1);
+    fclose(stderrFile);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    stderrFile = fopen(redirectStderrFileName, "r");
+    fgets(output, sizeof(output), stderrFile);
+    fclose(stderrFile);
+
+    assert_string_equal(output, "compiler: fatal error: no input files\n");
+
+    remove(redirectStderrFileName);
 }
 
 /*  test case 002 - single file name */
@@ -35,13 +54,29 @@ static void testCase_singleFileName()
     remove(argv[1]);
 }
 
+/*  test case 003 - trace on */
+static void testCase_traceOn()
+{
+    char *argv[] = {"compiler", "--trace", "sourceFile.c"};
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[2], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    assert_int_equal(compiler(3, argv), 0);
+    remove(argv[2]);
+}
+/*  TODO: to better test the compiler function, should create a mock for lexicalParser() to validate the results */
+
 /*  entry function - run all test cases */
-int main()
+int runCompilerTests()
 {
     const struct CMUnitTest testCases[] = {
-        cmocka_unit_test(testCase_noFileNames),
-        cmocka_unit_test(testCase_singleFileName),
+        {"test case 001 - no file names", testCase_noFileNames, NULL, NULL},
+        {"test case 002 - single file name", testCase_singleFileName, NULL, NULL},
+        {"test case 003 - trace on", testCase_traceOn, NULL, NULL},
     };
 
-    return cmocka_run_group_tests(testCases, NULL, NULL);
+    return cmocka_run_group_tests_name("compiler.c tests", testCases, NULL, NULL);
 }

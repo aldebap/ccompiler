@@ -4,4 +4,4 @@
     13-oct-2020 by aldebap
 */
 
-void lexicalParser(FILE *_fileInput);
+void lexicalParser(FILE *_fileInput, unsigned char _trace);
