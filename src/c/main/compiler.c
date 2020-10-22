@@ -4,6 +4,7 @@
     13-oct-2020 by aldebap
 */
 
+#include <sys/stat.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -45,7 +46,20 @@ int compiler(int _argc, char *_argv[])
     /* compile each input files */
     for (i = 0; i < fileNameListSize; i++)
     {
+        struct stat sourceFileAttributes;
         FILE *sourceFile;
+
+        /*  check if all file names are for valid files */
+        if (-1 == stat(fileNameList[i], &sourceFileAttributes))
+        {
+            fprintf(stderr, "%s: error: %s: no such file\n", _argv[0], fileNameList[i]);
+            return -1;
+        }
+        if (!S_ISREG(sourceFileAttributes.st_mode))
+        {
+            fprintf(stderr, "%s: error: %s: not a regular file\n", _argv[0], fileNameList[i]);
+            return -1;
+        }
 
         sourceFile = fopen(fileNameList[i], "r");
         lexicalParser(sourceFile, trace);

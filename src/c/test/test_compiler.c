@@ -24,7 +24,7 @@ static void testCase_noFileNames()
     /*  redirect stderr to a file and call compiler() function */
     stderrFile = fopen(redirectStderrFileName, "w");
     dup2(fileno(stderrFile), fileno(stderr));
-    assert_int_equal(compiler(1, argv), -1);
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), -1);
     fclose(stderrFile);
 
     /*  check the results from redirected file */
@@ -40,7 +40,59 @@ static void testCase_noFileNames()
     remove(redirectStderrFileName);
 }
 
-/*  test case 002 - single file name */
+/*  test case 002 - file not found */
+static void testCase_fileNotFound()
+{
+    char *argv[] = {"compiler", "testCase002"};
+    char redirectStderrFileName[] = "redirectStderr";
+    FILE *stderrFile;
+
+    /*  redirect stderr to a file and call compiler() function */
+    stderrFile = fopen(redirectStderrFileName, "w");
+    dup2(fileno(stderrFile), fileno(stderr));
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), -1);
+    fclose(stderrFile);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    stderrFile = fopen(redirectStderrFileName, "r");
+    fgets(output, sizeof(output), stderrFile);
+    fclose(stderrFile);
+
+    assert_string_equal(output, "compiler: error: testCase002: no such file\n");
+
+    remove(redirectStderrFileName);
+}
+
+/*  test case 003 - not a regular file */
+static void testCase_notRegularFile()
+{
+    char *argv[] = {"compiler", "."};
+    char redirectStderrFileName[] = "redirectStderr";
+    FILE *stderrFile;
+
+    /*  redirect stderr to a file and call compiler() function */
+    stderrFile = fopen(redirectStderrFileName, "w");
+    dup2(fileno(stderrFile), fileno(stderr));
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), -1);
+    fclose(stderrFile);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    stderrFile = fopen(redirectStderrFileName, "r");
+    fgets(output, sizeof(output), stderrFile);
+    fclose(stderrFile);
+
+    assert_string_equal(output, "compiler: error: .: not a regular file\n");
+
+    remove(redirectStderrFileName);
+}
+
+/*  test case 004 - single file name */
 static void testCase_singleFileName()
 {
     char *argv[] = {"compiler", "sourceFile.c"};
@@ -50,11 +102,11 @@ static void testCase_singleFileName()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    assert_int_equal(compiler(2, argv), 0);
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
     remove(argv[1]);
 }
 
-/*  test case 003 - trace on */
+/*  test case 005 - trace on */
 static void testCase_traceOn()
 {
     char *argv[] = {"compiler", "--trace", "sourceFile.c"};
@@ -64,7 +116,7 @@ static void testCase_traceOn()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    assert_int_equal(compiler(3, argv), 0);
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
     remove(argv[2]);
 }
 /*  TODO: to better test the compiler function, should create a mock for lexicalParser() to validate the results */
@@ -74,7 +126,9 @@ int runCompilerTests()
 {
     const struct CMUnitTest testCases[] = {
         {"test case 001 - no file names", testCase_noFileNames, NULL, NULL},
-        {"test case 002 - single file name", testCase_singleFileName, NULL, NULL},
+        {"test case 002 - file not found", testCase_fileNotFound, NULL, NULL},
+        {"test case 003 - not a regular file", testCase_notRegularFile, NULL, NULL},
+        {"test case 004 - single file name", testCase_singleFileName, NULL, NULL},
         {"test case 003 - trace on", testCase_traceOn, NULL, NULL},
     };
 
