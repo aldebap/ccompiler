@@ -21,7 +21,15 @@ int compiler(int _argc, char *_argv[])
     /*  parse the execution arguments */
     for (; i < _argc; i++)
     {
-        if (0 == strncmp("--trace", _argv[i], 8))
+        if (0 == strncmp("--help", _argv[i], 7))
+        {
+            fprintf(stdout, "Usage: %s [options] file...\n", _argv[0]);
+            fprintf(stdout, "  --help   Display this information.\n");
+            fprintf(stdout, "  --trace  Display detailed trace information of compiler execution.\n");
+
+            return 0;
+        }
+        else if (0 == strncmp("--trace", _argv[i], 8))
         {
             trace = 1;
         }
@@ -53,12 +61,12 @@ int compiler(int _argc, char *_argv[])
         if (-1 == stat(fileNameList[i], &sourceFileAttributes))
         {
             fprintf(stderr, "%s: error: %s: no such file\n", _argv[0], fileNameList[i]);
-            return -1;
+            continue;
         }
         if (!S_ISREG(sourceFileAttributes.st_mode))
         {
             fprintf(stderr, "%s: error: %s: not a regular file\n", _argv[0], fileNameList[i]);
-            return -1;
+            continue;
         }
 
         sourceFile = fopen(fileNameList[i], "r");

@@ -13,7 +13,7 @@ cd "${SOURCE_DIRECTORY}"
 export  UNIT_TESTS_FILES='runAllTests.c test_compiler.c test_escapeSequence.c'
 export  SOURCE_FILES='../main/compiler.c ../main/lexicalParser.c ../main/escapeSequence.c'
 
-gcc -I../main ${UNIT_TESTS_FILES} ${SOURCE_FILES} -o runAllTests -lcmocka
+gcc -I../main -Wl,--wrap=lexicalParser ${UNIT_TESTS_FILES} ${SOURCE_FILES} -o runAllTests -lcmocka
 ./runAllTests
 rm -f runAllTests > /dev/null
 
