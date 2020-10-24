@@ -20,6 +20,11 @@ void __wrap_lexicalParser(FILE *_fileInput, unsigned char _trace)
     check_expected(_fileInput);
     check_expected(_trace);
 
+    /*  redirect to stdout the first line of input file */
+    char output[1024];
+    fgets(output, sizeof(output), _fileInput);
+    fprintf(stdout, "%s", output);
+
     return;
 }
 
@@ -27,11 +32,11 @@ void __wrap_lexicalParser(FILE *_fileInput, unsigned char _trace)
 static void testCase_help()
 {
     char *argv[] = {"compiler", "--help"};
-    char redirectStdoutFileName[] = "redirectStdout";
-    FILE *stdoutFile;
 
     /*  redirect stdout to a file and call compiler() function */
     int originalStdout = dup(STDOUT_FILENO);
+    char redirectStdoutFileName[] = "redirectStdout";
+    FILE *stdoutFile;
 
     stdoutFile = fopen(redirectStdoutFileName, "w");
     dup2(fileno(stdoutFile), STDOUT_FILENO);
@@ -56,6 +61,8 @@ static void testCase_help()
 static void testCase_traceOn()
 {
     char *argv[] = {"compiler", "--trace", "sourceFile.c"};
+
+    /*  generate a source file */
     FILE *sourceFile;
 
     sourceFile = fopen(argv[2], "w");
@@ -70,18 +77,50 @@ static void testCase_traceOn()
     remove(argv[2]);
 }
 
-/*  test case 003 - no file names */
-static void testCase_noFileNames()
+/*  test case 003 - invalid argument */
+static void testCase_invalidArgument()
 {
-    char *argv[] = {"compiler"};
+    char *argv[] = {"compiler", "--invalidOption"};
+
+    /*  redirect stderr to a file and call compiler() function */
+    int originalStderr = dup(STDERR_FILENO);
     char redirectStderrFileName[] = "redirectStderr";
     FILE *stderrFile;
 
-    /*  redirect stderr to a file and call compiler() function */
     stderrFile = fopen(redirectStderrFileName, "w");
-    dup2(fileno(stderrFile), fileno(stderr));
+    dup2(fileno(stderrFile), STDERR_FILENO);
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), -1);
     fclose(stderrFile);
+    dup2(originalStderr, STDERR_FILENO);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    stderrFile = fopen(redirectStderrFileName, "r");
+    fgets(output, sizeof(output), stderrFile);
+    fclose(stderrFile);
+
+    assert_string_equal(output, "compiler: error: unrecognized command line option '--invalidOption'\n");
+
+    remove(redirectStderrFileName);
+}
+
+/*  test case 004 - no file names */
+static void testCase_noFileNames()
+{
+    char *argv[] = {"compiler"};
+
+    /*  redirect stderr to a file and call compiler() function */
+    int originalStderr = dup(STDERR_FILENO);
+    char redirectStderrFileName[] = "redirectStderr";
+    FILE *stderrFile;
+
+    stderrFile = fopen(redirectStderrFileName, "w");
+    dup2(fileno(stderrFile), STDERR_FILENO);
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), -1);
+    fclose(stderrFile);
+    dup2(originalStderr, STDERR_FILENO);
 
     /*  check the results from redirected file */
     char output[1024];
@@ -96,18 +135,21 @@ static void testCase_noFileNames()
     remove(redirectStderrFileName);
 }
 
-/*  test case 004 - file not found */
+/*  test case 005 - file not found */
 static void testCase_fileNotFound()
 {
     char *argv[] = {"compiler", "testCase002"};
+
+    /*  redirect stderr to a file and call compiler() function */
+    int originalStderr = dup(STDERR_FILENO);
     char redirectStderrFileName[] = "redirectStderr";
     FILE *stderrFile;
 
-    /*  redirect stderr to a file and call compiler() function */
     stderrFile = fopen(redirectStderrFileName, "w");
-    dup2(fileno(stderrFile), fileno(stderr));
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    dup2(fileno(stderrFile), STDERR_FILENO);
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), -1);
     fclose(stderrFile);
+    dup2(originalStderr, STDERR_FILENO);
 
     /*  check the results from redirected file */
     char output[1024];
@@ -122,18 +164,21 @@ static void testCase_fileNotFound()
     remove(redirectStderrFileName);
 }
 
-/*  test case 005 - not a regular file */
+/*  test case 006 - not a regular file */
 static void testCase_notRegularFile()
 {
     char *argv[] = {"compiler", "."};
+
+    /*  redirect stderr to a file and call compiler() function */
+    int originalStderr = dup(STDERR_FILENO);
     char redirectStderrFileName[] = "redirectStderr";
     FILE *stderrFile;
 
-    /*  redirect stderr to a file and call compiler() function */
     stderrFile = fopen(redirectStderrFileName, "w");
-    dup2(fileno(stderrFile), fileno(stderr));
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    dup2(fileno(stderrFile), STDERR_FILENO);
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), -1);
     fclose(stderrFile);
+    dup2(originalStderr, STDERR_FILENO);
 
     /*  check the results from redirected file */
     char output[1024];
@@ -148,17 +193,45 @@ static void testCase_notRegularFile()
     remove(redirectStderrFileName);
 }
 
-/*  test case 006 - single file name */
+/*  test case 007 - single file name */
 static void testCase_singleFileName()
 {
     char *argv[] = {"compiler", "sourceFile.c"};
+
+    /*  generate a source file */
     FILE *sourceFile;
 
     sourceFile = fopen(argv[1], "w");
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
+    /*  redirect stdout to a file and call compiler() function */
+    int originalStdout = dup(STDOUT_FILENO);
+    char redirectStdoutFileName[] = "redirectStdout";
+    FILE *stdoutFile;
+
+    stdoutFile = fopen(redirectStdoutFileName, "w");
+    dup2(fileno(stdoutFile), STDOUT_FILENO);
+
+    /*  set the expected values for the wrap lexicalParser() function */
+    expect_any(__wrap_lexicalParser, _fileInput);
+    expect_value(__wrap_lexicalParser, _trace, 0);
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+
+    fclose(stdoutFile);
+    dup2(originalStdout, STDOUT_FILENO);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    stdoutFile = fopen(redirectStdoutFileName, "r");
+    fgets(output, sizeof(output), stdoutFile);
+    fclose(stdoutFile);
+
+    assert_string_equal(output, "/* test file with just a comment */\n");
+
+    remove(redirectStdoutFileName);
     remove(argv[1]);
 }
 
@@ -168,10 +241,11 @@ int runCompilerTests()
     const struct CMUnitTest testCases[] = {
         {"test case 001 - help", testCase_help, NULL, NULL},
         {"test case 002 - trace on", testCase_traceOn, NULL, NULL},
-        {"test case 003 - no file names", testCase_noFileNames, NULL, NULL},
-        {"test case 004 - file not found", testCase_fileNotFound, NULL, NULL},
-        {"test case 005 - not a regular file", testCase_notRegularFile, NULL, NULL},
-        {"test case 006 - single file name", testCase_singleFileName, NULL, NULL},
+        {"test case 003 - invalid option argument", testCase_invalidArgument, NULL, NULL},
+        {"test case 004 - no file names", testCase_noFileNames, NULL, NULL},
+        {"test case 005 - file not found", testCase_fileNotFound, NULL, NULL},
+        {"test case 006 - not a regular file", testCase_notRegularFile, NULL, NULL},
+        {"test case 007 - single file name", testCase_singleFileName, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("compiler.c tests", testCases, NULL, NULL);

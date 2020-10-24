@@ -29,19 +29,32 @@ int compiler(int _argc, char *_argv[])
 
             return 0;
         }
-        else if (0 == strncmp("--trace", _argv[i], 8))
+        if (0 == strncmp("--trace", _argv[i], 8))
         {
             trace = 1;
+            continue;
         }
-        else if ('-' == _argv[i][0])
+        if ('-' == _argv[i][0])
         {
-            //  TODO: implement the validation of the arguments
-            fprintf(stderr, "[debug] execution argument: %s\n", _argv[i] + 1);
+            fprintf(stderr, "%s: error: unrecognized command line option '%s'\n", _argv[0], _argv[i]);
+            continue;
         }
-        else
+
+        /*  check if the file name argument points to a valid file */
+        struct stat inputFileAttributes;
+
+        if (-1 == stat(_argv[i], &inputFileAttributes))
         {
-            fileNameList[fileNameListSize++] = _argv[i];
+            fprintf(stderr, "%s: error: %s: no such file\n", _argv[0], _argv[i]);
+            continue;
         }
+        if (!S_ISREG(inputFileAttributes.st_mode))
+        {
+            fprintf(stderr, "%s: error: %s: not a regular file\n", _argv[0], _argv[i]);
+            continue;
+        }
+
+        fileNameList[fileNameListSize++] = _argv[i];
     }
 
     /*  abort if there are no files to compile */
@@ -54,20 +67,7 @@ int compiler(int _argc, char *_argv[])
     /* compile each input files */
     for (i = 0; i < fileNameListSize; i++)
     {
-        struct stat sourceFileAttributes;
         FILE *sourceFile;
-
-        /*  check if all file names are for valid files */
-        if (-1 == stat(fileNameList[i], &sourceFileAttributes))
-        {
-            fprintf(stderr, "%s: error: %s: no such file\n", _argv[0], fileNameList[i]);
-            continue;
-        }
-        if (!S_ISREG(sourceFileAttributes.st_mode))
-        {
-            fprintf(stderr, "%s: error: %s: not a regular file\n", _argv[0], fileNameList[i]);
-            continue;
-        }
 
         sourceFile = fopen(fileNameList[i], "r");
         lexicalParser(sourceFile, trace);
