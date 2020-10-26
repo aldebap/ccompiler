@@ -11,7 +11,7 @@ cd "${SOURCE_DIRECTORY}"
 
 #   run all unit tests
 export  UNIT_TESTS_FILES='runAllTests.c test_compiler.c test_escapeSequence.c'
-export  SOURCE_FILES='../main/compiler.c ../main/lexicalParser.c ../main/escapeSequence.c'
+export  SOURCE_FILES='../main/compiler.c ../main/options.c ../main/lexicalParser.c ../main/escapeSequence.c'
 
 gcc -I../main -Wl,--wrap=lexicalParser ${UNIT_TESTS_FILES} ${SOURCE_FILES} -o runAllTests -lcmocka
 ./runAllTests

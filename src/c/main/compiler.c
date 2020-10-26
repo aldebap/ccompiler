@@ -1,13 +1,14 @@
 /*
     Main function for the C Compiler
 
-    13-oct-2020 by aldebap
+    oct-13-2020 by aldebap
 */
 
 #include <sys/stat.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "options.h"
 #include "lexicalParser.h"
 #include "preProcessor.h"
 
@@ -15,8 +16,10 @@ int compiler(int _argc, char *_argv[])
 {
     char *fileNameList[_argc];
     unsigned int fileNameListSize = 0;
-    unsigned char trace = 0;
+    Options executionOptions;
     unsigned int i = 1;
+
+    setDefaultOptions(&executionOptions);
 
     /*  parse the execution arguments */
     for (; i < _argc; i++)
@@ -31,7 +34,7 @@ int compiler(int _argc, char *_argv[])
         }
         if (0 == strncmp("--trace", _argv[i], 8))
         {
-            trace = 1;
+            executionOptions.general.trace = 1;
             continue;
         }
         if ('-' == _argv[i][0])
@@ -70,7 +73,7 @@ int compiler(int _argc, char *_argv[])
         FILE *sourceFile;
 
         sourceFile = fopen(fileNameList[i], "r");
-        lexicalParser(sourceFile, trace);
+        lexicalParser(sourceFile, &executionOptions);
         fclose(sourceFile);
     }
 

@@ -13,19 +13,30 @@
 #include <cmocka.h>
 
 #include "compiler.h"
+#include "options.h"
 
 /* wrap lexical parser function */
-void __wrap_lexicalParser(FILE *_fileInput, unsigned char _trace)
+void __wrap_lexicalParser(FILE *_fileInput, Options *_options)
 {
-    check_expected(_fileInput);
-    check_expected(_trace);
+    check_expected_ptr(_fileInput);
+    check_expected(_options);
 
-    /*  redirect to stdout the first line of input file */
+    /*  for testing purposes, redirect to stdout only the first line of input file */
     char output[1024];
     fgets(output, sizeof(output), _fileInput);
     fprintf(stdout, "%s", output);
+}
 
-    return;
+/* Options value verification function */
+int checkOptions(const LargestIntegralType _parameter, const LargestIntegralType _checkValue)
+{
+    Options *parameter = (Options *)_parameter;
+    Options *checkValue = (Options *)_checkValue;
+
+    if (parameter->general.trace != checkValue->general.trace)
+        return 0;
+
+    return 1;
 }
 
 /*  test case 001 - help */
@@ -69,12 +80,29 @@ static void testCase_traceOn()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
+    /*  redirect stdout to a file and call compiler() function */
+    int originalStdout = dup(STDOUT_FILENO);
+    char redirectStdoutFileName[] = "redirectStdout";
+    FILE *stdoutFile;
+
+    stdoutFile = fopen(redirectStdoutFileName, "w");
+    dup2(fileno(stdoutFile), STDOUT_FILENO);
+
     /*  set the expected values for the wrap lexicalParser() function */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+    testOptions.general.trace = 1;
+
     expect_any(__wrap_lexicalParser, _fileInput);
-    expect_value(__wrap_lexicalParser, _trace, 1);
+    expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
 
+    fclose(stdoutFile);
+    dup2(originalStdout, STDOUT_FILENO);
+
     remove(argv[2]);
+    remove(redirectStdoutFileName);
 }
 
 /*  test case 003 - invalid argument */
@@ -214,8 +242,12 @@ static void testCase_singleFileName()
     dup2(fileno(stdoutFile), STDOUT_FILENO);
 
     /*  set the expected values for the wrap lexicalParser() function */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
     expect_any(__wrap_lexicalParser, _fileInput);
-    expect_value(__wrap_lexicalParser, _trace, 0);
+    expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
 
     fclose(stdoutFile);

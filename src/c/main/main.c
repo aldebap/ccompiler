@@ -1,7 +1,7 @@
 /*
     Entry point for the C Compiler
 
-    17-oct-2020 by aldebap
+    oct-17-2020 by aldebap
 */
 
 #include "compiler.h"

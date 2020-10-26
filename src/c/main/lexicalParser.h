@@ -1,7 +1,7 @@
 /*
     C Compiler - Lexical parser
 
-    13-oct-2020 by aldebap
+    oct-13-2020 by aldebap
 */
 
-void lexicalParser(FILE *_fileInput, unsigned char _trace);
+void lexicalParser(FILE *_fileInput, Options *_options);

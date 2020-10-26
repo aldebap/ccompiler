@@ -1,14 +1,15 @@
 /*
     C Compiler - Lexical parser
 
-    13-oct-2020 by aldebap
+    oct-13-2020 by aldebap
 */
 
 #include <stdio.h>
 
+#include "options.h"
 #include "escapeSequence.h"
 
-void lexicalParser(FILE *_fileInput, unsigned char _trace)
+void lexicalParser(FILE *_fileInput, Options *_options)
 {
     int inputByte;
     unsigned char delimitedComment = 0;
@@ -40,7 +41,7 @@ void lexicalParser(FILE *_fileInput, unsigned char _trace)
                 i = 0;
                 previousByte = 0;
 
-                if (_trace)
+                if (_options->general.trace)
                     fprintf(stdout, "[trace] comment: %s\n", token);
                 continue;
             }
@@ -52,7 +53,7 @@ void lexicalParser(FILE *_fileInput, unsigned char _trace)
             delimitedChar = 1;
             i = j = 0;
 
-            if (_trace)
+            if (_options->general.trace)
                 fprintf(stdout, "[trace] token: '\n");
             continue;
         }
@@ -80,7 +81,7 @@ void lexicalParser(FILE *_fileInput, unsigned char _trace)
                 i = 0;
                 previousByte = 0;
 
-                if (_trace)
+                if (_options->general.trace)
                 {
                     fprintf(stdout, "[trace] character: '%s'\n", token);
                     fprintf(stdout, "[trace] token: '\n");
@@ -95,7 +96,7 @@ void lexicalParser(FILE *_fileInput, unsigned char _trace)
             delimitedString = 1;
             i = j = 0;
 
-            if (_trace)
+            if (_options->general.trace)
                 fprintf(stdout, "[trace] token: \"\n");
             continue;
         }
@@ -123,7 +124,7 @@ void lexicalParser(FILE *_fileInput, unsigned char _trace)
                 i = 0;
                 previousByte = 0;
 
-                if (_trace)
+                if (_options->general.trace)
                 {
                     fprintf(stdout, "[trace] string: \"%s\"\n", token);
                     fprintf(stdout, "[trace] token: \"\n");
@@ -143,7 +144,7 @@ void lexicalParser(FILE *_fileInput, unsigned char _trace)
                     previousByte = 0;
                     i = 0;
 
-                    if (_trace)
+                    if (_options->general.trace)
                         fprintf(stdout, "[trace] token: %s\n", token);
                     continue;
                 }
