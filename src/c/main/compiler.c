@@ -70,11 +70,37 @@ int compiler(int _argc, char *_argv[])
     /* compile each input files */
     for (i = 0; i < fileNameListSize; i++)
     {
-        FILE *sourceFile;
+        /*  the preprocessor file name replace the .c extention for .i */
+        unsigned char preProcessorFileName[4096];
+        unsigned int length = strlen(fileNameList[i]);
 
+        strcpy(preProcessorFileName, fileNameList[i]);
+        if (2 < length && 0 == strcmp(preProcessorFileName + length - 2, ".c"))
+        {
+            preProcessorFileName[length - 1] = 'i';
+        }
+        else
+        {
+            strcat(preProcessorFileName, ".i");
+        }
+
+        /*  preprocessor pass */
+        FILE *sourceFile;
+        FILE *preProcessorFile;
+
+        sourceFile = fopen(fileNameList[i], "r");
+        preProcessorFile = fopen(preProcessorFileName, "w");
+        preProcessor(sourceFile, preProcessorFile, &executionOptions);
+        fclose(sourceFile);
+        fclose(preProcessorFile);
+
+        /*  lexical parser pass */
         sourceFile = fopen(fileNameList[i], "r");
         lexicalParser(sourceFile, &executionOptions);
         fclose(sourceFile);
+
+        /*  remove intermediate files */
+        remove(preProcessorFileName);
     }
 
     return 0;
