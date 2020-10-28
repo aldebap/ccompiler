@@ -12,6 +12,24 @@
 #include "lexicalParser.h"
 #include "preProcessor.h"
 
+/*  necessary trick to use CMocka to mock functions within the same source file */
+
+#ifdef DEBUG
+
+#define WEAK_SYMBOL __attribute__((weak))
+#else
+
+#define WEAK_SYMBOL
+#endif
+
+/*  prototypes */
+
+int compileSourceFile(char *_fileName, Options *_options);
+
+/*
+    Parse command line arguments and run the compiler for selected source files
+*/
+
 int compiler(int _argc, char *_argv[])
 {
     char *fileNameList[_argc];
@@ -70,38 +88,48 @@ int compiler(int _argc, char *_argv[])
     /* compile each input files */
     for (i = 0; i < fileNameListSize; i++)
     {
-        /*  the preprocessor file name replace the .c extention for .i */
-        unsigned char preProcessorFileName[4096];
-        unsigned int length = strlen(fileNameList[i]);
-
-        strcpy(preProcessorFileName, fileNameList[i]);
-        if (2 < length && 0 == strcmp(preProcessorFileName + length - 2, ".c"))
-        {
-            preProcessorFileName[length - 1] = 'i';
-        }
-        else
-        {
-            strcat(preProcessorFileName, ".i");
-        }
-
-        /*  preprocessor pass */
-        FILE *sourceFile;
-        FILE *preProcessorFile;
-
-        sourceFile = fopen(fileNameList[i], "r");
-        preProcessorFile = fopen(preProcessorFileName, "w");
-        preProcessor(sourceFile, preProcessorFile, &executionOptions);
-        fclose(sourceFile);
-        fclose(preProcessorFile);
-
-        /*  lexical parser pass */
-        sourceFile = fopen(fileNameList[i], "r");
-        lexicalParser(sourceFile, &executionOptions);
-        fclose(sourceFile);
-
-        /*  remove intermediate files */
-        remove(preProcessorFileName);
+        int compilationResult = compileSourceFile(fileNameList[i], &executionOptions);
     }
 
     return 0;
+}
+
+/*
+    Compile source code given it's file name
+*/
+
+WEAK_SYMBOL
+int compileSourceFile(char *_fileName, Options *_options)
+{
+    /*  the preprocessor file name replace the .c extention for .i */
+    unsigned char preProcessorFileName[4096];
+    unsigned int length = strlen(_fileName);
+
+    strcpy(preProcessorFileName, _fileName);
+    if (2 < length && 0 == strcmp(preProcessorFileName + length - 2, ".c"))
+    {
+        preProcessorFileName[length - 1] = 'i';
+    }
+    else
+    {
+        strcat(preProcessorFileName, ".i");
+    }
+
+    /*  preprocessor pass */
+    FILE *sourceFile;
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(_fileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+    preProcessor(sourceFile, preProcessorFile, _options);
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    /*  lexical parser pass */
+    sourceFile = fopen(_fileName, "r");
+    lexicalParser(sourceFile, _options);
+    fclose(sourceFile);
+
+    /*  remove intermediate files */
+    remove(preProcessorFileName);
 }

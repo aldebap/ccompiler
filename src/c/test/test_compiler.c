@@ -15,19 +15,10 @@
 #include "compiler.h"
 #include "options.h"
 
-/* wrap lexical parser function */
-void __wrap_lexicalParser(FILE *_fileInput, Options *_options)
-{
-    check_expected_ptr(_fileInput);
-    check_expected(_options);
+/*
+    Options value verification function
+*/
 
-    /*  for testing purposes, redirect to stdout only the first line of input file */
-    char output[1024];
-    fgets(output, sizeof(output), _fileInput);
-    fprintf(stdout, "%s", output);
-}
-
-/* Options value verification function */
 int checkOptions(const LargestIntegralType _parameter, const LargestIntegralType _checkValue)
 {
     Options *parameter = (Options *)_parameter;
@@ -39,7 +30,41 @@ int checkOptions(const LargestIntegralType _parameter, const LargestIntegralType
     return 1;
 }
 
-/*  test case 001 - help */
+/*
+    wrap compile source function
+*/
+
+int __wrap_compileSourceFile(char *_fileName, Options *_options)
+{
+    check_expected(_fileName);
+    check_expected(_options);
+
+    expect_any(__wrap_lexicalParser, _fileInput);
+    expect_check(__wrap_lexicalParser, _options, checkOptions, _options);
+
+    return 0;
+}
+
+/*
+    wrap lexical parser function
+*/
+
+void __wrap_lexicalParser(FILE *_fileInput, Options *_options)
+{
+    check_expected_ptr(_fileInput);
+    check_expected(_options);
+
+    /*  for testing purposes, redirect to stdout only the first line of input file */
+    char output[1024];
+
+    fgets(output, sizeof(output), _fileInput);
+    fprintf(stdout, "%s", output);
+}
+
+/*
+    test case 001 - help
+*/
+
 static void testCase_help()
 {
     char *argv[] = {"compiler", "--help"};
@@ -68,7 +93,10 @@ static void testCase_help()
     remove(redirectStdoutFileName);
 }
 
-/*  test case 002 - trace on */
+/*
+    test case 002 - trace on
+*/
+
 static void testCase_traceOn()
 {
     char *argv[] = {"compiler", "--trace", "sourceFile.c"};
@@ -81,12 +109,12 @@ static void testCase_traceOn()
     fclose(sourceFile);
 
     /*  redirect stdout to a file and call compiler() function */
-    int originalStdout = dup(STDOUT_FILENO);
-    char redirectStdoutFileName[] = "redirectStdout";
-    FILE *stdoutFile;
+    //    int originalStdout = dup(STDOUT_FILENO);
+    //    char redirectStdoutFileName[] = "redirectStdout";
+    //    FILE *stdoutFile;
 
-    stdoutFile = fopen(redirectStdoutFileName, "w");
-    dup2(fileno(stdoutFile), STDOUT_FILENO);
+    //    stdoutFile = fopen(redirectStdoutFileName, "w");
+    //    dup2(fileno(stdoutFile), STDOUT_FILENO);
 
     /*  set the expected values for the wrap lexicalParser() function */
     Options testOptions;
@@ -94,15 +122,17 @@ static void testCase_traceOn()
     setDefaultOptions(&testOptions);
     testOptions.general.trace = 1;
 
-    expect_any(__wrap_lexicalParser, _fileInput);
-    expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
+    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
+    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    //    expect_any(__wrap_lexicalParser, _fileInput);
+    //    expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
 
-    fclose(stdoutFile);
-    dup2(originalStdout, STDOUT_FILENO);
+    //    fclose(stdoutFile);
+    //    dup2(originalStdout, STDOUT_FILENO);
 
     remove(argv[2]);
-    remove(redirectStdoutFileName);
+    //    remove(redirectStdoutFileName);
 }
 
 /*  test case 003 - invalid argument */
@@ -234,36 +264,38 @@ static void testCase_singleFileName()
     fclose(sourceFile);
 
     /*  redirect stdout to a file and call compiler() function */
-    int originalStdout = dup(STDOUT_FILENO);
-    char redirectStdoutFileName[] = "redirectStdout";
-    FILE *stdoutFile;
+    //    int originalStdout = dup(STDOUT_FILENO);
+    //    char redirectStdoutFileName[] = "redirectStdout";
+    //    FILE *stdoutFile;
 
-    stdoutFile = fopen(redirectStdoutFileName, "w");
-    dup2(fileno(stdoutFile), STDOUT_FILENO);
+    //    stdoutFile = fopen(redirectStdoutFileName, "w");
+    //    dup2(fileno(stdoutFile), STDOUT_FILENO);
 
     /*  set the expected values for the wrap lexicalParser() function */
     Options testOptions;
 
     setDefaultOptions(&testOptions);
 
-    expect_any(__wrap_lexicalParser, _fileInput);
-    expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
+    expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
+    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    //    expect_any(__wrap_lexicalParser, _fileInput);
+    //    expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
 
-    fclose(stdoutFile);
-    dup2(originalStdout, STDOUT_FILENO);
+    //    fclose(stdoutFile);
+    //    dup2(originalStdout, STDOUT_FILENO);
 
     /*  check the results from redirected file */
-    char output[1024];
-    size_t outputSize;
+    //    char output[1024];
+    //    size_t outputSize;
 
-    stdoutFile = fopen(redirectStdoutFileName, "r");
-    fgets(output, sizeof(output), stdoutFile);
-    fclose(stdoutFile);
+    //    stdoutFile = fopen(redirectStdoutFileName, "r");
+    //    fgets(output, sizeof(output), stdoutFile);
+    //    fclose(stdoutFile);
 
-    assert_string_equal(output, "/* test file with just a comment */\n");
+    //    assert_string_equal(output, "/* test file with just a comment */\n");
 
-    remove(redirectStdoutFileName);
+    //    remove(redirectStdoutFileName);
     remove(argv[1]);
 }
 
