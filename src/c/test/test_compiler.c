@@ -42,7 +42,8 @@ int __wrap_compileSourceFile(char *_fileName, Options *_options)
     expect_any(__wrap_lexicalParser, _fileInput);
     expect_check(__wrap_lexicalParser, _options, checkOptions, _options);
 
-    return 0;
+    fprintf(stderr, "[debug] __wrap_compileSourceFile(%s, executionOptions)\n", _fileName);
+    return mock();
 }
 
 /*
@@ -124,6 +125,7 @@ static void testCase_traceOn()
 
     expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
     expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    will_return(__wrap_compileSourceFile, 0);
     //    expect_any(__wrap_lexicalParser, _fileInput);
     //    expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);

@@ -16,15 +16,15 @@
 
 #ifdef DEBUG
 
-#define WEAK_SYMBOL __attribute__((weak))
+#define LD_ATTRIBUTE __attribute__((weak, alias("__wrap_compileSourceFile")))
 #else
 
-#define WEAK_SYMBOL
+#define LD_ATTRIBUTE
 #endif
 
 /*  prototypes */
 
-int compileSourceFile(char *_fileName, Options *_options);
+int compileSourceFile(char *_fileName, Options *_options) LD_ATTRIBUTE;
 
 /*
     Parse command line arguments and run the compiler for selected source files
@@ -37,6 +37,7 @@ int compiler(int _argc, char *_argv[])
     Options executionOptions;
     unsigned int i = 1;
 
+    fprintf(stderr, "[debug] compiler(%d, _argv[])\n", _argc);
     setDefaultOptions(&executionOptions);
 
     /*  parse the execution arguments */
@@ -88,6 +89,7 @@ int compiler(int _argc, char *_argv[])
     /* compile each input files */
     for (i = 0; i < fileNameListSize; i++)
     {
+        fprintf(stderr, "[debug] about to call compileSourceFile(%s, executionOptions)\n", fileNameList[i]);
         int compilationResult = compileSourceFile(fileNameList[i], &executionOptions);
     }
 
@@ -98,9 +100,15 @@ int compiler(int _argc, char *_argv[])
     Compile source code given it's file name
 */
 
-WEAK_SYMBOL
-int compileSourceFile(char *_fileName, Options *_options)
+int compileSourceFile(char *_fileName, Options *_options) LD_ATTRIBUTE
 {
+#ifdef DEBUG
+
+    fprintf(stderr, "[debug] __attribute__((weak)) compileSourceFile(%s, executionOptions)\n", _fileName);
+#else
+
+    fprintf(stderr, "[debug] compileSourceFile(%s, executionOptions)\n", _fileName);
+#endif
     /*  the preprocessor file name replace the .c extention for .i */
     unsigned char preProcessorFileName[4096];
     unsigned int length = strlen(_fileName);
