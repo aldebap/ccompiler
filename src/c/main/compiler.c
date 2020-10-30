@@ -14,9 +14,9 @@
 
 /*  necessary trick to use CMocka to mock functions within the same source file */
 
-#ifdef DEBUG
+#ifdef UNIT_TEST
 
-#define LD_ATTRIBUTE __attribute__((weak, alias("__wrap_compileSourceFile")))
+#define LD_ATTRIBUTE __attribute__((weak))
 #else
 
 #define LD_ATTRIBUTE
@@ -37,7 +37,6 @@ int compiler(int _argc, char *_argv[])
     Options executionOptions;
     unsigned int i = 1;
 
-    fprintf(stderr, "[debug] compiler(%d, _argv[])\n", _argc);
     setDefaultOptions(&executionOptions);
 
     /*  parse the execution arguments */
@@ -89,7 +88,6 @@ int compiler(int _argc, char *_argv[])
     /* compile each input files */
     for (i = 0; i < fileNameListSize; i++)
     {
-        fprintf(stderr, "[debug] about to call compileSourceFile(%s, executionOptions)\n", fileNameList[i]);
         int compilationResult = compileSourceFile(fileNameList[i], &executionOptions);
     }
 
@@ -100,15 +98,8 @@ int compiler(int _argc, char *_argv[])
     Compile source code given it's file name
 */
 
-int compileSourceFile(char *_fileName, Options *_options) LD_ATTRIBUTE
+int compileSourceFile(char *_fileName, Options *_options)
 {
-#ifdef DEBUG
-
-    fprintf(stderr, "[debug] __attribute__((weak)) compileSourceFile(%s, executionOptions)\n", _fileName);
-#else
-
-    fprintf(stderr, "[debug] compileSourceFile(%s, executionOptions)\n", _fileName);
-#endif
     /*  the preprocessor file name replace the .c extention for .i */
     unsigned char preProcessorFileName[4096];
     unsigned int length = strlen(_fileName);

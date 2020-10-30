@@ -39,10 +39,10 @@ int __wrap_compileSourceFile(char *_fileName, Options *_options)
     check_expected(_fileName);
     check_expected(_options);
 
-    expect_any(__wrap_lexicalParser, _fileInput);
-    expect_check(__wrap_lexicalParser, _options, checkOptions, _options);
+#ifdef DEBUG
 
     fprintf(stderr, "[debug] __wrap_compileSourceFile(%s, executionOptions)\n", _fileName);
+#endif
     return mock();
 }
 
@@ -109,14 +109,6 @@ static void testCase_traceOn()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  redirect stdout to a file and call compiler() function */
-    //    int originalStdout = dup(STDOUT_FILENO);
-    //    char redirectStdoutFileName[] = "redirectStdout";
-    //    FILE *stdoutFile;
-
-    //    stdoutFile = fopen(redirectStdoutFileName, "w");
-    //    dup2(fileno(stdoutFile), STDOUT_FILENO);
-
     /*  set the expected values for the wrap lexicalParser() function */
     Options testOptions;
 
@@ -126,15 +118,10 @@ static void testCase_traceOn()
     expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
     expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
-    //    expect_any(__wrap_lexicalParser, _fileInput);
-    //    expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
+
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
 
-    //    fclose(stdoutFile);
-    //    dup2(originalStdout, STDOUT_FILENO);
-
     remove(argv[2]);
-    //    remove(redirectStdoutFileName);
 }
 
 /*  test case 003 - invalid argument */
@@ -265,14 +252,6 @@ static void testCase_singleFileName()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  redirect stdout to a file and call compiler() function */
-    //    int originalStdout = dup(STDOUT_FILENO);
-    //    char redirectStdoutFileName[] = "redirectStdout";
-    //    FILE *stdoutFile;
-
-    //    stdoutFile = fopen(redirectStdoutFileName, "w");
-    //    dup2(fileno(stdoutFile), STDOUT_FILENO);
-
     /*  set the expected values for the wrap lexicalParser() function */
     Options testOptions;
 
@@ -280,28 +259,14 @@ static void testCase_singleFileName()
 
     expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
     expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
-    //    expect_any(__wrap_lexicalParser, _fileInput);
-    //    expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
+    will_return(__wrap_compileSourceFile, 0);
+
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
 
-    //    fclose(stdoutFile);
-    //    dup2(originalStdout, STDOUT_FILENO);
-
-    /*  check the results from redirected file */
-    //    char output[1024];
-    //    size_t outputSize;
-
-    //    stdoutFile = fopen(redirectStdoutFileName, "r");
-    //    fgets(output, sizeof(output), stdoutFile);
-    //    fclose(stdoutFile);
-
-    //    assert_string_equal(output, "/* test file with just a comment */\n");
-
-    //    remove(redirectStdoutFileName);
     remove(argv[1]);
 }
 
-/*  entry function - run all test cases */
+/*  run all test cases */
 int runCompilerTests()
 {
     const struct CMUnitTest testCases[] = {
@@ -315,4 +280,10 @@ int runCompilerTests()
     };
 
     return cmocka_run_group_tests_name("compiler.c tests", testCases, NULL, NULL);
+}
+
+/*  entry point */
+int main()
+{
+    return runCompilerTests();
 }

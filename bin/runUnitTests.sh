@@ -9,14 +9,25 @@ export CMOCKA_MESSAGE_OUTPUT=STDOUT
 
 cd "${SOURCE_DIRECTORY}"
 
-#   run all unit tests
-export  UNIT_TESTS_FILES='runAllTests.c test_compiler.c test_preProcessor.c test_escapeSequence.c'
+#   run all compiler unit tests
+export  UNIT_TESTS_FILES='test_compiler.c'
+export  UNIT_TEST_OUTPUT='test_compiler'
 export  SOURCE_FILES='../main/compiler.c ../main/options.c ../main/preProcessor.c ../main/lexicalParser.c ../main/escapeSequence.c'
+export  WRAP_FUNCTIONS='-Wl,--defsym,compileSourceFile=__wrap_compileSourceFile'
+export  INCLUDE_PATH='-I ../main'
+export  DEFINE_SYMBOLS='-D UNIT_TEST'
+
+gcc ${INCLUDE_PATH} ${DEFINE_SYMBOLS} ${UNIT_TESTS_FILES} ${SOURCE_FILES} ${WRAP_FUNCTIONS} -o ${UNIT_TEST_OUTPUT} -lcmocka
+./${UNIT_TEST_OUTPUT}
+rm -f ${UNIT_TEST_OUTPUT} > /dev/null
+
+#   run all unit tests
+export  UNIT_TESTS_FILES='runAllTests.c test_preProcessor.c test_escapeSequence.c'
+export  SOURCE_FILES='../main/options.c ../main/preProcessor.c ../main/lexicalParser.c ../main/escapeSequence.c'
 #export  WRAP_FUNCTIONS='-Wl,--wrap,compileSourceFile -Wl,--wrap,lexicalParser'
 export  WRAP_FUNCTIONS='-Wl,--wrap=compileSourceFile'
 export  DEFINE_SYMBOLS='-D DEBUG'
 
-echo [debug] gcc -I../main ${DEFINE_SYMBOLS} ${WRAP_FUNCTIONS} ${UNIT_TESTS_FILES} ${SOURCE_FILES} -o runAllTests -lcmocka
 gcc -I../main ${DEFINE_SYMBOLS} ${WRAP_FUNCTIONS} ${UNIT_TESTS_FILES} ${SOURCE_FILES} -o runAllTests -lcmocka
 ./runAllTests
 rm -f runAllTests > /dev/null
