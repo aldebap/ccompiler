@@ -266,6 +266,48 @@ static void testCase_singleFileName()
     remove(argv[1]);
 }
 
+/*  test case 008 - multiple file names */
+static void testCase_multipleFileNames()
+{
+    char *argv[] = {"compiler", "sourceFile1.c", "sourceFile2.c", "sourceFile3.c"};
+
+    /*  generate all source files */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[1], "w");
+    fprintf(sourceFile, "/* test file 1 with just a comment */\n");
+    fclose(sourceFile);
+
+    sourceFile = fopen(argv[2], "w");
+    fprintf(sourceFile, "/* test file 2 with just a comment */\n");
+    fclose(sourceFile);
+
+    sourceFile = fopen(argv[3], "w");
+    fprintf(sourceFile, "/* test file 3 with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  set the expected values for the wrap lexicalParser() function */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
+    expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
+    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    will_return(__wrap_compileSourceFile, 0);
+
+    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
+    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    will_return(__wrap_compileSourceFile, 0);
+
+    expect_string(__wrap_compileSourceFile, _fileName, argv[3]);
+    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    will_return(__wrap_compileSourceFile, 0);
+
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+
+    remove(argv[1]);
+}
+
 /*  run all test cases */
 int runCompilerTests()
 {
@@ -277,6 +319,7 @@ int runCompilerTests()
         {"test case 005 - file not found", testCase_fileNotFound, NULL, NULL},
         {"test case 006 - not a regular file", testCase_notRegularFile, NULL, NULL},
         {"test case 007 - single file name", testCase_singleFileName, NULL, NULL},
+        {"test case 008 - multiple file names", testCase_multipleFileNames, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("compiler.c tests", testCases, NULL, NULL);
