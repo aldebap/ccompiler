@@ -101,7 +101,7 @@ int compiler(int _argc, char *_argv[])
 int compileSourceFile(char *_fileName, Options *_options)
 {
     /*  the preprocessor file name replace the .c extention for .i */
-    unsigned char preProcessorFileName[4096];
+    unsigned char preProcessorFileName[1024];
     unsigned int length = strlen(_fileName);
 
     strcpy(preProcessorFileName, _fileName);

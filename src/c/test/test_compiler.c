@@ -47,22 +47,6 @@ int __wrap_compileSourceFile(char *_fileName, Options *_options)
 }
 
 /*
-    wrap lexical parser function
-*/
-
-void __wrap_lexicalParser(FILE *_fileInput, Options *_options)
-{
-    check_expected_ptr(_fileInput);
-    check_expected(_options);
-
-    /*  for testing purposes, redirect to stdout only the first line of input file */
-    char output[1024];
-
-    fgets(output, sizeof(output), _fileInput);
-    fprintf(stdout, "%s", output);
-}
-
-/*
     test case 001 - help
 */
 
@@ -124,7 +108,10 @@ static void testCase_traceOn()
     remove(argv[2]);
 }
 
-/*  test case 003 - invalid argument */
+/*
+    test case 003 - invalid argument
+*/
+
 static void testCase_invalidArgument()
 {
     char *argv[] = {"compiler", "--invalidOption"};
@@ -153,7 +140,10 @@ static void testCase_invalidArgument()
     remove(redirectStderrFileName);
 }
 
-/*  test case 004 - no file names */
+/*
+    test case 004 - no file names
+*/
+
 static void testCase_noFileNames()
 {
     char *argv[] = {"compiler"};
@@ -182,7 +172,10 @@ static void testCase_noFileNames()
     remove(redirectStderrFileName);
 }
 
-/*  test case 005 - file not found */
+/*
+    test case 005 - file not found
+*/
+
 static void testCase_fileNotFound()
 {
     char *argv[] = {"compiler", "testCase002"};
@@ -211,7 +204,10 @@ static void testCase_fileNotFound()
     remove(redirectStderrFileName);
 }
 
-/*  test case 006 - not a regular file */
+/*
+    test case 006 - not a regular file
+*/
+
 static void testCase_notRegularFile()
 {
     char *argv[] = {"compiler", "."};
@@ -240,7 +236,10 @@ static void testCase_notRegularFile()
     remove(redirectStderrFileName);
 }
 
-/*  test case 007 - single file name */
+/*
+    test case 007 - single file name
+*/
+
 static void testCase_singleFileName()
 {
     char *argv[] = {"compiler", "sourceFile.c"};
@@ -266,7 +265,10 @@ static void testCase_singleFileName()
     remove(argv[1]);
 }
 
-/*  test case 008 - multiple file names */
+/*
+    test case 008 - multiple file names
+*/
+
 static void testCase_multipleFileNames()
 {
     char *argv[] = {"compiler", "sourceFile1.c", "sourceFile2.c", "sourceFile3.c"};
@@ -306,9 +308,14 @@ static void testCase_multipleFileNames()
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
 
     remove(argv[1]);
+    remove(argv[2]);
+    remove(argv[3]);
 }
 
-/*  run all test cases */
+/*
+    run all test cases
+*/
+
 int runCompilerTests()
 {
     const struct CMUnitTest testCases[] = {
@@ -325,7 +332,10 @@ int runCompilerTests()
     return cmocka_run_group_tests_name("compiler.c tests", testCases, NULL, NULL);
 }
 
-/*  entry point */
+/*
+    entry point
+*/
+
 int main()
 {
     return runCompilerTests();
