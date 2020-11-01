@@ -6,9 +6,10 @@ cmake_minimum_required(VERSION 3.10)
 
 project(CCompiler VERSION 0.1)
 
-add_subdirectory($ENV{SOURCE_DIRECTORY}/)
+#   add compiler source directory
+add_subdirectory($ENV{SOURCE_DIRECTORY})
 
+#   add unit test source directory
 find_package(CMocka CONFIG REQUIRED)
-#include(AddMockedTest)
-add_subdirectory($ENV{TEST_DIRECTORY}/)
+add_subdirectory($ENV{TEST_DIRECTORY})
 enable_testing()
