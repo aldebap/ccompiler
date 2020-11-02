@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "options.h"
 
@@ -15,6 +16,7 @@ void preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
     unsigned char previousByte = 0;
     unsigned char byte;
     unsigned int i = 0;
+    unsigned int commentStart = 0;
     int inputByte;
 
     while (EOF != (inputByte = getc(_fileInput)))
@@ -25,7 +27,8 @@ void preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
         if (0 == delimitedComment && '/' == previousByte && '*' == byte)
         {
             delimitedComment = 1;
-            i = 0;
+            i -= 2;
+            commentStart = i;
             continue;
         }
         else if (1 == delimitedComment)
@@ -34,12 +37,12 @@ void preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
             {
                 line[i - 2] = '\0';
                 delimitedComment = 0;
-                i = 0;
+                i = commentStart;
                 previousByte = 0;
 
                 /*  comments are discarded */
                 if (_options->general.trace)
-                    fprintf(stdout, "[trace] comment: %s\n", line);
+                    fprintf(stdout, "[trace] comment: %s\n", line + commentStart);
                 continue;
             }
         }
@@ -56,7 +59,7 @@ void preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
                 fputs(line, _fileOutput);
 
                 if (_options->general.trace)
-                    fprintf(stdout, "[trace] line: %s\n", line);
+                    fprintf(stdout, "[trace] line: %s", line);
                 continue;
             }
             else
@@ -64,6 +67,11 @@ void preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
                 /*  discard empty lines */
                 i--;
             }
+        }
+
+        /*  check for macro definition */
+        if (0 == delimitedComment && 0 == strcmp(line, "#define "))
+        {
         }
 
         previousByte = byte;

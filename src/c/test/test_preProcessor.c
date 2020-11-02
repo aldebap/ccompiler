@@ -15,7 +15,10 @@
 #include "options.h"
 #include "preProcessor.h"
 
-/*  test case 001 - discard full line comments */
+/*
+    test case 001 - discard full line comments
+*/
+
 static void testCase_discardFullLineComments()
 {
     /*  generate a source file */
@@ -25,7 +28,194 @@ static void testCase_discardFullLineComments()
     sourceFile = fopen(sourceFileName, "w");
     fprintf(sourceFile, "/* test file with a full line comment and a declaration */\n");
     fprintf(sourceFile, "\n");
-    fprintf(sourceFile, "static int variable = 0;\n");
+    fprintf(sourceFile, "static int i = 0;\n");
+    fclose(sourceFile);
+
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    preProcessor(sourceFile, preProcessorFile, &testOptions);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    preProcessorFile = fopen(preProcessorFileName, "r");
+    fgets(output, sizeof(output), preProcessorFile);
+    fclose(preProcessorFile);
+
+    assert_string_equal(output, "static int i = 0;\n");
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 002 - discard comments in the beginning of a line
+*/
+
+static void testCase_discardBeginningOfLineComments()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* test file with a comment before a declaration */ static int i = 0;\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int j = 0;\n");
+    fclose(sourceFile);
+
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    preProcessor(sourceFile, preProcessorFile, &testOptions);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    preProcessorFile = fopen(preProcessorFileName, "r");
+    fgets(output, sizeof(output), preProcessorFile);
+    fclose(preProcessorFile);
+
+    assert_string_equal(output, " static int i = 0;\n");
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 003 - discard comments in the middle of a line
+*/
+
+static void testCase_discardMiddleOfLineComments()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "static int /* test file with a comment in the middle of a declaration */ i = 0;\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int j = 0;\n");
+    fclose(sourceFile);
+
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    preProcessor(sourceFile, preProcessorFile, &testOptions);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    preProcessorFile = fopen(preProcessorFileName, "r");
+    fgets(output, sizeof(output), preProcessorFile);
+    fclose(preProcessorFile);
+
+    assert_string_equal(output, "static int  i = 0;\n");
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 004 - discard comments in the end of a line
+*/
+
+static void testCase_discardEndOfLineComments()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "static int i = 0; /* test file with a comment in the end of a declaration */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int j = 0;\n");
+    fclose(sourceFile);
+
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    preProcessor(sourceFile, preProcessorFile, &testOptions);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    preProcessorFile = fopen(preProcessorFileName, "r");
+    fgets(output, sizeof(output), preProcessorFile);
+    fclose(preProcessorFile);
+
+    assert_string_equal(output, "static int i = 0; \n");
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 005 - discard empty lines
+*/
+
+static void testCase_discardEmptyLines()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 0;\n");
     fclose(sourceFile);
 
     /*  set the test options */
@@ -54,18 +244,34 @@ static void testCase_discardFullLineComments()
     fgets(output, sizeof(output), preProcessorFile);
     fclose(preProcessorFile);
 
-    assert_string_equal(output, "static int variable = 0;\n");
+    assert_string_equal(output, "static int i = 0;\n");
 
     remove(sourceFileName);
     remove(preProcessorFileName);
 }
 
-/*  entry function - run all test cases */
+/*
+    entry function - run all test cases
+*/
+
 int runPreProcessorTests()
 {
     const struct CMUnitTest testCases[] = {
         {"test case 001 - discard full line comments", testCase_discardFullLineComments, NULL, NULL},
+        {"test case 002 - discard comments in the beginning of a line", testCase_discardBeginningOfLineComments, NULL, NULL},
+        {"test case 003 - discard comments in the middle of a line", testCase_discardMiddleOfLineComments, NULL, NULL},
+        {"test case 004 - discard comments in the end of a line", testCase_discardEndOfLineComments, NULL, NULL},
+        {"test case 005 - discard empty lines", testCase_discardEmptyLines, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("preProcessor.c tests", testCases, NULL, NULL);
+}
+
+/*
+    entry point
+*/
+
+int main()
+{
+    return runPreProcessorTests();
 }

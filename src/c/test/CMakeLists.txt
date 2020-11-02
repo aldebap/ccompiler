@@ -28,6 +28,15 @@ add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
 
+#   preProcessor unit tests
+set(TEST_NAME "test_preProcessor")
+set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
+set(TEST_FLAGS "")
+
+add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
+target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
+target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+
 #   escapeSequence unit tests
 set(TEST_NAME "test_escapeSequence")
 set(SOURCE_LIST ../main/escapeSequence.c)

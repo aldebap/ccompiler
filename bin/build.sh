@@ -7,12 +7,27 @@ export  SOURCE_DIRECTORY="${BASE_DIR}/src/c/main"
 export  TEST_DIRECTORY="${BASE_DIR}/src/c/test"
 
 cd "${SOURCE_DIRECTORY}"
-if [ -d build ]
+if [ "${1}" == "all" ]
 then
-    rm -rf build
+    echo '>>>>> Creating build directory'
+
+    if [ -d build ]
+    then
+        rm -rf build
+    fi
+
+    mkdir build
+    cd build
+
+    echo '>>>>> Building makefiles from CMake'
+    cmake ../../../..
+
+    echo '>>>>> Building target from source code'
+    cmake --build .
+else
+    cd build
+
+    echo '>>>>> Building target from source code'
+    cmake --build .
 fi
-mkdir build
-cd build
-cmake ../../../..
-cmake --build .
 cd "${CURRENT_DIRECTORY}"
