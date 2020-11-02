@@ -76,3 +76,12 @@ int runEscapeSequenceTests()
 
     return cmocka_run_group_tests_name("escapeSequence.c tests", testCases, NULL, NULL);
 }
+
+/*
+    entry point
+*/
+
+int main()
+{
+    return runEscapeSequenceTests();
+}
