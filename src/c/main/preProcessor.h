@@ -4,4 +4,5 @@
     oct-16-2020 by aldebap
 */
 
+int initializePreProcessor();
 void preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options);
