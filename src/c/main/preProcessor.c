@@ -21,9 +21,7 @@ int initializePreProcessor()
 {
     int result;
 
-    //result = regcomp(&reSimpleMacroDefinition, "^[ \\t]*#define[ \\t][ \\t]*\\([a-zA-Z0-9_][a-zA-Z0-9_]*\\)[ \\t]*$", REG_EXTENDED);
-    //result = regcomp(&reSimpleMacroDefinition, "^[:blank:]*#define[:blank:]+[a-zA-Z_][a-zA-Z0-9_]*[:blank:]*$", REG_EXTENDED);
-    result = regcomp(&reSimpleMacroDefinition, "#define[ ]+", REG_EXTENDED);
+    result = regcomp(&reSimpleMacroDefinition, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*[\n]$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
@@ -77,14 +75,19 @@ void preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
         {
             if (1 < i)
             {
+                regmatch_t match[3];
+                char macro[1024];
                 int result;
 
                 line[i] = '\0';
-                result = regexec(&reSimpleMacroDefinition, line, 0, NULL, 0);
+                result = regexec(&reSimpleMacroDefinition, line, 2, match, 0);
                 if (0 == result)
                 {
+                    strncpy(macro, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
+                    macro[match[1].rm_eo - match[1].rm_so] = '\0';
+
                     if (_options->general.trace)
-                        fprintf(stdout, "[trace] macro definition found: %s", line);
+                        fprintf(stdout, "[trace] macro definition found: %s\n", macro);
                 }
                 previousByte = 0;
                 i = 0;
