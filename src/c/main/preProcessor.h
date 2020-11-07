@@ -5,4 +5,4 @@
 */
 
 int initializePreProcessor();
-void preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options);
+int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options);

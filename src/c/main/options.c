@@ -6,6 +6,10 @@
 
 #include "options.h"
 
+/*
+    initialize Options structure with default values
+*/
+
 void setDefaultOptions(Options *_options)
 {
     /*  set feault values for general options */

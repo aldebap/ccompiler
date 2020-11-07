@@ -22,7 +22,9 @@
 #define LD_ATTRIBUTE
 #endif
 
-/*  prototypes */
+/*
+    prototypes
+*/
 
 int compileSourceFile(char *_fileName, Options *_options) LD_ATTRIBUTE;
 

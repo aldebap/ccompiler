@@ -9,6 +9,10 @@
 #include "options.h"
 #include "escapeSequence.h"
 
+/*
+    Lexical parser
+*/
+
 void lexicalParser(FILE *_fileInput, Options *_options)
 {
     int inputByte;

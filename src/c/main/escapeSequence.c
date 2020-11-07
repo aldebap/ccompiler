@@ -4,6 +4,10 @@
     oct-14-2020 by aldebap
 */
 
+/*
+    parse an escape sequence and return corresponding character
+*/
+
 int escapeSequenceParse(char *_sequence)
 {
     /*  return -1 if it's not a escape sequence */
