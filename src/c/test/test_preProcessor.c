@@ -16,16 +16,7 @@
 #include "preProcessor.h"
 
 /*
-    test case 001 - initialize the preprocessor
-*/
-
-static void testCase_initializePreprocessor()
-{
-    assert_int_equal(initializePreProcessor(), 0);
-}
-
-/*
-    test case 002 - discard full line comments
+    test case 001 - discard full line comments
 */
 
 static void testCase_discardFullLineComments()
@@ -72,7 +63,7 @@ static void testCase_discardFullLineComments()
 }
 
 /*
-    test case 003 - discard comments in the beginning of a line
+    test case 002 - discard comments in the beginning of a line
 */
 
 static void testCase_discardBeginningOfLineComments()
@@ -119,7 +110,7 @@ static void testCase_discardBeginningOfLineComments()
 }
 
 /*
-    test case 004 - discard comments in the middle of a line
+    test case 003 - discard comments in the middle of a line
 */
 
 static void testCase_discardMiddleOfLineComments()
@@ -166,7 +157,7 @@ static void testCase_discardMiddleOfLineComments()
 }
 
 /*
-    test case 005 - discard comments in the end of a line
+    test case 004 - discard comments in the end of a line
 */
 
 static void testCase_discardEndOfLineComments()
@@ -213,7 +204,7 @@ static void testCase_discardEndOfLineComments()
 }
 
 /*
-    test case 006 - discard empty lines
+    test case 005 - discard empty lines
 */
 
 static void testCase_discardEmptyLines()
@@ -260,7 +251,7 @@ static void testCase_discardEmptyLines()
 }
 
 /*
-    test case 007 - simple macro definition (begin of line)
+    test case 006 - simple macro definition (begin of line)
 */
 
 static void testCase_simpleMacroDefinitionBeginOfLine()
@@ -309,7 +300,7 @@ static void testCase_simpleMacroDefinitionBeginOfLine()
 }
 
 /*
-    test case 008 - simple macro definition (middle of line)
+    test case 007 - simple macro definition (middle of line)
 */
 
 static void testCase_simpleMacroDefinitionMiddleOfLine()
@@ -358,7 +349,7 @@ static void testCase_simpleMacroDefinitionMiddleOfLine()
 }
 
 /*
-    test case 009 - simple macro definition (after tabs and spaces)
+    test case 008 - simple macro definition (after tabs and spaces)
 */
 
 static void testCase_simpleMacroDefinitionAfterTabsAndSpaces()
@@ -407,7 +398,7 @@ static void testCase_simpleMacroDefinitionAfterTabsAndSpaces()
 }
 
 /*
-    test case 010 - simple macro definition (space after pound)
+    test case 009 - simple macro definition (space after pound)
 */
 
 static void testCase_simpleMacroDefinitionSpaceAfterPound()
@@ -462,17 +453,18 @@ static void testCase_simpleMacroDefinitionSpaceAfterPound()
 int runPreProcessorTests()
 {
     const struct CMUnitTest testCases[] = {
-        {"test case 001 - initialize preprocessor", testCase_initializePreprocessor, NULL, NULL},
-        {"test case 002 - discard full line comments", testCase_discardFullLineComments, NULL, NULL},
-        {"test case 003 - discard comments in the beginning of a line", testCase_discardBeginningOfLineComments, NULL, NULL},
-        {"test case 004 - discard comments in the middle of a line", testCase_discardMiddleOfLineComments, NULL, NULL},
-        {"test case 005 - discard comments in the end of a line", testCase_discardEndOfLineComments, NULL, NULL},
-        {"test case 006 - discard empty lines", testCase_discardEmptyLines, NULL, NULL},
-        {"test case 007 - simple macro definition (begin of line)", testCase_simpleMacroDefinitionBeginOfLine, NULL, NULL},
-        {"test case 008 - simple macro definition (middle of line)", testCase_simpleMacroDefinitionMiddleOfLine, NULL, NULL},
-        {"test case 009 - simple macro definition (after tabs and spaces)", testCase_simpleMacroDefinitionAfterTabsAndSpaces, NULL, NULL},
-        {"test case 010 - simple macro definition (space after pound)", testCase_simpleMacroDefinitionSpaceAfterPound, NULL, NULL},
+        {"test case 001 - discard full line comments", testCase_discardFullLineComments, NULL, NULL},
+        {"test case 002 - discard comments in the beginning of a line", testCase_discardBeginningOfLineComments, NULL, NULL},
+        {"test case 003 - discard comments in the middle of a line", testCase_discardMiddleOfLineComments, NULL, NULL},
+        {"test case 004 - discard comments in the end of a line", testCase_discardEndOfLineComments, NULL, NULL},
+        {"test case 005 - discard empty lines", testCase_discardEmptyLines, NULL, NULL},
+        {"test case 006 - simple macro definition (begin of line)", testCase_simpleMacroDefinitionBeginOfLine, NULL, NULL},
+        {"test case 007 - simple macro definition (middle of line)", testCase_simpleMacroDefinitionMiddleOfLine, NULL, NULL},
+        {"test case 008 - simple macro definition (after tabs and spaces)", testCase_simpleMacroDefinitionAfterTabsAndSpaces, NULL, NULL},
+        {"test case 009 - simple macro definition (space after pound)", testCase_simpleMacroDefinitionSpaceAfterPound, NULL, NULL},
     };
+
+    assert_int_equal(initializePreProcessor(), 0);
 
     return cmocka_run_group_tests_name("preProcessor.c tests", testCases, NULL, NULL);
 }

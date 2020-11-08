@@ -19,6 +19,7 @@ cd "${BUILD_DIRECTORY}"
 
 for TEST in ./test*
 do
+    echo ">>>>> running unit test program: ${TEST}"
     ./${TEST}
 done
 

@@ -34,7 +34,7 @@ int macroListElements;
     prototypes
 */
 
-int addMacro(char *_macro, char *_value);
+int addMacro(char *_macro, char *_value, Options *_options);
 
 /*
     initialize the preprocessor
@@ -116,6 +116,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
         {
             if (1 < i)
             {
+                /*  check if the line syntax is of a simple macro definition */
                 if (0 == regexec(&reSimpleMacroDefinition, line, 2, match, 0))
                 {
                     char macro[1024];
@@ -124,20 +125,20 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
                     strncpy(macro, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
                     macro[match[1].rm_eo - match[1].rm_so] = '\0';
 
-                    if (_options->general.trace)
-                        fprintf(stdout, "[trace] simple macro definition found: %s\n", macro);
-
-                    result = addMacro(macro, NULL);
+                    result = addMacro(macro, NULL, _options);
                     if (0 != result)
                         return result;
+
+                    continue;
                 }
+
+                /*  if it's not a comment nor a preprocessor syntax, output the line */
                 i = 0;
 
                 fputs(line, _fileOutput);
 
                 if (_options->general.trace)
                     fprintf(stdout, "[trace] line: %s", line);
-                continue;
             }
             else
             {
@@ -154,8 +155,22 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
     Add a macro to the list
 */
 
-int addMacro(char *_macro, char *_value)
+int addMacro(char *_macro, char *_value, Options *_options)
 {
+    /*  check if the macro is defined already */
+    int i = 0;
+
+    for (; i < macroListElements; i++)
+    {
+        if (0 == strcmp(_macro, macroList[i]))
+        {
+            if (_options->general.trace)
+                fprintf(stdout, "[trace] macro already defined: %s\n", _macro);
+
+            return 0;
+        }
+    }
+
     /*  enlarge the list if all elements are in use */
     if (macroListElements > macroListSize)
     {
@@ -172,6 +187,9 @@ int addMacro(char *_macro, char *_value)
         return -2;
 
     strcpy(macroList[macroListElements++], _macro);
+
+    if (_options->general.trace)
+        fprintf(stdout, "[trace] simple macro definition added: %s\n", _macro);
 
     return 0;
 }
