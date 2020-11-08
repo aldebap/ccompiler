@@ -31,7 +31,7 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 #   initialize preProcessor unit tests
 set(TEST_NAME "test_initializePreProcessor")
 set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
-set(TEST_FLAGS "-Wl,--defsym,regcomp=__wrap_regcomp -Wl,--defsym,malloc=__wrap_malloc")
+set(TEST_FLAGS "-Wl,--wrap,regcomp -Wl,--wrap,malloc")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
