@@ -16,7 +16,6 @@
 void lexicalParser(FILE *_fileInput, Options *_options)
 {
     int inputByte;
-    unsigned char delimitedComment = 0;
     unsigned char delimitedChar = 0;
     unsigned char delimitedString = 0;
     unsigned char previousByte = 0;
@@ -29,30 +28,8 @@ void lexicalParser(FILE *_fileInput, Options *_options)
     {
         token[i++] = byte = (unsigned char)inputByte;
 
-        /*  check for comment delimiters and content */
-        if (0 == delimitedComment && 0 == delimitedChar && 0 == delimitedString && '/' == previousByte && '*' == byte)
-        {
-            delimitedComment = 1;
-            i = 0;
-            continue;
-        }
-        else if (1 == delimitedComment)
-        {
-            if ('*' == previousByte && '/' == byte)
-            {
-                token[i - 2] = '\0';
-                delimitedComment = 0;
-                i = 0;
-                previousByte = 0;
-
-                if (_options->general.trace)
-                    fprintf(stdout, "[trace] comment: %s\n", token);
-                continue;
-            }
-        }
-
         /* check for character delimiters */
-        if (0 == delimitedComment && 0 == delimitedChar && 0 == delimitedString && '\'' == byte)
+        if (0 == delimitedChar && 0 == delimitedString && '\'' == byte)
         {
             delimitedChar = 1;
             i = j = 0;
@@ -95,7 +72,7 @@ void lexicalParser(FILE *_fileInput, Options *_options)
         }
 
         /* check for string delimiters */
-        if (0 == delimitedComment && 0 == delimitedChar && 0 == delimitedString && '"' == byte)
+        if (0 == delimitedChar && 0 == delimitedString && '"' == byte)
         {
             delimitedString = 1;
             i = j = 0;
@@ -138,7 +115,7 @@ void lexicalParser(FILE *_fileInput, Options *_options)
         }
 
         /*  check for token delimiters */
-        if (0 == delimitedComment && 0 == delimitedChar && 0 == delimitedString)
+        if (0 == delimitedChar && 0 == delimitedString)
         {
             if (' ' == byte || '\t' == byte || '\n' == byte)
             {

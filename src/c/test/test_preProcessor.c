@@ -458,10 +458,14 @@ int runPreProcessorTests()
         {"test case 003 - discard comments in the middle of a line", testCase_discardMiddleOfLineComments, NULL, NULL},
         {"test case 004 - discard comments in the end of a line", testCase_discardEndOfLineComments, NULL, NULL},
         {"test case 005 - discard empty lines", testCase_discardEmptyLines, NULL, NULL},
+        //  TODO: add a test case for /*/ possible fail in comment end !
         {"test case 006 - simple macro definition (begin of line)", testCase_simpleMacroDefinitionBeginOfLine, NULL, NULL},
         {"test case 007 - simple macro definition (middle of line)", testCase_simpleMacroDefinitionMiddleOfLine, NULL, NULL},
         {"test case 008 - simple macro definition (after tabs and spaces)", testCase_simpleMacroDefinitionAfterTabsAndSpaces, NULL, NULL},
         {"test case 009 - simple macro definition (space after pound)", testCase_simpleMacroDefinitionSpaceAfterPound, NULL, NULL},
+        //  TODO: wrap the addMacro() function to isolate tests of preProcessor() function
+        //  TODO: add a new set of test cases for addMacro() function
+        //  TODO: in the main() function of every set os tests, add a print with the name of test group
     };
 
     assert_int_equal(initializePreProcessor(), 0);
