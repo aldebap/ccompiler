@@ -12,21 +12,11 @@
 #include "lexicalParser.h"
 #include "preProcessor.h"
 
-/*  necessary trick to use CMocka to mock functions within the same source file */
-
-#ifdef UNIT_TEST
-
-#define LD_ATTRIBUTE __attribute__((weak))
-#else
-
-#define LD_ATTRIBUTE
-#endif
-
 /*
     prototypes
 */
 
-int compileSourceFile(char *_fileName, Options *_options) LD_ATTRIBUTE;
+int compileSourceFile(char *_fileName, Options *_options);
 
 /*
     Parse command line arguments and run the compiler for selected source files

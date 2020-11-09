@@ -23,10 +23,9 @@
 char *testMacroList[50];
 
 /*
-    wrap regcomp
+    mock for regcomp() function
 */
 
-//int __wrap_regcomp(regex_t *__restrict__ _regex, const char *__restrict__ _pattern, int _cflags)
 int __wrap_regcomp(regex_t *_regex, const char *_pattern, int _cflags)
 {
     check_expected(_regex);
@@ -37,7 +36,7 @@ int __wrap_regcomp(regex_t *_regex, const char *_pattern, int _cflags)
 }
 
 /*
-    wrap malloc
+    mock for malloc() function
 */
 
 void *__wrap_malloc(size_t _size)
@@ -195,5 +194,7 @@ int runInitializePreProcessorTests()
 
 int main()
 {
+    fprintf(stdout, "[unit tests] initialize preprocessor\n");
+
     return runInitializePreProcessorTests();
 }

@@ -40,7 +40,16 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 #   preProcessor unit tests
 set(TEST_NAME "test_preProcessor")
 set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
-set(TEST_FLAGS "")
+set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro")
+
+add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
+target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
+target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+
+#   addMacro unit tests
+set(TEST_NAME "test_addMacro")
+set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
+set(TEST_FLAGS "-Wl,--wrap,realloc -Wl,--wrap,malloc")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)

@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <cmocka.h>
 
 #include "escapeSequence.h"
@@ -83,5 +84,7 @@ int runEscapeSequenceTests()
 
 int main()
 {
+    fprintf(stdout, "[unit tests] escape sequence\n");
+
     return runEscapeSequenceTests();
 }

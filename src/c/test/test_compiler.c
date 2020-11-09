@@ -338,5 +338,7 @@ int runCompilerTests()
 
 int main()
 {
+    fprintf(stdout, "[unit tests] compiler\n");
+
     return runCompilerTests();
 }

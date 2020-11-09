@@ -17,11 +17,15 @@
 
 #include "options.h"
 
-/*  globals */
+/*
+    globals
+*/
 
 char preProcessorFileName[MAXPATHLEN];
 
-/*  prototypes */
+/*
+    prototypes
+*/
 
 int compileSourceFile(char *_fileName, Options *_options);
 
@@ -153,7 +157,7 @@ int runCompileSourceFileTests()
         {"test case 002 - source file name without .c extention", testCase_sourceFileNameWithoutExtention, NULL, NULL},
     };
 
-    return cmocka_run_group_tests_name("compiler.c tests", testCases, NULL, NULL);
+    return cmocka_run_group_tests_name("compileSourceFile.c tests", testCases, NULL, NULL);
 }
 
 /*
@@ -162,5 +166,7 @@ int runCompileSourceFileTests()
 
 int main()
 {
+    fprintf(stdout, "[unit tests] compile source file\n");
+
     return runCompileSourceFileTests();
 }
