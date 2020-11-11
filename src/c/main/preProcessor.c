@@ -172,17 +172,20 @@ int addMacro(char *_macro, char *_value, Options *_options)
     }
 
     /*  enlarge the list if all elements are in use */
-    if (macroListElements > macroListSize)
+    if (macroListElements >= macroListSize)
     {
-        macroList = (char **)realloc(macroList, (macroListSize + MACRO_LIST_GROWTH_FACTOR) * sizeof(char *));
-        if (NULL == macroList)
+        char **macroListAux;
+
+        macroListAux = (char **)realloc(macroList, (macroListSize + MACRO_LIST_GROWTH_FACTOR) * sizeof(char *));
+        if (NULL == macroListAux)
             return -1;
 
+        macroList = macroListAux;
         macroListSize += MACRO_LIST_GROWTH_FACTOR;
     }
 
     /*  allocate memory for the macro and store it's value */
-    macroList[macroListElements] = (char *)malloc((strlen(_macro) + 1) * sizeof(char *));
+    macroList[macroListElements] = (char *)malloc((strlen(_macro) + 1) * sizeof(char));
     if (NULL == macroList[macroListElements])
         return -2;
 
