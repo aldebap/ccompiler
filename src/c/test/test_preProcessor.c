@@ -484,6 +484,49 @@ static void testCase_simpleMacroDefinitionSpaceAfterPound()
 }
 
 /*
+    test case 011 - valued macro definition (begin of line)
+*/
+
+static void testCase_valuedMacroDefinitionBeginOfLine()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __VALUED_MACRO_ONE 175 \n");
+    fclose(sourceFile);
+
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_string(__wrap_addMacro, _macro, "__VALUED_MACRO_ONE");
+    expect_string(__wrap_addMacro, _value, "175");
+    expect_any(__wrap_addMacro, _options);
+    will_return(__wrap_addMacro, 0);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile, &testOptions), 0);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
     entry function - run all test cases
 */
 
@@ -500,6 +543,7 @@ int runPreProcessorTests()
         {"test case 008 - simple macro definition (middle of line)", testCase_simpleMacroDefinitionMiddleOfLine, NULL, NULL},
         {"test case 009 - simple macro definition (after tabs and spaces)", testCase_simpleMacroDefinitionAfterTabsAndSpaces, NULL, NULL},
         {"test case 010 - simple macro definition (space after pound)", testCase_simpleMacroDefinitionSpaceAfterPound, NULL, NULL},
+        {"test case 011 - valued macro definition (begin of line)", testCase_valuedMacroDefinitionBeginOfLine, NULL, NULL},
     };
 
     assert_int_equal(initializePreProcessor(), 0);
