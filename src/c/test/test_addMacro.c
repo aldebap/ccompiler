@@ -18,8 +18,10 @@
     globals
 */
 
+char testMacroName[70][27];
+char *testMacroNameList[70];
 char testMacroValue[70][27];
-char *testMacroList[70];
+char *testMacroValueList[70];
 
 /*
     prototypes
@@ -56,9 +58,13 @@ void *__wrap_realloc(void *_ptr, size_t _size)
 
 static void testCase_initializePreProcessor()
 {
-    /*  expected parameters for simple macro definition */
+    /*  expected parameters for macro name list allocation */
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
-    will_return(__wrap_malloc, testMacroList);
+    will_return(__wrap_malloc, testMacroNameList);
+
+    /*  expected parameters for macro value list allocation */
+    expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
+    will_return(__wrap_malloc, testMacroValueList);
 
     assert_int_equal(initializePreProcessor(), 0);
 }
@@ -71,7 +77,7 @@ static void testCase_successfullyAddFirstMacro()
 {
     /*  expected parameters for malloc */
     expect_value(__wrap_malloc, _size, 21 * sizeof(char));
-    will_return(__wrap_malloc, testMacroValue[0]);
+    will_return(__wrap_malloc, testMacroName[0]);
 
     /*  set the test options */
     Options testOptions;
@@ -112,7 +118,7 @@ static void testCase_failInMemoryAllocation()
 
     setDefaultOptions(&testOptions);
 
-    assert_int_equal(addMacro("__SIMPLE_MACRO_TWO_H", NULL, &testOptions), -2);
+    assert_int_equal(addMacro("__SIMPLE_MACRO_TWO_H", NULL, &testOptions), -3);
 }
 
 /*
@@ -145,10 +151,10 @@ static void testCase_successfullyFulfillMacroArray()
 }
 
 /*
-    test case 006 - attempt to add macro with fail in the memory for macro list reallocation
+    test case 006 - attempt to add macro with fail in the memory for macro name list reallocation
 */
 
-static void testCase_failInMemoryReallocation()
+static void testCase_failInMemoryNameListReallocation()
 {
     /*  expected parameters for realloc */
     expect_any(__wrap_realloc, _ptr);
@@ -165,16 +171,65 @@ static void testCase_failInMemoryReallocation()
 }
 
 /*
-    test case 007 - successfully add a macro with macro list reallocation 
+    test case 007 - attempt to add macro with fail in the memory for macro value list reallocation
 */
 
-static void testCase_successfullyReallocateMacroList()
+static void testCase_failInMemoryValueListReallocation()
 {
     /*  expected parameters for realloc */
     expect_any(__wrap_realloc, _ptr);
     expect_value(__wrap_realloc, _size, 70 * sizeof(char *));
-    will_return(__wrap_realloc, testMacroList);
+    will_return(__wrap_realloc, testMacroNameList);
 
+    /*  expected parameters for realloc */
+    expect_any(__wrap_realloc, _ptr);
+    expect_value(__wrap_realloc, _size, 70 * sizeof(char *));
+    will_return(__wrap_realloc, NULL);
+
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+    testOptions.general.trace = 1;
+
+    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL, &testOptions), -2);
+}
+
+/*
+    test case 008 - attempt to add macro with fail in the memory for macro name allocation
+*/
+
+static void testCase_failInMemoryNameAllocation()
+{
+    /*  expected parameters for realloc */
+    expect_any(__wrap_realloc, _ptr);
+    expect_value(__wrap_realloc, _size, 70 * sizeof(char *));
+    will_return(__wrap_realloc, testMacroNameList);
+
+    /*  expected parameters for realloc */
+    expect_any(__wrap_realloc, _ptr);
+    expect_value(__wrap_realloc, _size, 70 * sizeof(char *));
+    will_return(__wrap_realloc, testMacroValueList);
+
+    /*  expected parameters for malloc */
+    expect_value(__wrap_malloc, _size, 27 * sizeof(char));
+    will_return(__wrap_malloc, NULL);
+
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+    testOptions.general.trace = 1;
+
+    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL, &testOptions), -3);
+}
+
+/*
+    test case 009 - successfully add a macro with macro list reallocation 
+*/
+
+static void testCase_successfullyReallocateMacroList()
+{
     /*  expected parameters for malloc */
     expect_value(__wrap_malloc, _size, 27 * sizeof(char));
     will_return(__wrap_malloc, testMacroValue[50]);
@@ -188,6 +243,8 @@ static void testCase_successfullyReallocateMacroList()
     assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL, &testOptions), 0);
 }
 
+//  TODO: add test cases for valued macros (success + failure)
+
 /*
     entry function - run all test cases
 */
@@ -200,8 +257,10 @@ int runAddMacroTests()
         {"test case 003 - successfully ignore attempt to add an existing macro", testCase_successfullyIgnoreAttemptToAddExistingMacro, NULL, NULL},
         {"test case 004 - attempt to add macro with fail in the memory for macro name allocation", testCase_failInMemoryAllocation, NULL, NULL},
         {"test case 005 - successfully add macros to fulfill initial array", testCase_successfullyFulfillMacroArray, NULL, NULL},
-        {"test case 006 - attempt to add macro with fail in the memory for macro list reallocation", testCase_failInMemoryReallocation, NULL, NULL},
-        {"test case 007 - successfully add a macro with macro list reallocation ", testCase_successfullyReallocateMacroList, NULL, NULL},
+        {"test case 006 - attempt to add macro with fail in the memory for macro name list reallocation", testCase_failInMemoryNameListReallocation, NULL, NULL},
+        {"test case 007 - attempt to add macro with fail in the memory for macro value list reallocation", testCase_failInMemoryValueListReallocation, NULL, NULL},
+        {"test case 008 - attempt to add macro with fail in the memory for macro name allocation", testCase_failInMemoryNameAllocation, NULL, NULL},
+        {"test case 009 - successfully add a macro with macro list reallocation ", testCase_successfullyReallocateMacroList, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("addMacro.c tests", testCases, NULL, NULL);

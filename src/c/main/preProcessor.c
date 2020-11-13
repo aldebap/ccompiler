@@ -31,8 +31,9 @@ struct TPreProcessor
 
     struct
     {
-        char **data;
-        int dataSize;
+        char **name;
+        char **value;
+        int size;
         int elements;
     } macroList;
 } preProcessorData;
@@ -69,12 +70,16 @@ int initializePreProcessor()
         return -1;
 
     /*  alocate the macro list */
-    preProcessorData.macroList.dataSize = INITIAL_MACRO_LIST_SIZE;
+    preProcessorData.macroList.size = INITIAL_MACRO_LIST_SIZE;
     preProcessorData.macroList.elements = 0;
 
-    preProcessorData.macroList.data = (char **)malloc(preProcessorData.macroList.dataSize * sizeof(char *));
-    if (NULL == preProcessorData.macroList.data)
+    preProcessorData.macroList.name = (char **)malloc(preProcessorData.macroList.size * sizeof(char *));
+    if (NULL == preProcessorData.macroList.name)
         return -2;
+
+    preProcessorData.macroList.value = (char **)malloc(preProcessorData.macroList.size * sizeof(char *));
+    if (NULL == preProcessorData.macroList.value)
+        return -3;
 
     return 0;
 }
@@ -193,7 +198,7 @@ int addMacro(char *_macro, char *_value, Options *_options)
 
     for (; i < preProcessorData.macroList.elements; i++)
     {
-        if (0 == strcmp(_macro, preProcessorData.macroList.data[i]))
+        if (0 == strcmp(_macro, preProcessorData.macroList.name[i]))
         {
             if (_options->general.trace)
                 fprintf(stdout, "[trace] macro already defined: %s\n", _macro);
@@ -203,27 +208,52 @@ int addMacro(char *_macro, char *_value, Options *_options)
     }
 
     /*  enlarge the list if all elements are in use */
-    if (preProcessorData.macroList.elements >= preProcessorData.macroList.dataSize)
+    if (preProcessorData.macroList.elements >= preProcessorData.macroList.size)
     {
-        char **macroListAux;
+        char **macroListName;
+        char **macroListValue;
 
-        macroListAux = (char **)realloc(preProcessorData.macroList.data, (preProcessorData.macroList.dataSize + MACRO_LIST_GROWTH_FACTOR) * sizeof(char *));
-        if (NULL == macroListAux)
+        macroListName = (char **)realloc(preProcessorData.macroList.name, (preProcessorData.macroList.size + MACRO_LIST_GROWTH_FACTOR) * sizeof(char *));
+        if (NULL == macroListName)
             return -1;
 
-        preProcessorData.macroList.data = macroListAux;
-        preProcessorData.macroList.dataSize += MACRO_LIST_GROWTH_FACTOR;
+        macroListValue = (char **)realloc(preProcessorData.macroList.value, (preProcessorData.macroList.size + MACRO_LIST_GROWTH_FACTOR) * sizeof(char *));
+        if (NULL == macroListValue)
+            return -2;
+
+        preProcessorData.macroList.name = macroListName;
+        preProcessorData.macroList.value = macroListValue;
+        preProcessorData.macroList.size += MACRO_LIST_GROWTH_FACTOR;
     }
 
-    /*  allocate memory for the macro and store it's value */
-    preProcessorData.macroList.data[preProcessorData.macroList.elements] = (char *)malloc((strlen(_macro) + 1) * sizeof(char));
-    if (NULL == preProcessorData.macroList.data[preProcessorData.macroList.elements])
-        return -2;
+    /*  allocate memory for the macro's name and store it's value */
+    preProcessorData.macroList.name[preProcessorData.macroList.elements] = (char *)malloc((strlen(_macro) + 1) * sizeof(char));
+    if (NULL == preProcessorData.macroList.name[preProcessorData.macroList.elements])
+        return -3;
 
-    strcpy(preProcessorData.macroList.data[preProcessorData.macroList.elements++], _macro);
+    strcpy(preProcessorData.macroList.name[preProcessorData.macroList.elements], _macro);
 
-    if (_options->general.trace)
-        fprintf(stdout, "[trace] simple macro definition added: %s\n", _macro);
+    /*  allocate memory for the macro's value and store it's value */
+    if (NULL == _value)
+    {
+        preProcessorData.macroList.value[preProcessorData.macroList.elements] = NULL;
+
+        if (_options->general.trace)
+            fprintf(stdout, "[trace] simple macro definition added: %s\n", _macro);
+    }
+    else
+    {
+        preProcessorData.macroList.value[preProcessorData.macroList.elements] = (char *)malloc((strlen(_value) + 1) * sizeof(char));
+        if (NULL == preProcessorData.macroList.value[preProcessorData.macroList.elements])
+            return -4;
+
+        strcpy(preProcessorData.macroList.value[preProcessorData.macroList.elements], _value);
+
+        if (_options->general.trace)
+            fprintf(stdout, "[trace] valued macro definition added: %s --> %s\n", _macro, _value);
+    }
+
+    preProcessorData.macroList.elements++;
 
     return 0;
 }

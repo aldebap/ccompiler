@@ -20,7 +20,8 @@
     globals
 */
 
-char *testMacroList[50];
+char *testMacroNameList[50];
+char *testMacroValueList[50];
 
 /*
     mock for regcomp() function
@@ -76,9 +77,13 @@ static void testCase_success()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, 0);
 
-    /*  expected parameters for simple macro definition */
+    /*  expected parameters for macro name list allocation */
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
-    will_return(__wrap_malloc, testMacroList);
+    will_return(__wrap_malloc, testMacroNameList);
+
+    /*  expected parameters for macro value list allocation */
+    expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
+    will_return(__wrap_malloc, testMacroValueList);
 
     assert_int_equal(initializePreProcessor(), 0);
 }
@@ -180,10 +185,10 @@ static void testCase_failInFourthRegex()
 }
 
 /*
-    test case 006 - initialize the preprocessor with fail in the memory for macro list allocation
+    test case 006 - initialize the preprocessor with fail in the memory for macro name list allocation
 */
 
-static void testCase_failInMemoryAllocation()
+static void testCase_failInMemoryNameListAllocation()
 {
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
@@ -209,11 +214,52 @@ static void testCase_failInMemoryAllocation()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, 0);
 
-    /*  expected parameters for simple macro definition */
+    /*  expected parameters for macro name list allocation */
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
     will_return(__wrap_malloc, NULL);
 
     assert_int_equal(initializePreProcessor(), -2);
+}
+
+/*
+    test case 007 - initialize the preprocessor with fail in the memory for macro value list allocation
+*/
+
+static void testCase_failInMemoryValueListAllocation()
+{
+    /*  expected parameters for comment begin */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "(/[*])$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for comment end */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "([*]/)$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for simple macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*[\n]$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for valued macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]+([^ ^\t].*[^ ^\t])[ \t]*[\n]$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for macro name list allocation */
+    expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
+    will_return(__wrap_malloc, testMacroNameList);
+
+    /*  expected parameters for macro value list allocation */
+    expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
+    will_return(__wrap_malloc, NULL);
+
+    assert_int_equal(initializePreProcessor(), -3);
 }
 
 /*
@@ -228,7 +274,8 @@ int runInitializePreProcessorTests()
         {"test case 003 - initialize the preprocessor with fail in the second regex", testCase_failInSecondRegex, NULL, NULL},
         {"test case 004 - initialize the preprocessor with fail in the third regex", testCase_failInThirdRegex, NULL, NULL},
         {"test case 005 - initialize the preprocessor with fail in the fourth regex", testCase_failInFourthRegex, NULL, NULL},
-        {"test case 006 - initialize the preprocessor with fail in the memory for macro list allocation", testCase_failInMemoryAllocation, NULL, NULL},
+        {"test case 006 - initialize the preprocessor with fail in the memory for macro name list allocation", testCase_failInMemoryNameListAllocation, NULL, NULL},
+        {"test case 007 - initialize the preprocessor with fail in the memory for macro value list allocation", testCase_failInMemoryValueListAllocation, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("initializePreProcessor.c tests", testCases, NULL, NULL);
