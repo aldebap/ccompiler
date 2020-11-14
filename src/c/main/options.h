@@ -4,18 +4,32 @@
     oct-25-2020 by aldebap
 */
 
-/*  structure with general options */
+#if !defined(__OPTIONS_H)
+
+#define __OPTIONS_H
+
+/*
+    structure with general options
+*/
+
 typedef struct GeneralOptions
 {
     unsigned char trace;
 } GeneralOptions;
 
-/*  structure with all groups of options */
+/*
+    structure with all groups of options
+*/
+
 typedef struct Options
 {
     GeneralOptions general;
 } Options;
 
-/*  prototypes */
+/*
+    prototypes
+*/
 
 void setDefaultOptions(Options *_options);
+
+#endif /* !defined( __OPTIONS_H ) */

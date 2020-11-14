@@ -22,7 +22,7 @@
     globals
 */
 
-struct TPreProcessor
+static struct TPreProcessor
 {
     regex_t reCommentBegin;
     regex_t reCommentEnd;
@@ -36,7 +36,7 @@ struct TPreProcessor
         int size;
         int elements;
     } macroList;
-} preProcessorData;
+} preProc;
 
 /*
     prototypes
@@ -53,32 +53,32 @@ int initializePreProcessor()
     int result;
 
     /*  compile all regex's for preprocessor syntax */
-    result = regcomp(&preProcessorData.reCommentBegin, "(/[*])$", REG_EXTENDED);
+    result = regcomp(&preProc.reCommentBegin, "(/[*])$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
-    result = regcomp(&preProcessorData.reCommentEnd, "([*]/)$", REG_EXTENDED);
+    result = regcomp(&preProc.reCommentEnd, "([*]/)$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
-    result = regcomp(&preProcessorData.reSimpleMacroDefinition, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*[\n]$", REG_EXTENDED);
+    result = regcomp(&preProc.reSimpleMacroDefinition, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*[\n]$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
-    result = regcomp(&preProcessorData.reValuedMacroDefinition, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]+([^ ^\t].*[^ ^\t])[ \t]*[\n]$", REG_EXTENDED);
+    result = regcomp(&preProc.reValuedMacroDefinition, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]+([^ ^\t].*[^ ^\t])[ \t]*[\n]$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
     /*  alocate the macro list */
-    preProcessorData.macroList.size = INITIAL_MACRO_LIST_SIZE;
-    preProcessorData.macroList.elements = 0;
+    preProc.macroList.size = INITIAL_MACRO_LIST_SIZE;
+    preProc.macroList.elements = 0;
 
-    preProcessorData.macroList.name = (char **)malloc(preProcessorData.macroList.size * sizeof(char *));
-    if (NULL == preProcessorData.macroList.name)
+    preProc.macroList.name = (char **)malloc(preProc.macroList.size * sizeof(char *));
+    if (NULL == preProc.macroList.name)
         return -2;
 
-    preProcessorData.macroList.value = (char **)malloc(preProcessorData.macroList.size * sizeof(char *));
-    if (NULL == preProcessorData.macroList.value)
+    preProc.macroList.value = (char **)malloc(preProc.macroList.size * sizeof(char *));
+    if (NULL == preProc.macroList.value)
         return -3;
 
     return 0;
@@ -105,7 +105,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
         line[i] = '\0';
 
         /*  check for comment delimiters and content */
-        if (0 == delimitedComment && 0 == regexec(&preProcessorData.reCommentBegin, line, 2, match, 0))
+        if (0 == delimitedComment && 0 == regexec(&preProc.reCommentBegin, line, 2, match, 0))
         {
             delimitedComment = 1;
             i -= (match[1].rm_eo - match[1].rm_so);
@@ -114,7 +114,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
         }
         else if (1 == delimitedComment)
         {
-            if (0 == regexec(&preProcessorData.reCommentEnd, line, 2, match, 0))
+            if (0 == regexec(&preProc.reCommentEnd, line, 2, match, 0))
             {
                 line[i - (match[1].rm_eo - match[1].rm_so)] = '\0';
                 delimitedComment = 0;
@@ -133,7 +133,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
             if (1 < i)
             {
                 /*  check if the line syntax is of a simple macro definition */
-                if (0 == regexec(&preProcessorData.reSimpleMacroDefinition, line, 2, match, 0))
+                if (0 == regexec(&preProc.reSimpleMacroDefinition, line, 2, match, 0))
                 {
                     char macro[1024];
                     int result;
@@ -149,7 +149,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
                 }
 
                 /*  check if the line syntax is of a valued macro definition */
-                if (0 == regexec(&preProcessorData.reValuedMacroDefinition, line, 3, match, 0))
+                if (0 == regexec(&preProc.reValuedMacroDefinition, line, 3, match, 0))
                 {
                     char macro[1024];
                     char value[1024];
@@ -196,9 +196,9 @@ int addMacro(char *_macro, char *_value, Options *_options)
     /*  check if the macro is defined already */
     int i = 0;
 
-    for (; i < preProcessorData.macroList.elements; i++)
+    for (; i < preProc.macroList.elements; i++)
     {
-        if (0 == strcmp(_macro, preProcessorData.macroList.name[i]))
+        if (0 == strcmp(_macro, preProc.macroList.name[i]))
         {
             if (_options->general.trace)
                 fprintf(stdout, "[trace] macro already defined: %s\n", _macro);
@@ -208,52 +208,52 @@ int addMacro(char *_macro, char *_value, Options *_options)
     }
 
     /*  enlarge the list if all elements are in use */
-    if (preProcessorData.macroList.elements >= preProcessorData.macroList.size)
+    if (preProc.macroList.elements >= preProc.macroList.size)
     {
         char **macroListName;
         char **macroListValue;
 
-        macroListName = (char **)realloc(preProcessorData.macroList.name, (preProcessorData.macroList.size + MACRO_LIST_GROWTH_FACTOR) * sizeof(char *));
+        macroListName = (char **)realloc(preProc.macroList.name, (preProc.macroList.size + MACRO_LIST_GROWTH_FACTOR) * sizeof(char *));
         if (NULL == macroListName)
             return -1;
 
-        macroListValue = (char **)realloc(preProcessorData.macroList.value, (preProcessorData.macroList.size + MACRO_LIST_GROWTH_FACTOR) * sizeof(char *));
+        macroListValue = (char **)realloc(preProc.macroList.value, (preProc.macroList.size + MACRO_LIST_GROWTH_FACTOR) * sizeof(char *));
         if (NULL == macroListValue)
             return -2;
 
-        preProcessorData.macroList.name = macroListName;
-        preProcessorData.macroList.value = macroListValue;
-        preProcessorData.macroList.size += MACRO_LIST_GROWTH_FACTOR;
+        preProc.macroList.name = macroListName;
+        preProc.macroList.value = macroListValue;
+        preProc.macroList.size += MACRO_LIST_GROWTH_FACTOR;
     }
 
     /*  allocate memory for the macro's name and store it's value */
-    preProcessorData.macroList.name[preProcessorData.macroList.elements] = (char *)malloc((strlen(_macro) + 1) * sizeof(char));
-    if (NULL == preProcessorData.macroList.name[preProcessorData.macroList.elements])
+    preProc.macroList.name[preProc.macroList.elements] = (char *)malloc((strlen(_macro) + 1) * sizeof(char));
+    if (NULL == preProc.macroList.name[preProc.macroList.elements])
         return -3;
 
-    strcpy(preProcessorData.macroList.name[preProcessorData.macroList.elements], _macro);
+    strcpy(preProc.macroList.name[preProc.macroList.elements], _macro);
 
     /*  allocate memory for the macro's value and store it's value */
     if (NULL == _value)
     {
-        preProcessorData.macroList.value[preProcessorData.macroList.elements] = NULL;
+        preProc.macroList.value[preProc.macroList.elements] = NULL;
 
         if (_options->general.trace)
             fprintf(stdout, "[trace] simple macro definition added: %s\n", _macro);
     }
     else
     {
-        preProcessorData.macroList.value[preProcessorData.macroList.elements] = (char *)malloc((strlen(_value) + 1) * sizeof(char));
-        if (NULL == preProcessorData.macroList.value[preProcessorData.macroList.elements])
+        preProc.macroList.value[preProc.macroList.elements] = (char *)malloc((strlen(_value) + 1) * sizeof(char));
+        if (NULL == preProc.macroList.value[preProc.macroList.elements])
             return -4;
 
-        strcpy(preProcessorData.macroList.value[preProcessorData.macroList.elements], _value);
+        strcpy(preProc.macroList.value[preProc.macroList.elements], _value);
 
         if (_options->general.trace)
             fprintf(stdout, "[trace] valued macro definition added: %s --> %s\n", _macro, _value);
     }
 
-    preProcessorData.macroList.elements++;
+    preProc.macroList.elements++;
 
     return 0;
 }
