@@ -527,6 +527,49 @@ static void testCase_valuedMacroDefinitionBeginOfLine()
 }
 
 /*
+    test case 012 - valued macro definition with spaces in the value
+*/
+
+static void testCase_valuedMacroDefinitionSpacesInValue()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "\t # define __VALUED_MACRO_TWO (2 * 5) \n");
+    fclose(sourceFile);
+
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_string(__wrap_addMacro, _macro, "__VALUED_MACRO_TWO");
+    expect_string(__wrap_addMacro, _value, "(2 * 5)");
+    expect_any(__wrap_addMacro, _options);
+    will_return(__wrap_addMacro, 0);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile, &testOptions), 0);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
     entry function - run all test cases
 */
 
@@ -544,6 +587,7 @@ int runPreProcessorTests()
         {"test case 009 - simple macro definition (after tabs and spaces)", testCase_simpleMacroDefinitionAfterTabsAndSpaces, NULL, NULL},
         {"test case 010 - simple macro definition (space after pound)", testCase_simpleMacroDefinitionSpaceAfterPound, NULL, NULL},
         {"test case 011 - valued macro definition (begin of line)", testCase_valuedMacroDefinitionBeginOfLine, NULL, NULL},
+        {"test case 012 - valued macro definition with spaces in the value", testCase_valuedMacroDefinitionSpacesInValue, NULL, NULL},
     };
 
     assert_int_equal(initializePreProcessor(), 0);

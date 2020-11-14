@@ -107,7 +107,7 @@ static void testCase_successfullyIgnoreAttemptToAddExistingMacro()
     test case 004 - attempt to add macro with fail in the memory for macro name allocation
 */
 
-static void testCase_failInMemoryAllocation()
+static void testCase_failInNameMemoryAllocation()
 {
     /*  expected parameters for malloc */
     expect_value(__wrap_malloc, _size, 21 * sizeof(char));
@@ -144,7 +144,7 @@ static void testCase_successfullyFulfillMacroArray()
 
         /*  expected parameters for malloc */
         expect_value(__wrap_malloc, _size, 20 * sizeof(char));
-        will_return(__wrap_malloc, testMacroValue[i]);
+        will_return(__wrap_malloc, testMacroName[i]);
 
         assert_int_equal(addMacro(macroName, NULL, &testOptions), 0);
     }
@@ -232,7 +232,7 @@ static void testCase_successfullyReallocateMacroList()
 {
     /*  expected parameters for malloc */
     expect_value(__wrap_malloc, _size, 27 * sizeof(char));
-    will_return(__wrap_malloc, testMacroValue[50]);
+    will_return(__wrap_malloc, testMacroName[50]);
 
     /*  set the test options */
     Options testOptions;
@@ -243,7 +243,51 @@ static void testCase_successfullyReallocateMacroList()
     assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL, &testOptions), 0);
 }
 
-//  TODO: add test cases for valued macros (success + failure)
+/*
+    test case 010 - successfully add a valued macro
+*/
+
+static void testCase_successfullyAddValuedMacro()
+{
+    /*  expected parameters for malloc */
+    expect_value(__wrap_malloc, _size, 27 * sizeof(char));
+    will_return(__wrap_malloc, testMacroName[51]);
+
+    /*  expected parameters for malloc */
+    expect_value(__wrap_malloc, _size, 4 * sizeof(char));
+    will_return(__wrap_malloc, testMacroValue[51]);
+
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+    testOptions.general.trace = 1;
+
+    assert_int_equal(addMacro("__VALUED_MACRO_FIFTY_TWO_H", "B52", &testOptions), 0);
+}
+
+/*
+    test case 011 - attempt to add macro with fail in the memory for macro value allocation
+*/
+
+static void testCase_failInValueMemoryAllocation()
+{
+    /*  expected parameters for malloc */
+    expect_value(__wrap_malloc, _size, 29 * sizeof(char));
+    will_return(__wrap_malloc, testMacroName[51]);
+
+    /*  expected parameters for malloc */
+    expect_value(__wrap_malloc, _size, 9 * sizeof(char));
+    will_return(__wrap_malloc, NULL);
+
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+    testOptions.general.trace = 1;
+
+    assert_int_equal(addMacro("__VALUED_MACRO_FIFTY_THREE_H", "Herby 53", &testOptions), -4);
+}
 
 /*
     entry function - run all test cases
@@ -255,12 +299,14 @@ int runAddMacroTests()
         {"test case 001 - initialize the preprocessor with success", testCase_initializePreProcessor, NULL, NULL},
         {"test case 002 - successfully add first macro", testCase_successfullyAddFirstMacro, NULL, NULL},
         {"test case 003 - successfully ignore attempt to add an existing macro", testCase_successfullyIgnoreAttemptToAddExistingMacro, NULL, NULL},
-        {"test case 004 - attempt to add macro with fail in the memory for macro name allocation", testCase_failInMemoryAllocation, NULL, NULL},
+        {"test case 004 - attempt to add macro with fail in the memory for macro name allocation", testCase_failInNameMemoryAllocation, NULL, NULL},
         {"test case 005 - successfully add macros to fulfill initial array", testCase_successfullyFulfillMacroArray, NULL, NULL},
         {"test case 006 - attempt to add macro with fail in the memory for macro name list reallocation", testCase_failInMemoryNameListReallocation, NULL, NULL},
         {"test case 007 - attempt to add macro with fail in the memory for macro value list reallocation", testCase_failInMemoryValueListReallocation, NULL, NULL},
         {"test case 008 - attempt to add macro with fail in the memory for macro name allocation", testCase_failInMemoryNameAllocation, NULL, NULL},
         {"test case 009 - successfully add a macro with macro list reallocation ", testCase_successfullyReallocateMacroList, NULL, NULL},
+        {"test case 010 - successfully add a valued macro", testCase_successfullyAddValuedMacro, NULL, NULL},
+        {"test case 011 - attempt to add macro with fail in the memory for macro value allocation", testCase_failInValueMemoryAllocation, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("addMacro.c tests", testCases, NULL, NULL);
