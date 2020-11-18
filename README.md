@@ -5,6 +5,8 @@ The references from *Kernigham & Ritchie* "The C programming language" were used
 There are no requirements about the target platform for this compiler but, it was created using *gcc* on an *Ubuntu 20.04* so,
 it's almost guaranteed that it will run smooth on any Linux flavour.
 
+The preprocessor was implemented based on GNU reference: [GNU ppc](https://gcc.gnu.org/onlinedocs/cpp/index.html#SEC_Contents)
+
 ## Libraries, Packages and Tools
 The following libraries were used to build this project:
 
