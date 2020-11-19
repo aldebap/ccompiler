@@ -1,6 +1,6 @@
 #   C Compiler CMake file
 #
-#   20-oct-2020 by aldebap
+#   oct-20-2020 by aldebap
 
 #   compiler project target
 

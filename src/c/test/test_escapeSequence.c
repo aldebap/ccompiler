@@ -1,7 +1,7 @@
 /*
     C Compiler - Unit tests for Escape sequence parser
 
-    16-oct-2020 by aldebap
+    oct-16-2020 by aldebap
 */
 
 #include <stdarg.h>

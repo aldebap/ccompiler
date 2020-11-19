@@ -1,7 +1,7 @@
 /*
     C Compiler - Unit tests for preprocessor
 
-    26-oct-2020 by aldebap
+    oct-26-2020 by aldebap
 */
 
 #include <stdarg.h>
@@ -9,6 +9,8 @@
 #include <setjmp.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <cmocka.h>
 
@@ -29,6 +31,22 @@ int __wrap_addMacro(char *_macro, char *_value, Options *_options)
 }
 
 /*
+    mock for replaceAllMacros() function
+*/
+
+int __wrap_replaceAllMacros(char *_inputLine, char **_outputValue, Options *_options)
+{
+    check_expected(_inputLine);
+    check_expected(_outputValue);
+    check_expected(_options);
+
+    *_outputValue = (char *)malloc((strlen(_inputLine) + 1) * sizeof(char));
+    strcpy(*_outputValue, _inputLine);
+
+    return (int)mock();
+}
+
+/*
     test case 001 - discard full line comments
 */
 
@@ -43,6 +61,12 @@ static void testCase_discardFullLineComments()
     fprintf(sourceFile, "\n");
     fprintf(sourceFile, "static int i = 0;\n");
     fclose(sourceFile);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    expect_any(__wrap_replaceAllMacros, _options);
+    will_return(__wrap_replaceAllMacros, 0);
 
     /*  set the test options */
     Options testOptions;
@@ -91,6 +115,17 @@ static void testCase_discardBeginningOfLineComments()
     fprintf(sourceFile, "static int j = 0;\n");
     fclose(sourceFile);
 
+    /*  expected parameters for replaceAllMacros */
+    expect_string(__wrap_replaceAllMacros, _inputLine, " static int i = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    expect_any(__wrap_replaceAllMacros, _options);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int j = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    expect_any(__wrap_replaceAllMacros, _options);
+    will_return(__wrap_replaceAllMacros, 0);
+
     /*  set the test options */
     Options testOptions;
 
@@ -137,6 +172,17 @@ static void testCase_discardMiddleOfLineComments()
     fprintf(sourceFile, "\n");
     fprintf(sourceFile, "static int j = 0;\n");
     fclose(sourceFile);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int  i = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    expect_any(__wrap_replaceAllMacros, _options);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int j = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    expect_any(__wrap_replaceAllMacros, _options);
+    will_return(__wrap_replaceAllMacros, 0);
 
     /*  set the test options */
     Options testOptions;
@@ -185,6 +231,17 @@ static void testCase_discardEndOfLineComments()
     fprintf(sourceFile, "static int j = 0;\n");
     fclose(sourceFile);
 
+    /*  expected parameters for replaceAllMacros */
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0; \n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    expect_any(__wrap_replaceAllMacros, _options);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int j = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    expect_any(__wrap_replaceAllMacros, _options);
+    will_return(__wrap_replaceAllMacros, 0);
+
     /*  set the test options */
     Options testOptions;
 
@@ -232,6 +289,12 @@ static void testCase_checkThreeCharactersCommentBug()
     fprintf(sourceFile, "static int i = 0;\n");
     fclose(sourceFile);
 
+    /*  expected parameters for replaceAllMacros */
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    expect_any(__wrap_replaceAllMacros, _options);
+    will_return(__wrap_replaceAllMacros, 0);
+
     /*  set the test options */
     Options testOptions;
 
@@ -278,6 +341,12 @@ static void testCase_discardEmptyLines()
     fprintf(sourceFile, "\n");
     fprintf(sourceFile, "static int i = 0;\n");
     fclose(sourceFile);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    expect_any(__wrap_replaceAllMacros, _options);
+    will_return(__wrap_replaceAllMacros, 0);
 
     /*  set the test options */
     Options testOptions;

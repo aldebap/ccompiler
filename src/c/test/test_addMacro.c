@@ -1,7 +1,7 @@
 /*
     C Compiler - Unit tests for addMacro
 
-    08-nov-2020 by aldebap
+    nov-08-2020 by aldebap
 */
 
 #include <stdarg.h>

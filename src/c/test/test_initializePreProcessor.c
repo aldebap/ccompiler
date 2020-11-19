@@ -1,7 +1,7 @@
 /*
     C Compiler - Unit tests for preprocessor
 
-    26-oct-2020 by aldebap
+    oct-26-2020 by aldebap
 */
 
 #include <regex.h>

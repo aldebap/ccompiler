@@ -1,6 +1,6 @@
 #   C Compiler CMake file
 #
-#   20-oct-2020 by aldebap
+#   oct-20-2020 by aldebap
 
 #   add CMocka
 include_directories(${CMAKE_SOURCE_DIR}/../test/cmocka/include)
@@ -40,7 +40,7 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 #   preProcessor unit tests
 set(TEST_NAME "test_preProcessor")
 set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
-set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro")
+set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,replaceAllMacros=__wrap_replaceAllMacros")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
@@ -50,6 +50,15 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 set(TEST_NAME "test_addMacro")
 set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
 set(TEST_FLAGS "-Wl,--wrap,realloc -Wl,--wrap,malloc")
+
+add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
+target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
+target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+
+#   replaceAllMacros unit tests
+set(TEST_NAME "test_replaceAllMacros")
+set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
+set(TEST_FLAGS "")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
