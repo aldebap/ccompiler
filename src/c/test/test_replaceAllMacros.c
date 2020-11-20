@@ -102,8 +102,6 @@ static void testCase_successfullyDoNoReplacements()
     assert_int_equal(addMacro("__CONSTANT_ONE", "10", &testOptions), 0);
     assert_int_equal(replaceAllMacros("int array[__CONSTANT_TWO];\n", &outputLine, &testOptions), 0);
     assert_string_equal(outputLine, "int array[__CONSTANT_TWO];\n");
-
-    //    free(outputLine);
 }
 
 /*
@@ -137,8 +135,6 @@ static void testCase_successfullyDoOneReplacement()
     assert_int_equal(addMacro("__CONSTANT_TWO", "20", &testOptions), 0);
     assert_int_equal(replaceAllMacros("int array[__CONSTANT_TWO];\n", &outputLine, &testOptions), 0);
     assert_string_equal(outputLine, "int array[20];\n");
-
-    //    free(outputLine);
 }
 
 /*
@@ -181,11 +177,10 @@ static void testCase_successfullyDoOneReplacementsValueGreaterName()
     expect_value(__wrap_malloc, _size, 17 * sizeof(char));
     will_return(__wrap_malloc, output);
 
-    /*  expected parameters for malloc */
-    char *output[19];
-
-    expect_value(__wrap_malloc, _size, 17 * sizeof(char));
-    will_return(__wrap_malloc, output);
+    /*  expected parameters for realloc */
+    expect_any(__wrap_realloc, _ptr);
+    expect_value(__wrap_realloc, _size, 19 * sizeof(char));
+    will_return(__wrap_realloc, output);
 
     /*  set the test options */
     Options testOptions;
@@ -198,10 +193,35 @@ static void testCase_successfullyDoOneReplacementsValueGreaterName()
     assert_int_equal(addMacro("MAX", "65535", &testOptions), 0);
     assert_int_equal(replaceAllMacros("int array[MAX];\n", &outputLine, &testOptions), 0);
     assert_string_equal(outputLine, "int array[65535];\n");
-
-    //    free(outputLine);
 }
 
+/*
+    test case 006 - attempt to replace macros with fail in the memory for output reallocation
+*/
+
+static void testCase_failInOutputMemoryReallocation()
+{
+    /*  expected parameters for malloc */
+    char *output[19];
+
+    expect_value(__wrap_malloc, _size, 17 * sizeof(char));
+    will_return(__wrap_malloc, output);
+
+    /*  expected parameters for realloc */
+    expect_any(__wrap_realloc, _ptr);
+    expect_value(__wrap_realloc, _size, 19 * sizeof(char));
+    will_return(__wrap_realloc, NULL);
+
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+    testOptions.general.trace = 1;
+
+    char *outputLine;
+
+    assert_int_equal(replaceAllMacros("int array[MAX];\n", &outputLine, &testOptions), -2);
+}
 /*
     entry function - run all test cases
 */
@@ -214,6 +234,7 @@ int runReplaceAllMacrosTests()
         {"test case 003 - successfully return input line if it have one macro occurence", testCase_successfullyDoOneReplacement, NULL, NULL},
         {"test case 004 - attempt to replace macros with fail in the memory for output allocation", testCase_failInOutputMemoryAllocation, NULL, NULL},
         {"test case 005 - successfully return input line if it have one macro occurence with value size greater than macro name", testCase_successfullyDoOneReplacementsValueGreaterName, NULL, NULL},
+        {"test case 006 - attempt to replace macros with fail in the memory for output reallocation", testCase_failInOutputMemoryReallocation, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("replaceAllMacros.c tests", testCases, NULL, NULL);
