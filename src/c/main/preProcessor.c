@@ -209,7 +209,7 @@ int addMacro(char *_macro, char *_value, Options *_options)
         if (0 == strcmp(_macro, preProc.macroList.name[i]))
         {
             if (_options->general.trace)
-                fprintf(stdout, "[trace] macro already defined: %s\n", _macro);
+                fprintf(stdout, "[trace] macro (%d) already defined: %s\n", i, _macro);
 
             return 0;
         }
@@ -247,7 +247,7 @@ int addMacro(char *_macro, char *_value, Options *_options)
         preProc.macroList.value[preProc.macroList.elements] = NULL;
 
         if (_options->general.trace)
-            fprintf(stdout, "[trace] simple macro definition added: %s\n", _macro);
+            fprintf(stdout, "[trace] simple macro definition added (%d): %s\n", preProc.macroList.elements, _macro);
     }
     else
     {
@@ -258,7 +258,7 @@ int addMacro(char *_macro, char *_value, Options *_options)
         strcpy(preProc.macroList.value[preProc.macroList.elements], _value);
 
         if (_options->general.trace)
-            fprintf(stdout, "[trace] valued macro definition added: %s --> %s\n", _macro, _value);
+            fprintf(stdout, "[trace] valued macro definition added (%d): %s --> %s\n", preProc.macroList.elements, _macro, _value);
     }
 
     preProc.macroList.elements++;
@@ -280,37 +280,54 @@ int replaceAllMacros(char *_inputLine, char **_outputValue, Options *_options)
     strcpy(*_outputValue, _inputLine);
 
     /*  check if the macro is defined already */
-    int i = 0;
+    int replacements = 0;
 
-    for (; i < preProc.macroList.elements; i++)
+    do
     {
-        char *macroOccurrence = strstr(*_outputValue, preProc.macroList.name[i]);
+        int i = 0;
+        replacements = 0;
 
-        if (NULL != macroOccurrence)
+        for (; i < preProc.macroList.elements; i++)
         {
-            /*  realloc memory if macro value is longer than macro name */
-            int nameLength = strlen(preProc.macroList.name[i]);
-            int valueLength = strlen(preProc.macroList.value[i]);
-            int lengthDifference = valueLength - nameLength;
+            char *macroOccurrence = strstr(*_outputValue, preProc.macroList.name[i]);
 
-            if (0 < lengthDifference)
+            if (NULL != macroOccurrence)
             {
-                char *auxValue = (char *)realloc(*_outputValue, (strlen(*_outputValue) + lengthDifference + 1) * sizeof(char));
+                int nameLength = strlen(preProc.macroList.name[i]);
 
-                if (NULL == auxValue)
-                    return -2;
+                if (NULL == preProc.macroList.value[i])
+                {
+                    /*  if macro have no value, remove the macro name from the line */
+                    memmove(macroOccurrence, macroOccurrence + nameLength, strlen(macroOccurrence + nameLength) + 1);
+                }
+                else
+                {
+                    /*  realloc memory if macro value is longer than macro name */
+                    int valueLength = strlen(preProc.macroList.value[i]);
+                    int lengthDifference = valueLength - nameLength;
 
-                *_outputValue = auxValue;
+                    if (0 < lengthDifference)
+                    {
+                        char *auxValue = (char *)realloc(*_outputValue, (strlen(*_outputValue) + lengthDifference + 1) * sizeof(char));
+
+                        if (NULL == auxValue)
+                            return -2;
+
+                        *_outputValue = auxValue;
+                    }
+
+                    /*  replace the macro name by it's value */
+                    memmove(macroOccurrence + nameLength + lengthDifference, macroOccurrence + nameLength, strlen(macroOccurrence + nameLength) + 1);
+                    memmove(macroOccurrence, preProc.macroList.value[i], valueLength);
+                }
+
+                if (_options->general.trace)
+                    fprintf(stdout, "[trace] macro %s replaced by it's value --> %s\n", preProc.macroList.name[i], *_outputValue);
+
+                replacements++;
             }
-
-            /*  replace the macro name by it's value */
-            memmove(macroOccurrence + nameLength + lengthDifference, macroOccurrence + nameLength, strlen(macroOccurrence + nameLength) + 1);
-            memmove(macroOccurrence, preProc.macroList.value[i], valueLength);
-
-            if (_options->general.trace)
-                fprintf(stdout, "[trace] macro %s replaced by it's value --> %s\n", preProc.macroList.name[i], *_outputValue);
         }
-    }
+    } while (replacements > 0);
 
     return 0;
 }
