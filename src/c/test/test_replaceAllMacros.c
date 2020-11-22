@@ -28,8 +28,8 @@ char *testMacroValueList[70];
     prototypes
 */
 
-int addMacro(char *_macro, char *_value, Options *_options);
-int replaceAllMacros(char *_inputLine, char **_outputValue, Options *_options);
+int addMacro(char *_macro, char *_value);
+int replaceAllMacros(char *_inputLine, char **_outputValue);
 
 /*
     mock for malloc() function
@@ -68,7 +68,13 @@ static void testCase_initializePreProcessor()
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
     will_return(__wrap_malloc, testMacroValueList);
 
-    assert_int_equal(initializePreProcessor(), 0);
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+    testOptions.general.trace = 1;
+
+    assert_int_equal(initializePreProcessor(&testOptions), 0);
 }
 
 /*
@@ -91,16 +97,10 @@ static void testCase_successfullyDoNoReplacements()
     expect_value(__wrap_malloc, _size, 28 * sizeof(char));
     will_return(__wrap_malloc, output);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
     char *outputLine;
 
-    assert_int_equal(addMacro("__CONSTANT_ONE", "10", &testOptions), 0);
-    assert_int_equal(replaceAllMacros("int array[__CONSTANT_TWO];\n", &outputLine, &testOptions), 0);
+    assert_int_equal(addMacro("__CONSTANT_ONE", "10"), 0);
+    assert_int_equal(replaceAllMacros("int array[__CONSTANT_TWO];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array[__CONSTANT_TWO];\n");
 }
 
@@ -120,16 +120,10 @@ static void testCase_successfullyStripMacroName()
     expect_value(__wrap_malloc, _size, 28 * sizeof(char));
     will_return(__wrap_malloc, output);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
     char *outputLine;
 
-    assert_int_equal(addMacro("__SIMPLE_MACRO", NULL, &testOptions), 0);
-    assert_int_equal(replaceAllMacros("int array[__SIMPLE_MACRO];\n", &outputLine, &testOptions), 0);
+    assert_int_equal(addMacro("__SIMPLE_MACRO", NULL), 0);
+    assert_int_equal(replaceAllMacros("int array[__SIMPLE_MACRO];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array[];\n");
 }
 
@@ -153,16 +147,10 @@ static void testCase_successfullyDoOneReplacement()
     expect_value(__wrap_malloc, _size, 28 * sizeof(char));
     will_return(__wrap_malloc, output);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
     char *outputLine;
 
-    assert_int_equal(addMacro("__CONSTANT_TWO", "20", &testOptions), 0);
-    assert_int_equal(replaceAllMacros("int array[__CONSTANT_TWO];\n", &outputLine, &testOptions), 0);
+    assert_int_equal(addMacro("__CONSTANT_TWO", "20"), 0);
+    assert_int_equal(replaceAllMacros("int array[__CONSTANT_TWO];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array[20];\n");
 }
 
@@ -178,15 +166,9 @@ static void testCase_successfullyDoTwoReplacementsOfSameMacro()
     expect_value(__wrap_malloc, _size, 57 * sizeof(char));
     will_return(__wrap_malloc, output);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
     char *outputLine;
 
-    assert_int_equal(replaceAllMacros("int array1[ __CONSTANT_TWO ], array2[ __CONSTANT_TWO ];\n", &outputLine, &testOptions), 0);
+    assert_int_equal(replaceAllMacros("int array1[ __CONSTANT_TWO ], array2[ __CONSTANT_TWO ];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array1[ 20 ], array2[ 20 ];\n");
 }
 
@@ -202,15 +184,9 @@ static void testCase_successfullyDoTwoReplacementsOfDistinctMacros()
     expect_value(__wrap_malloc, _size, 57 * sizeof(char));
     will_return(__wrap_malloc, output);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
     char *outputLine;
 
-    assert_int_equal(replaceAllMacros("int array1[ __CONSTANT_ONE ], array2[ __CONSTANT_TWO ];\n", &outputLine, &testOptions), 0);
+    assert_int_equal(replaceAllMacros("int array1[ __CONSTANT_ONE ], array2[ __CONSTANT_TWO ];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array1[ 10 ], array2[ 20 ];\n");
 }
 
@@ -224,14 +200,9 @@ static void testCase_failInOutputMemoryAllocation()
     expect_value(__wrap_malloc, _size, 28 * sizeof(char));
     will_return(__wrap_malloc, NULL);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     char *outputLine;
 
-    assert_int_equal(replaceAllMacros("int array[__CONSTANT_ONE];\n", &outputLine, &testOptions), -1);
+    assert_int_equal(replaceAllMacros("int array[__CONSTANT_ONE];\n", &outputLine), -1);
 }
 
 /*
@@ -259,16 +230,10 @@ static void testCase_successfullyDoOneReplacementsValueGreaterName()
     expect_value(__wrap_realloc, _size, 19 * sizeof(char));
     will_return(__wrap_realloc, output);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
     char *outputLine;
 
-    assert_int_equal(addMacro("MAX", "65535", &testOptions), 0);
-    assert_int_equal(replaceAllMacros("int array[MAX];\n", &outputLine, &testOptions), 0);
+    assert_int_equal(addMacro("MAX", "65535"), 0);
+    assert_int_equal(replaceAllMacros("int array[MAX];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array[65535];\n");
 }
 
@@ -289,15 +254,9 @@ static void testCase_failInOutputMemoryReallocation()
     expect_value(__wrap_realloc, _size, 19 * sizeof(char));
     will_return(__wrap_realloc, NULL);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
     char *outputLine;
 
-    assert_int_equal(replaceAllMacros("int array[MAX];\n", &outputLine, &testOptions), -2);
+    assert_int_equal(replaceAllMacros("int array[MAX];\n", &outputLine), -2);
 }
 /*
     entry function - run all test cases

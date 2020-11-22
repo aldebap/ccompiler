@@ -27,7 +27,7 @@ char *testMacroValueList[70];
     prototypes
 */
 
-int addMacro(char *_macro, char *_value, Options *_options);
+int addMacro(char *_macro, char *_value);
 
 /*
     mock for malloc() function
@@ -66,7 +66,13 @@ static void testCase_initializePreProcessor()
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
     will_return(__wrap_malloc, testMacroValueList);
 
-    assert_int_equal(initializePreProcessor(), 0);
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+    testOptions.general.trace = 1;
+
+    assert_int_equal(initializePreProcessor(&testOptions), 0);
 }
 
 /*
@@ -79,13 +85,7 @@ static void testCase_successfullyAddFirstMacro()
     expect_value(__wrap_malloc, _size, 21 * sizeof(char));
     will_return(__wrap_malloc, testMacroName[0]);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(addMacro("__SIMPLE_MACRO_ONE_H", NULL, &testOptions), 0);
+    assert_int_equal(addMacro("__SIMPLE_MACRO_ONE_H", NULL), 0);
 }
 
 /*
@@ -94,13 +94,7 @@ static void testCase_successfullyAddFirstMacro()
 
 static void testCase_successfullyIgnoreAttemptToAddExistingMacro()
 {
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(addMacro("__SIMPLE_MACRO_ONE_H", NULL, &testOptions), 0);
+    assert_int_equal(addMacro("__SIMPLE_MACRO_ONE_H", NULL), 0);
 }
 
 /*
@@ -113,12 +107,7 @@ static void testCase_failInNameMemoryAllocation()
     expect_value(__wrap_malloc, _size, 21 * sizeof(char));
     will_return(__wrap_malloc, NULL);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
-    assert_int_equal(addMacro("__SIMPLE_MACRO_TWO_H", NULL, &testOptions), -3);
+    assert_int_equal(addMacro("__SIMPLE_MACRO_TWO_H", NULL), -3);
 }
 
 /*
@@ -127,12 +116,6 @@ static void testCase_failInNameMemoryAllocation()
 
 static void testCase_successfullyFulfillMacroArray()
 {
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
     /*  add 49 macros to fulfill initial array */
     char macroName[21];
     int i = 1;
@@ -146,7 +129,7 @@ static void testCase_successfullyFulfillMacroArray()
         expect_value(__wrap_malloc, _size, 20 * sizeof(char));
         will_return(__wrap_malloc, testMacroName[i]);
 
-        assert_int_equal(addMacro(macroName, NULL, &testOptions), 0);
+        assert_int_equal(addMacro(macroName, NULL), 0);
     }
 }
 
@@ -161,13 +144,7 @@ static void testCase_failInMemoryNameListReallocation()
     expect_value(__wrap_realloc, _size, 70 * sizeof(char *));
     will_return(__wrap_realloc, NULL);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL, &testOptions), -1);
+    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL), -1);
 }
 
 /*
@@ -186,13 +163,7 @@ static void testCase_failInMemoryValueListReallocation()
     expect_value(__wrap_realloc, _size, 70 * sizeof(char *));
     will_return(__wrap_realloc, NULL);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL, &testOptions), -2);
+    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL), -2);
 }
 
 /*
@@ -215,13 +186,7 @@ static void testCase_failInMemoryNameAllocation()
     expect_value(__wrap_malloc, _size, 27 * sizeof(char));
     will_return(__wrap_malloc, NULL);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL, &testOptions), -3);
+    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL), -3);
 }
 
 /*
@@ -234,13 +199,7 @@ static void testCase_successfullyReallocateMacroList()
     expect_value(__wrap_malloc, _size, 27 * sizeof(char));
     will_return(__wrap_malloc, testMacroName[50]);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL, &testOptions), 0);
+    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL), 0);
 }
 
 /*
@@ -257,13 +216,7 @@ static void testCase_successfullyAddValuedMacro()
     expect_value(__wrap_malloc, _size, 4 * sizeof(char));
     will_return(__wrap_malloc, testMacroValue[51]);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(addMacro("__VALUED_MACRO_FIFTY_TWO_H", "B52", &testOptions), 0);
+    assert_int_equal(addMacro("__VALUED_MACRO_FIFTY_TWO_H", "B52"), 0);
 }
 
 /*
@@ -280,13 +233,7 @@ static void testCase_failInValueMemoryAllocation()
     expect_value(__wrap_malloc, _size, 9 * sizeof(char));
     will_return(__wrap_malloc, NULL);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(addMacro("__VALUED_MACRO_FIFTY_THREE_H", "Herby 53", &testOptions), -4);
+    assert_int_equal(addMacro("__VALUED_MACRO_FIFTY_THREE_H", "Herby 53"), -4);
 }
 
 /*

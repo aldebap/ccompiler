@@ -45,14 +45,24 @@ int checkOptions(const LargestIntegralType _parameter, const LargestIntegralType
 }
 
 /*
-    wrap lexical parser function
+    wrap initialize preprocessor function
 */
 
-void __wrap_preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
+int __wrap_initializePreProcessor(Options *_options)
+{
+    check_expected(_options);
+
+    return (int)mock();
+}
+
+/*
+    wrap preprocessor function
+*/
+
+void __wrap_preProcessor(FILE *_fileInput, FILE *_fileOutput)
 {
     check_expected_ptr(_fileInput);
     check_expected_ptr(_fileOutput);
-    check_expected(_options);
 
     /*  make sure preprocessor file exist */
     struct stat preProcessorFileStatus;
@@ -85,14 +95,17 @@ static void testCase_sourceFileNameDotC()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  set the expected values for the wrap preProcessor and wrap lexicalParser() functions */
+    /*  set the expected values for the wrap initializePreProcessor */
     Options testOptions;
 
     setDefaultOptions(&testOptions);
 
+    expect_check(__wrap_initializePreProcessor, _options, checkOptions, &testOptions);
+    will_return(__wrap_initializePreProcessor, 0);
+
+    /*  set the expected values for the wrap preProcessor and wrap lexicalParser() functions */
     expect_any(__wrap_preProcessor, _fileInput);
     expect_any(__wrap_preProcessor, _fileOutput);
-    expect_check(__wrap_preProcessor, _options, checkOptions, &testOptions);
 
     expect_any(__wrap_lexicalParser, _fileInput);
     expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
@@ -123,14 +136,17 @@ static void testCase_sourceFileNameWithoutExtention()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  set the expected values for the wrap preProcessor and wrap lexicalParser() functions */
+    /*  set the expected values for the wrap initializePreProcessor */
     Options testOptions;
 
     setDefaultOptions(&testOptions);
 
+    expect_check(__wrap_initializePreProcessor, _options, checkOptions, &testOptions);
+    will_return(__wrap_initializePreProcessor, 0);
+
+    /*  set the expected values for the wrap preProcessor and wrap lexicalParser() functions */
     expect_any(__wrap_preProcessor, _fileInput);
     expect_any(__wrap_preProcessor, _fileOutput);
-    expect_check(__wrap_preProcessor, _options, checkOptions, &testOptions);
 
     expect_any(__wrap_lexicalParser, _fileInput);
     expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);

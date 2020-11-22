@@ -21,8 +21,8 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 
 #   compileSourceFile unit tests
 set(TEST_NAME "test_compileSourceFile")
-set(SOURCE_LIST ../main/compiler.c ../main/options.c)
-set(TEST_FLAGS "-Wl,--defsym,preProcessor=__wrap_preProcessor -Wl,--defsym,lexicalParser=__wrap_lexicalParser")
+set(SOURCE_LIST ../main/compiler.c ../main/preProcessor.c ../main/options.c)
+set(TEST_FLAGS "-Wl,--defsym,initializePreProcessor=__wrap_initializePreProcessor -Wl,--defsym,preProcessor=__wrap_preProcessor -Wl,--defsym,lexicalParser=__wrap_lexicalParser")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
@@ -50,6 +50,15 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 set(TEST_NAME "test_addMacro")
 set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
 set(TEST_FLAGS "-Wl,--wrap,realloc -Wl,--wrap,malloc")
+
+add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
+target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
+target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+
+#   getMacro unit tests
+set(TEST_NAME "test_getMacro")
+set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
+set(TEST_FLAGS "")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)

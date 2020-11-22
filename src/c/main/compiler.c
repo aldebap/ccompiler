@@ -112,7 +112,8 @@ int compileSourceFile(char *_fileName, Options *_options)
 
     sourceFile = fopen(_fileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
-    preProcessor(sourceFile, preProcessorFile, _options);
+    initializePreProcessor(_options);
+    preProcessor(sourceFile, preProcessorFile);
     fclose(sourceFile);
     fclose(preProcessorFile);
 

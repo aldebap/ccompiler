@@ -24,12 +24,15 @@
 
 static struct TPreProcessor
 {
-    //  TODO: the options should be an attribute here, instead of being passed to all functions
+    Options *options;
 
     regex_t reCommentBegin;
     regex_t reCommentEnd;
     regex_t reSimpleMacroDefinition;
     regex_t reValuedMacroDefinition;
+    regex_t reDefinedMacroConditional;
+    regex_t reNotDefinedMacroConditional;
+    regex_t reEndConditional;
 
     struct
     {
@@ -44,16 +47,19 @@ static struct TPreProcessor
     prototypes
 */
 
-int addMacro(char *_macro, char *_value, Options *_options);
-int replaceAllMacros(char *_inputLine, char **_outputValue, Options *_options);
+int addMacro(char *_macro, char *_value);
+int getMacro(char *_macro, char **_value);
+int replaceAllMacros(char *_inputLine, char **_outputValue);
 
 /*
     initialize the preprocessor
 */
 
-int initializePreProcessor()
+int initializePreProcessor(Options *_options)
 {
     int result;
+
+    preProc.options = _options;
 
     /*  compile all regex's for preprocessor syntax */
     result = regcomp(&preProc.reCommentBegin, "(/[*])$", REG_EXTENDED);
@@ -69,6 +75,18 @@ int initializePreProcessor()
         return -1;
 
     result = regcomp(&preProc.reValuedMacroDefinition, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]+([^ ^\t].*[^ ^\t])[ \t]*[\n]$", REG_EXTENDED);
+    if (0 != result)
+        return -1;
+
+    result = regcomp(&preProc.reDefinedMacroConditional, "^[ \t]*#[ \t]*ifdef[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*[\n]$", REG_EXTENDED);
+    if (0 != result)
+        return -1;
+
+    result = regcomp(&preProc.reNotDefinedMacroConditional, "^[ \t]*#[ \t]*ifndef[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*[\n]$", REG_EXTENDED);
+    if (0 != result)
+        return -1;
+
+    result = regcomp(&preProc.reEndConditional, "^[ \t]*#[ \t]*endif[ \t]*[\n]$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
@@ -91,12 +109,13 @@ int initializePreProcessor()
     the "C" preprocessor
 */
 
-int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
+int preProcessor(FILE *_fileInput, FILE *_fileOutput)
 {
     unsigned char line[4096];
     unsigned int i = 0;
     unsigned char delimitedComment = 0;
     unsigned int commentStart = 0;
+    unsigned int conditional = 0;
     int inputByte;
 
     while (EOF != (inputByte = getc(_fileInput)))
@@ -124,7 +143,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
                 i = commentStart;
 
                 /*  comments are discarded */
-                if (_options->general.trace)
+                if (preProc.options->general.trace)
                     fprintf(stdout, "[trace] comment: %s\n", line + commentStart);
             }
             continue;
@@ -144,7 +163,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
                     strncpy(macro, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
                     macro[match[1].rm_eo - match[1].rm_so] = '\0';
 
-                    result = addMacro(macro, NULL, _options);
+                    result = addMacro(macro, NULL);
                     if (0 != result)
                         return result;
 
@@ -164,25 +183,62 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
                     strncpy(value, line + match[2].rm_so, match[2].rm_eo - match[2].rm_so);
                     value[match[2].rm_eo - match[2].rm_so] = '\0';
 
-                    result = addMacro(macro, value, _options);
+                    result = addMacro(macro, value);
                     if (0 != result)
                         return result;
 
                     continue;
                 }
 
-                /*  if it's not a comment nor a preprocessor syntax, replace all macros in the line and output it */
-                char *outputLine;
-                i = 0;
-
-                if (0 == replaceAllMacros(line, &outputLine, _options))
+                /*  check if the line syntax is of a defined macro conditional*/
+                if (0 == regexec(&preProc.reDefinedMacroConditional, line, 2, match, 0))
                 {
-                    fputs(outputLine, _fileOutput);
-                    free(outputLine);
+                    if (0 == conditional)
+                    {
+                        char macro[1024];
+                        char *value;
+                        int result;
+
+                        strncpy(macro, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
+                        macro[match[1].rm_eo - match[1].rm_so] = '\0';
+
+                        result = getMacro(macro, &value);
+                        if (0 == result)
+                            conditional = 1;
+                        else
+                            conditional = 2;
+
+                        continue;
+                    }
                 }
 
-                if (_options->general.trace)
-                    fprintf(stdout, "[trace] original line: %s", line);
+                /*  check if the line syntax is of a defined macro conditional*/
+                if (0 == regexec(&preProc.reEndConditional, line, 1, match, 0))
+                {
+                    if (0 != conditional)
+                    {
+                        conditional = 0;
+
+                        continue;
+                    }
+                    //  TODO: should give an error message if there's an endif outside of a conditional statement
+                }
+
+                /*  if it's not a comment nor a preprocessor syntax, replace all macros in the line and output it */
+                if (0 == conditional || 1 == conditional)
+                {
+                    char *outputLine;
+                    i = 0;
+
+                    if (0 == replaceAllMacros(line, &outputLine))
+                    {
+                        fputs(outputLine, _fileOutput);
+                        free(outputLine);
+                    }
+
+                    if (preProc.options->general.trace)
+                        fprintf(stdout, "[trace] original line: %s", line);
+                }
             }
             else
             {
@@ -199,7 +255,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput, Options *_options)
     Add a macro to the list
 */
 
-int addMacro(char *_macro, char *_value, Options *_options)
+int addMacro(char *_macro, char *_value)
 {
     /*  check if the macro is defined already */
     int i = 0;
@@ -208,7 +264,7 @@ int addMacro(char *_macro, char *_value, Options *_options)
     {
         if (0 == strcmp(_macro, preProc.macroList.name[i]))
         {
-            if (_options->general.trace)
+            if (preProc.options->general.trace)
                 fprintf(stdout, "[trace] macro (%d) already defined: %s\n", i, _macro);
 
             return 0;
@@ -246,7 +302,7 @@ int addMacro(char *_macro, char *_value, Options *_options)
     {
         preProc.macroList.value[preProc.macroList.elements] = NULL;
 
-        if (_options->general.trace)
+        if (preProc.options->general.trace)
             fprintf(stdout, "[trace] simple macro definition added (%d): %s\n", preProc.macroList.elements, _macro);
     }
     else
@@ -257,7 +313,7 @@ int addMacro(char *_macro, char *_value, Options *_options)
 
         strcpy(preProc.macroList.value[preProc.macroList.elements], _value);
 
-        if (_options->general.trace)
+        if (preProc.options->general.trace)
             fprintf(stdout, "[trace] valued macro definition added (%d): %s --> %s\n", preProc.macroList.elements, _macro, _value);
     }
 
@@ -267,10 +323,32 @@ int addMacro(char *_macro, char *_value, Options *_options)
 }
 
 /*
+    Get the value of a macro from the list
+*/
+
+int getMacro(char *_macro, char **_value)
+{
+    /*  check if the macro is defined */
+    int i = 0;
+
+    for (; i < preProc.macroList.elements; i++)
+    {
+        if (0 == strcmp(_macro, preProc.macroList.name[i]))
+        {
+            *_value = preProc.macroList.value[i];
+
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+/*
     Replace all occurrences of macros in the input line
 */
 
-int replaceAllMacros(char *_inputLine, char **_outputValue, Options *_options)
+int replaceAllMacros(char *_inputLine, char **_outputValue)
 {
     /*  allocate memory for the initial inputLine value */
     *_outputValue = (char *)malloc((strlen(_inputLine) + 1) * sizeof(char));
@@ -321,7 +399,7 @@ int replaceAllMacros(char *_inputLine, char **_outputValue, Options *_options)
                     memmove(macroOccurrence, preProc.macroList.value[i], valueLength);
                 }
 
-                if (_options->general.trace)
+                if (preProc.options->general.trace)
                     fprintf(stdout, "[trace] macro %s replaced by it's value --> %s\n", preProc.macroList.name[i], *_outputValue);
 
                 replacements++;

@@ -68,11 +68,6 @@ static void testCase_discardFullLineComments()
     expect_any(__wrap_replaceAllMacros, _options);
     will_return(__wrap_replaceAllMacros, 0);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -80,7 +75,7 @@ static void testCase_discardFullLineComments()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    preProcessor(sourceFile, preProcessorFile, &testOptions);
+    preProcessor(sourceFile, preProcessorFile);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -126,11 +121,6 @@ static void testCase_discardBeginningOfLineComments()
     expect_any(__wrap_replaceAllMacros, _options);
     will_return(__wrap_replaceAllMacros, 0);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -138,7 +128,7 @@ static void testCase_discardBeginningOfLineComments()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    preProcessor(sourceFile, preProcessorFile, &testOptions);
+    preProcessor(sourceFile, preProcessorFile);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -184,11 +174,6 @@ static void testCase_discardMiddleOfLineComments()
     expect_any(__wrap_replaceAllMacros, _options);
     will_return(__wrap_replaceAllMacros, 0);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -196,7 +181,7 @@ static void testCase_discardMiddleOfLineComments()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    preProcessor(sourceFile, preProcessorFile, &testOptions);
+    preProcessor(sourceFile, preProcessorFile);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -242,11 +227,6 @@ static void testCase_discardEndOfLineComments()
     expect_any(__wrap_replaceAllMacros, _options);
     will_return(__wrap_replaceAllMacros, 0);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -254,7 +234,7 @@ static void testCase_discardEndOfLineComments()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    preProcessor(sourceFile, preProcessorFile, &testOptions);
+    preProcessor(sourceFile, preProcessorFile);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -295,11 +275,6 @@ static void testCase_checkThreeCharactersCommentBug()
     expect_any(__wrap_replaceAllMacros, _options);
     will_return(__wrap_replaceAllMacros, 0);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -307,7 +282,7 @@ static void testCase_checkThreeCharactersCommentBug()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    preProcessor(sourceFile, preProcessorFile, &testOptions);
+    preProcessor(sourceFile, preProcessorFile);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -348,11 +323,6 @@ static void testCase_discardEmptyLines()
     expect_any(__wrap_replaceAllMacros, _options);
     will_return(__wrap_replaceAllMacros, 0);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -360,7 +330,7 @@ static void testCase_discardEmptyLines()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    preProcessor(sourceFile, preProcessorFile, &testOptions);
+    preProcessor(sourceFile, preProcessorFile);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -395,11 +365,6 @@ static void testCase_simpleMacroDefinitionBeginOfLine()
     fprintf(sourceFile, "#define __SIMPLE_MACRO_ONE_H\n");
     fclose(sourceFile);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -413,7 +378,7 @@ static void testCase_simpleMacroDefinitionBeginOfLine()
     expect_any(__wrap_addMacro, _options);
     will_return(__wrap_addMacro, 0);
 
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile, &testOptions), 0);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -438,11 +403,6 @@ static void testCase_simpleMacroDefinitionMiddleOfLine()
     fprintf(sourceFile, "  #define __SIMPLE_MACRO_TWO_H\n");
     fclose(sourceFile);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -456,7 +416,7 @@ static void testCase_simpleMacroDefinitionMiddleOfLine()
     expect_any(__wrap_addMacro, _options);
     will_return(__wrap_addMacro, 0);
 
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile, &testOptions), 0);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -481,11 +441,6 @@ static void testCase_simpleMacroDefinitionAfterTabsAndSpaces()
     fprintf(sourceFile, "\t  #define __SIMPLE_MACRO_THREE_H\n");
     fclose(sourceFile);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -499,7 +454,7 @@ static void testCase_simpleMacroDefinitionAfterTabsAndSpaces()
     expect_any(__wrap_addMacro, _options);
     will_return(__wrap_addMacro, 0);
 
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile, &testOptions), 0);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -524,12 +479,6 @@ static void testCase_simpleMacroDefinitionSpaceAfterPound()
     fprintf(sourceFile, " # define __SIMPLE_MACRO_FOUR_H\n");
     fclose(sourceFile);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -543,7 +492,7 @@ static void testCase_simpleMacroDefinitionSpaceAfterPound()
     expect_any(__wrap_addMacro, _options);
     will_return(__wrap_addMacro, 0);
 
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile, &testOptions), 0);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -568,11 +517,6 @@ static void testCase_valuedMacroDefinitionBeginOfLine()
     fprintf(sourceFile, "#define __VALUED_MACRO_ONE 175 \n");
     fclose(sourceFile);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -586,7 +530,7 @@ static void testCase_valuedMacroDefinitionBeginOfLine()
     expect_any(__wrap_addMacro, _options);
     will_return(__wrap_addMacro, 0);
 
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile, &testOptions), 0);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -611,11 +555,6 @@ static void testCase_valuedMacroDefinitionSpacesInValue()
     fprintf(sourceFile, "\t # define __VALUED_MACRO_TWO (2 * 5) \n");
     fclose(sourceFile);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
     /*  preprocessor pass */
     char preProcessorFileName[] = "sourceTest.i";
     FILE *preProcessorFile;
@@ -629,7 +568,7 @@ static void testCase_valuedMacroDefinitionSpacesInValue()
     expect_any(__wrap_addMacro, _options);
     will_return(__wrap_addMacro, 0);
 
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile, &testOptions), 0);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -659,7 +598,13 @@ int runPreProcessorTests()
         {"test case 012 - valued macro definition with spaces in the value", testCase_valuedMacroDefinitionSpacesInValue, NULL, NULL},
     };
 
-    assert_int_equal(initializePreProcessor(), 0);
+    /*  set the test options */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+    testOptions.general.trace = 1;
+
+    assert_int_equal(initializePreProcessor(&testOptions), 0);
 
     return cmocka_run_group_tests_name("preProcessor.c tests", testCases, NULL, NULL);
 }
