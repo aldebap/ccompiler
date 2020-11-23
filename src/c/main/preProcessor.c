@@ -204,7 +204,12 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
 
                         result = getMacro(macro, &value);
                         if (0 == result)
-                            conditional = 1;
+                        {
+                            conditional = 1; // TODO: use some constants here to make code clearer
+
+                            if (preProc.options->general.trace)
+                                fprintf(stdout, "[trace] conditional block on defined macro: %s\n", macro);
+                        }
                         else
                             conditional = 2;
 
@@ -218,6 +223,9 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (0 != conditional)
                     {
                         conditional = 0;
+
+                        if (preProc.options->general.trace)
+                            fprintf(stdout, "[trace] end of conditional block\n");
 
                         continue;
                     }
@@ -258,17 +266,14 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
 int addMacro(char *_macro, char *_value)
 {
     /*  check if the macro is defined already */
-    int i = 0;
+    char *value;
 
-    for (; i < preProc.macroList.elements; i++)
+    if (0 == getMacro(_macro, &value))
     {
-        if (0 == strcmp(_macro, preProc.macroList.name[i]))
-        {
-            if (preProc.options->general.trace)
-                fprintf(stdout, "[trace] macro (%d) already defined: %s\n", i, _macro);
+        if (preProc.options->general.trace)
+            fprintf(stdout, "[trace] macro already defined: %s\n", _macro);
 
-            return 0;
-        }
+        return 0;
     }
 
     /*  enlarge the list if all elements are in use */

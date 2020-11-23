@@ -52,6 +52,8 @@ void *__wrap_realloc(void *_ptr, size_t _size)
     return (void *)mock();
 }
 
+// TODO: should mock getMacro function here
+
 /*
     test case 001 - initialize the preprocessor with success
 */

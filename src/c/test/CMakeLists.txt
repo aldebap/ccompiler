@@ -40,7 +40,7 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 #   preProcessor unit tests
 set(TEST_NAME "test_preProcessor")
 set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
-set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,replaceAllMacros=__wrap_replaceAllMacros")
+set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,getMacro=__wrap_getMacro -Wl,--defsym,replaceAllMacros=__wrap_replaceAllMacros")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
