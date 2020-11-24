@@ -14,6 +14,7 @@
 
 typedef struct GeneralOptions
 {
+    unsigned char preprocessOnly;
     unsigned char trace;
 } GeneralOptions;
 

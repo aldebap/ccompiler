@@ -38,9 +38,15 @@ int compiler(int _argc, char *_argv[])
         {
             fprintf(stdout, "Usage: %s [options] file...\n", _argv[0]);
             fprintf(stdout, "  --help   Display this information.\n");
+            fprintf(stdout, "  --E      Preprocess only; do not compile, assemble or link.\n");
             fprintf(stdout, "  --trace  Display detailed trace information of compiler execution.\n");
 
             return 0;
+        }
+        if (0 == strncmp("-E", _argv[i], 3))
+        {
+            executionOptions.general.preprocessOnly = 1;
+            continue;
         }
         if (0 == strncmp("--trace", _argv[i], 8))
         {
@@ -116,6 +122,9 @@ int compileSourceFile(char *_fileName, Options *_options)
     preProcessor(sourceFile, preProcessorFile);
     fclose(sourceFile);
     fclose(preProcessorFile);
+
+    if (1 == _options->general.preprocessOnly)
+        return 0;
 
     /*  lexical parser pass */
     sourceFile = fopen(_fileName, "r");

@@ -78,6 +78,7 @@ static void testCase_help()
     remove(redirectStdoutFileName);
 }
 
+//  TODO: add a test case for -E option
 /*
     test case 002 - trace on
 */

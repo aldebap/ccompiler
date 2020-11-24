@@ -608,16 +608,6 @@ static void testCase_ifdefOnExistingMacro()
     /*  expected parameters for getMacro */
     expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
     expect_any(__wrap_getMacro, _value);
-    will_return(__wrap_getMacro, -1);
-
-    /*  expected parameters for replaceAllMacros */
-    expect_string(__wrap_replaceAllMacros, _inputLine, "#define __SOURCE_TEST_H\n");
-    expect_any(__wrap_replaceAllMacros, _outputValue);
-    will_return(__wrap_replaceAllMacros, 0);
-
-    /*  expected parameters for getMacro */
-    expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
-    expect_any(__wrap_getMacro, _value);
     will_return(__wrap_getMacro, 0);
 
     /*  expected parameters for replaceAllMacros */

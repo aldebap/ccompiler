@@ -167,6 +167,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (0 != result)
                         return result;
 
+                    i = 0;
                     continue;
                 }
 
@@ -187,6 +188,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (0 != result)
                         return result;
 
+                    i = 0;
                     continue;
                 }
 
@@ -213,6 +215,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         else
                             conditional = 2;
 
+                        i = 0;
                         continue;
                     }
                 }
@@ -227,6 +230,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         if (preProc.options->general.trace)
                             fprintf(stdout, "[trace] end of conditional block\n");
 
+                        i = 0;
                         continue;
                     }
                     //  TODO: should give an error message if there's an endif outside of a conditional statement
@@ -236,7 +240,6 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 if (0 == conditional || 1 == conditional)
                 {
                     char *outputLine;
-                    i = 0;
 
                     if (0 == replaceAllMacros(line, &outputLine))
                     {
@@ -246,6 +249,8 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
 
                     if (preProc.options->general.trace)
                         fprintf(stdout, "[trace] original line: %s", line);
+
+                    i = 0;
                 }
             }
             else
