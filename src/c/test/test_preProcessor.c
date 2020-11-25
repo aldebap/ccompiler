@@ -625,6 +625,85 @@ static void testCase_ifdefOnExistingMacro()
 }
 
 /*
+    test case 014 - ifdef on non existing macro
+*/
+
+static void testCase_ifdefOnNonExistingMacro()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __SOURCE_CODE_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 0;\n");
+    fprintf(sourceFile, "#endif /* #ifdef __SOURCE_CODE_H */\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_string(__wrap_getMacro, _macro, "__SOURCE_CODE_H");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, -1);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 015 - endif ouside conditional block
+*/
+
+static void testCase_endifOutsideConditionalBlock()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#endif /* #ifdef __SOURCE_CODE_H */\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), -1);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
     entry function - run all test cases
 */
 
@@ -644,6 +723,8 @@ int runPreProcessorTests()
         {"test case 011 - valued macro definition (begin of line)", testCase_valuedMacroDefinitionBeginOfLine, NULL, NULL},
         {"test case 012 - valued macro definition with spaces in the value", testCase_valuedMacroDefinitionSpacesInValue, NULL, NULL},
         {"test case 013 - ifdef on existing macro", testCase_ifdefOnExistingMacro, NULL, NULL},
+        {"test case 014 - ifdef on non existing macro", testCase_ifdefOnNonExistingMacro, NULL, NULL},
+        {"test case 015 - endif ouside conditional block", testCase_endifOutsideConditionalBlock, NULL, NULL},
     };
 
     /*  set the test options */

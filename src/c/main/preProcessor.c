@@ -18,6 +18,10 @@
 #define INITIAL_MACRO_LIST_SIZE 50
 #define MACRO_LIST_GROWTH_FACTOR 20
 
+#define NO_CONDITIONAL_BLOCK 0
+#define TRUE_CONDITIONAL_BLOCK 1
+#define FALSE_CONDITIONAL_BLOCK 2
+
 /*
     globals
 */
@@ -115,7 +119,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
     unsigned int i = 0;
     unsigned char delimitedComment = 0;
     unsigned int commentStart = 0;
-    unsigned int conditional = 0;
+    unsigned int conditional = NO_CONDITIONAL_BLOCK;
     int inputByte;
 
     while (EOF != (inputByte = getc(_fileInput)))
@@ -195,7 +199,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 /*  check if the line syntax is of a defined macro conditional*/
                 if (0 == regexec(&preProc.reDefinedMacroConditional, line, 2, match, 0))
                 {
-                    if (0 == conditional)
+                    if (NO_CONDITIONAL_BLOCK == conditional)
                     {
                         char macro[1024];
                         char *value;
@@ -207,13 +211,13 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         result = getMacro(macro, &value);
                         if (0 == result)
                         {
-                            conditional = 1; // TODO: use some constants here to make code clearer
+                            conditional = TRUE_CONDITIONAL_BLOCK;
 
                             if (preProc.options->general.trace)
                                 fprintf(stdout, "[trace] conditional block on defined macro: %s\n", macro);
                         }
                         else
-                            conditional = 2;
+                            conditional = FALSE_CONDITIONAL_BLOCK;
 
                         i = 0;
                         continue;
@@ -223,9 +227,9 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 /*  check if the line syntax is of a defined macro conditional*/
                 if (0 == regexec(&preProc.reEndConditional, line, 1, match, 0))
                 {
-                    if (0 != conditional)
+                    if (NO_CONDITIONAL_BLOCK != conditional)
                     {
-                        conditional = 0;
+                        conditional = NO_CONDITIONAL_BLOCK;
 
                         if (preProc.options->general.trace)
                             fprintf(stdout, "[trace] end of conditional block\n");
@@ -233,11 +237,15 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         i = 0;
                         continue;
                     }
-                    //  TODO: should give an error message if there's an endif outside of a conditional statement
+                    else
+                    {
+                        fprintf(stderr, "preprocessor: #endif outside conditional block\n");
+                        return -1;
+                    }
                 }
 
                 /*  if it's not a comment nor a preprocessor syntax, replace all macros in the line and output it */
-                if (0 == conditional || 1 == conditional)
+                if (NO_CONDITIONAL_BLOCK == conditional || TRUE_CONDITIONAL_BLOCK == conditional)
                 {
                     char *outputLine;
 
