@@ -36,6 +36,7 @@ static struct TPreProcessor
     regex_t reValuedMacroDefinition;
     regex_t reDefinedMacroConditional;
     regex_t reNotDefinedMacroConditional;
+    regex_t reElseConditional;
     regex_t reEndConditional;
 
     struct
@@ -87,6 +88,10 @@ int initializePreProcessor(Options *_options)
         return -1;
 
     result = regcomp(&preProc.reNotDefinedMacroConditional, "^[ \t]*#[ \t]*ifndef[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*[\n]$", REG_EXTENDED);
+    if (0 != result)
+        return -1;
+
+    result = regcomp(&preProc.reElseConditional, "^[ \t]*#[ \t]*else[ \t]*[\n]$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
@@ -224,7 +229,59 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     }
                 }
 
-                /*  check if the line syntax is of a defined macro conditional*/
+                /*  check if the line syntax is of a not defined macro conditional*/
+                if (0 == regexec(&preProc.reNotDefinedMacroConditional, line, 2, match, 0))
+                {
+                    if (NO_CONDITIONAL_BLOCK == conditional)
+                    {
+                        char macro[1024];
+                        char *value;
+                        int result;
+
+                        strncpy(macro, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
+                        macro[match[1].rm_eo - match[1].rm_so] = '\0';
+
+                        result = getMacro(macro, &value);
+                        if (0 != result)
+                        {
+                            conditional = TRUE_CONDITIONAL_BLOCK;
+
+                            if (preProc.options->general.trace)
+                                fprintf(stdout, "[trace] conditional block on defined macro: %s\n", macro);
+                        }
+                        else
+                            conditional = FALSE_CONDITIONAL_BLOCK;
+
+                        i = 0;
+                        continue;
+                    }
+                }
+
+                /*  check if the line syntax is of an else of a macro conditional*/
+                if (0 == regexec(&preProc.reElseConditional, line, 1, match, 0))
+                {
+                    if (NO_CONDITIONAL_BLOCK != conditional)
+                    {
+                        //  TODO: need to save a state indicating the the block have an else, to avoi d multiple elses to the same if
+                        if (TRUE_CONDITIONAL_BLOCK == conditional)
+                            conditional = FALSE_CONDITIONAL_BLOCK;
+                        else
+                            conditional = TRUE_CONDITIONAL_BLOCK;
+
+                        if (preProc.options->general.trace)
+                            fprintf(stdout, "[trace] else of conditional block\n");
+
+                        i = 0;
+                        continue;
+                    }
+                    else
+                    {
+                        fprintf(stderr, "preprocessor: #else outside conditional block\n");
+                        return -1;
+                    }
+                }
+
+                /*  check if the line syntax is of an end of a macro conditional*/
                 if (0 == regexec(&preProc.reEndConditional, line, 1, match, 0))
                 {
                     if (NO_CONDITIONAL_BLOCK != conditional)
