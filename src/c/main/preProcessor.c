@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "limits.h"
 #include "options.h"
 
 /*
@@ -120,7 +121,7 @@ int initializePreProcessor(Options *_options)
 
 int preProcessor(FILE *_fileInput, FILE *_fileOutput)
 {
-    unsigned char line[4096];
+    unsigned char line[MAX_INPUT_LINE_SIZE];
     unsigned int i = 0;
     unsigned char delimitedComment = 0;
     unsigned int commentStart = 0;
@@ -166,7 +167,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 /*  check if the line syntax is of a simple macro definition */
                 if (0 == regexec(&preProc.reSimpleMacroDefinition, line, 2, match, 0))
                 {
-                    char macro[1024];
+                    char macro[MAX_MACRO_SIZE];
                     int result;
 
                     strncpy(macro, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
@@ -183,8 +184,8 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 /*  check if the line syntax is of a valued macro definition */
                 if (0 == regexec(&preProc.reValuedMacroDefinition, line, 3, match, 0))
                 {
-                    char macro[1024];
-                    char value[1024];
+                    char macro[MAX_MACRO_SIZE];
+                    char value[MAX_MACRO_VALUE_SIZE];
                     int result;
 
                     strncpy(macro, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
@@ -206,7 +207,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 {
                     if (NO_CONDITIONAL_BLOCK == conditional)
                     {
-                        char macro[1024];
+                        char macro[MAX_MACRO_SIZE];
                         char *value;
                         int result;
 
@@ -234,7 +235,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 {
                     if (NO_CONDITIONAL_BLOCK == conditional)
                     {
-                        char macro[1024];
+                        char macro[MAX_MACRO_SIZE];
                         char *value;
                         int result;
 

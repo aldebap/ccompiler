@@ -4,6 +4,8 @@
     oct-25-2020 by aldebap
 */
 
+#include <string.h>
+
 #include "options.h"
 
 /*
@@ -12,7 +14,10 @@
 
 void setDefaultOptions(Options *_options)
 {
-    /*  set feault values for general options */
+    /*  set default values for general options */
+    //  TODO: the include path should be dependent on OS
+    strcpy(_options->general.includePath, "/usr/include");
+
     _options->general.preprocessOnly = 0;
     _options->general.trace = 0;
 }

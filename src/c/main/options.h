@@ -4,6 +4,8 @@
     oct-25-2020 by aldebap
 */
 
+#include "limits.h"
+
 #if !defined(__OPTIONS_H)
 
 #define __OPTIONS_H
@@ -14,6 +16,7 @@
 
 typedef struct GeneralOptions
 {
+    char includePath[MAX_INCLUDE_PATH_SIZE];
     unsigned char preprocessOnly;
     unsigned char trace;
 } GeneralOptions;

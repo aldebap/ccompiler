@@ -9,6 +9,7 @@
 #include <setjmp.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <cmocka.h>
 
@@ -78,9 +79,68 @@ static void testCase_help()
     remove(redirectStdoutFileName);
 }
 
-//  TODO: add a test case for -E option
 /*
-    test case 002 - trace on
+    test case 002 - include directory option
+*/
+
+static void testCase_includeDirectoryOption()
+{
+    char *argv[] = {"compiler", "-I", "./include", "sourceFile.c"};
+
+    /*  generate a source file */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[3], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  set the expected values for the wrap lexicalParser() function */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+    strcpy(testOptions.general.includePath, "/usr/bin:./include");
+
+    expect_string(__wrap_compileSourceFile, _fileName, argv[3]);
+    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    will_return(__wrap_compileSourceFile, 0);
+
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+
+    remove(argv[3]);
+}
+
+/*
+    test case 003 - preprocessor only option
+*/
+
+static void testCase_preprocessorOnlyOption()
+{
+    char *argv[] = {"compiler", "-E", "sourceFile.c"};
+
+    /*  generate a source file */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[2], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  set the expected values for the wrap lexicalParser() function */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+    testOptions.general.preprocessOnly = 1;
+
+    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
+    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    will_return(__wrap_compileSourceFile, 0);
+
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+
+    remove(argv[2]);
+}
+
+/*
+    test case 004 - trace on
 */
 
 static void testCase_traceOn()
@@ -110,7 +170,7 @@ static void testCase_traceOn()
 }
 
 /*
-    test case 003 - invalid argument
+    test case 005 - invalid argument
 */
 
 static void testCase_invalidArgument()
@@ -142,7 +202,7 @@ static void testCase_invalidArgument()
 }
 
 /*
-    test case 004 - no file names
+    test case 006 - no file names
 */
 
 static void testCase_noFileNames()
@@ -174,7 +234,7 @@ static void testCase_noFileNames()
 }
 
 /*
-    test case 005 - file not found
+    test case 007 - file not found
 */
 
 static void testCase_fileNotFound()
@@ -206,7 +266,7 @@ static void testCase_fileNotFound()
 }
 
 /*
-    test case 006 - not a regular file
+    test case 008 - not a regular file
 */
 
 static void testCase_notRegularFile()
@@ -238,7 +298,7 @@ static void testCase_notRegularFile()
 }
 
 /*
-    test case 007 - single file name
+    test case 009 - single file name
 */
 
 static void testCase_singleFileName()
@@ -267,7 +327,7 @@ static void testCase_singleFileName()
 }
 
 /*
-    test case 008 - multiple file names
+    test case 010 - multiple file names
 */
 
 static void testCase_multipleFileNames()
@@ -321,13 +381,15 @@ int runCompilerTests()
 {
     const struct CMUnitTest testCases[] = {
         {"test case 001 - help", testCase_help, NULL, NULL},
-        {"test case 002 - trace on", testCase_traceOn, NULL, NULL},
-        {"test case 003 - invalid option argument", testCase_invalidArgument, NULL, NULL},
-        {"test case 004 - no file names", testCase_noFileNames, NULL, NULL},
-        {"test case 005 - file not found", testCase_fileNotFound, NULL, NULL},
-        {"test case 006 - not a regular file", testCase_notRegularFile, NULL, NULL},
-        {"test case 007 - single file name", testCase_singleFileName, NULL, NULL},
-        {"test case 008 - multiple file names", testCase_multipleFileNames, NULL, NULL},
+        {"test case 002 - include directory option", testCase_includeDirectoryOption, NULL, NULL},
+        {"test case 003 - preprocessor only option", testCase_preprocessorOnlyOption, NULL, NULL},
+        {"test case 004 - trace on", testCase_traceOn, NULL, NULL},
+        {"test case 005 - invalid option argument", testCase_invalidArgument, NULL, NULL},
+        {"test case 006 - no file names", testCase_noFileNames, NULL, NULL},
+        {"test case 007 - file not found", testCase_fileNotFound, NULL, NULL},
+        {"test case 008 - not a regular file", testCase_notRegularFile, NULL, NULL},
+        {"test case 009 - single file name", testCase_singleFileName, NULL, NULL},
+        {"test case 010 - multiple file names", testCase_multipleFileNames, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("compiler.c tests", testCases, NULL, NULL);

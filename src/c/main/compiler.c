@@ -37,11 +37,26 @@ int compiler(int _argc, char *_argv[])
         if (0 == strncmp("--help", _argv[i], 7))
         {
             fprintf(stdout, "Usage: %s [options] file...\n", _argv[0]);
-            fprintf(stdout, "  --help   Display this information.\n");
-            fprintf(stdout, "  --E      Preprocess only; do not compile, assemble or link.\n");
-            fprintf(stdout, "  --trace  Display detailed trace information of compiler execution.\n");
+            fprintf(stdout, "  --help    Display this information.\n");
+            fprintf(stdout, "  -I <dir>  Add <dir> to the preprocessor's include search paths.\n");
+            fprintf(stdout, "  -E        Preprocess only; do not compile, assemble or link.\n");
+            fprintf(stdout, "  --trace   Display detailed trace information of compiler execution.\n");
 
             return 0;
+        }
+        if (0 == strncmp("-I", _argv[i], 3))
+        {
+            if (i + 1 < _argc)
+            {
+                /*  the following argument is the directory name */
+                strcpy(executionOptions.general.includePath, ":");
+                strcpy(executionOptions.general.includePath, _argv[++i]);
+
+                continue;
+            }
+
+            fprintf(stderr, "%s: error: missing path after '%s'\n", _argv[0], _argv[i]);
+            continue;
         }
         if (0 == strncmp("-E", _argv[i], 3))
         {
