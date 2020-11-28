@@ -155,6 +155,8 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 /*  comments are discarded */
                 if (preProc.options->general.trace)
                     fprintf(stdout, "[trace] comment: %s\n", line + commentStart);
+                if (preProc.options->general.trace)
+                    fprintf(stdout, "[trace] remaining line: %s\n", line);
             }
             continue;
         }
@@ -248,7 +250,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                             conditional = TRUE_CONDITIONAL_BLOCK;
 
                             if (preProc.options->general.trace)
-                                fprintf(stdout, "[trace] conditional block on defined macro: %s\n", macro);
+                                fprintf(stdout, "[trace] conditional block on not defined macro: %s\n", macro);
                         }
                         else
                             conditional = FALSE_CONDITIONAL_BLOCK;
@@ -261,6 +263,9 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 /*  check if the line syntax is of an else of a macro conditional*/
                 if (0 == regexec(&preProc.reElseConditional, line, 1, match, 0))
                 {
+                    if (preProc.options->general.trace)
+                        fprintf(stdout, "[trace] else found\n");
+
                     if (NO_CONDITIONAL_BLOCK != conditional)
                     {
                         //  TODO: need to save a state indicating the the block have an else, to avoi d multiple elses to the same if

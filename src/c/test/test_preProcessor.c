@@ -770,10 +770,150 @@ static void testCase_ifndefOnExistingMacro()
     remove(preProcessorFileName);
 }
 
-// TODO: add test cases for #else
+/*
+    test case 017 - else on #ifdef conditional block
+*/
+
+static void testCase_elseOnIfdefConditionalBlock()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 0;\n");
+    fprintf(sourceFile, "#else /* #ifdef __SOURCE_TEST_H */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 1;\n");
+    fprintf(sourceFile, "#endif /* #ifdef __SOURCE_TEST_H */\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
 
 /*
-    test case 017 - endif ouside conditional block
+    test case 018 - else on #ifndef conditional block
+*/
+
+static void testCase_elseOnIfndefConditionalBlock()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifndef __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 0;\n");
+    fprintf(sourceFile, "#else /* #ifndef __SOURCE_TEST_H */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 1;\n");
+    fprintf(sourceFile, "#endif /* #ifndef __SOURCE_TEST_H */\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 1;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 019 - else ouside conditional block
+*/
+
+static void testCase_elseOutsideConditionalBlock()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#else /* #ifdef __SOURCE_CODE_H */\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), -1);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 020 - endif ouside conditional block
 */
 
 static void testCase_endifOutsideConditionalBlock()
@@ -827,7 +967,10 @@ int runPreProcessorTests()
         {"test case 014 - ifdef on non existing macro", testCase_ifdefOnNonExistingMacro, NULL, NULL},
         {"test case 015 - ifndef on not existing macro", testCase_ifndefOnNotExistingMacro, NULL, NULL},
         {"test case 016 - ifndef on existing macro", testCase_ifndefOnExistingMacro, NULL, NULL},
-        {"test case 017 - endif ouside conditional block", testCase_endifOutsideConditionalBlock, NULL, NULL},
+        {"test case 017 - else on #ifdef conditional block", testCase_elseOnIfdefConditionalBlock, NULL, NULL},
+        {"test case 018 - else on #ifndef conditional block", testCase_elseOnIfndefConditionalBlock, NULL, NULL},
+        {"test case 019 - else ouside conditional block", testCase_elseOutsideConditionalBlock, NULL, NULL},
+        {"test case 020 - endif ouside conditional block", testCase_endifOutsideConditionalBlock, NULL, NULL},
     };
 
     /*  set the test options */
