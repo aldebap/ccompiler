@@ -149,14 +149,14 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
             if (0 == regexec(&preProc.reCommentEnd, line, 2, match, 0))
             {
                 line[i - (match[1].rm_eo - match[1].rm_so)] = '\0';
-                delimitedComment = 0;
-                i = commentStart;
 
                 /*  comments are discarded */
                 if (preProc.options->general.trace)
                     fprintf(stdout, "[trace] comment: %s\n", line + commentStart);
-                if (preProc.options->general.trace)
-                    fprintf(stdout, "[trace] remaining line: %s\n", line);
+
+                line[commentStart] = '\0';
+                delimitedComment = 0;
+                i = commentStart;
             }
             continue;
         }
@@ -263,9 +263,6 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 /*  check if the line syntax is of an else of a macro conditional*/
                 if (0 == regexec(&preProc.reElseConditional, line, 1, match, 0))
                 {
-                    if (preProc.options->general.trace)
-                        fprintf(stdout, "[trace] else found\n");
-
                     if (NO_CONDITIONAL_BLOCK != conditional)
                     {
                         //  TODO: need to save a state indicating the the block have an else, to avoi d multiple elses to the same if
@@ -321,6 +318,10 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (preProc.options->general.trace)
                         fprintf(stdout, "[trace] original line: %s", line);
 
+                    i = 0;
+                }
+                else
+                {
                     i = 0;
                 }
             }
