@@ -257,7 +257,56 @@ static void testCase_discardEndOfLineComments()
 }
 
 /*
-    test case 005 - make sure the three character comment parsing is not a bug
+    test case 005 - discard multiple lines comments
+*/
+
+static void testCase_discardMultipleLinesComments()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/*\n");
+    fprintf(sourceFile, "\ttest file with a multiple lines comment\n");
+    fprintf(sourceFile, "*/\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 0;\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    preProcessor(sourceFile, preProcessorFile);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    preProcessorFile = fopen(preProcessorFileName, "r");
+    fgets(output, sizeof(output), preProcessorFile);
+    fclose(preProcessorFile);
+
+    assert_string_equal(output, "static int i = 0;\n");
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 006 - make sure the three character comment parsing is not a bug
 */
 
 static void testCase_checkThreeCharactersCommentBug()
@@ -305,7 +354,7 @@ static void testCase_checkThreeCharactersCommentBug()
 }
 
 /*
-    test case 006 - discard empty lines
+    test case 007 - discard empty lines
 */
 
 static void testCase_discardEmptyLines()
@@ -351,7 +400,7 @@ static void testCase_discardEmptyLines()
 }
 
 /*
-    test case 007 - simple macro definition (begin of line)
+    test case 008 - simple macro definition (begin of line)
 */
 
 static void testCase_simpleMacroDefinitionBeginOfLine()
@@ -388,7 +437,7 @@ static void testCase_simpleMacroDefinitionBeginOfLine()
 }
 
 /*
-    test case 008 - simple macro definition (middle of line)
+    test case 009 - simple macro definition (middle of line)
 */
 
 static void testCase_simpleMacroDefinitionMiddleOfLine()
@@ -425,7 +474,7 @@ static void testCase_simpleMacroDefinitionMiddleOfLine()
 }
 
 /*
-    test case 009 - simple macro definition (after tabs and spaces)
+    test case 010 - simple macro definition (after tabs and spaces)
 */
 
 static void testCase_simpleMacroDefinitionAfterTabsAndSpaces()
@@ -462,7 +511,7 @@ static void testCase_simpleMacroDefinitionAfterTabsAndSpaces()
 }
 
 /*
-    test case 010 - simple macro definition (space after pound)
+    test case 011 - simple macro definition (space after pound)
 */
 
 static void testCase_simpleMacroDefinitionSpaceAfterPound()
@@ -499,7 +548,7 @@ static void testCase_simpleMacroDefinitionSpaceAfterPound()
 }
 
 /*
-    test case 011 - valued macro definition (begin of line)
+    test case 012 - valued macro definition (begin of line)
 */
 
 static void testCase_valuedMacroDefinitionBeginOfLine()
@@ -536,7 +585,7 @@ static void testCase_valuedMacroDefinitionBeginOfLine()
 }
 
 /*
-    test case 012 - valued macro definition with spaces in the value
+    test case 013 - valued macro definition with spaces in the value
 */
 
 static void testCase_valuedMacroDefinitionSpacesInValue()
@@ -573,7 +622,7 @@ static void testCase_valuedMacroDefinitionSpacesInValue()
 }
 
 /*
-    test case 013 - ifdef on existing macro
+    test case 014 - ifdef on existing macro
 */
 
 static void testCase_ifdefOnExistingMacro()
@@ -625,7 +674,7 @@ static void testCase_ifdefOnExistingMacro()
 }
 
 /*
-    test case 014 - ifdef on non existing macro
+    test case 015 - ifdef on non existing macro
 */
 
 static void testCase_ifdefOnNonExistingMacro()
@@ -672,7 +721,7 @@ static void testCase_ifdefOnNonExistingMacro()
 }
 
 /*
-    test case 015 - ifndef on not existing macro
+    test case 016 - ifndef on not existing macro
 */
 
 static void testCase_ifndefOnNotExistingMacro()
@@ -724,7 +773,7 @@ static void testCase_ifndefOnNotExistingMacro()
 }
 
 /*
-    test case 016 - ifndef on existing macro
+    test case 017 - ifndef on existing macro
 */
 
 static void testCase_ifndefOnExistingMacro()
@@ -771,7 +820,7 @@ static void testCase_ifndefOnExistingMacro()
 }
 
 /*
-    test case 017 - else on #ifdef conditional block
+    test case 018 - else on #ifdef conditional block
 */
 
 static void testCase_elseOnIfdefConditionalBlock()
@@ -826,7 +875,7 @@ static void testCase_elseOnIfdefConditionalBlock()
 }
 
 /*
-    test case 018 - else on #ifndef conditional block
+    test case 019 - else on #ifndef conditional block
 */
 
 static void testCase_elseOnIfndefConditionalBlock()
@@ -881,7 +930,7 @@ static void testCase_elseOnIfndefConditionalBlock()
 }
 
 /*
-    test case 019 - else ouside conditional block
+    test case 020 - else ouside conditional block
 */
 
 static void testCase_elseOutsideConditionalBlock()
@@ -913,7 +962,7 @@ static void testCase_elseOutsideConditionalBlock()
 }
 
 /*
-    test case 020 - endif ouside conditional block
+    test case 021 - endif ouside conditional block
 */
 
 static void testCase_endifOutsideConditionalBlock()
@@ -955,22 +1004,23 @@ int runPreProcessorTests()
         {"test case 002 - discard comments in the beginning of a line", testCase_discardBeginningOfLineComments, NULL, NULL},
         {"test case 003 - discard comments in the middle of a line", testCase_discardMiddleOfLineComments, NULL, NULL},
         {"test case 004 - discard comments in the end of a line", testCase_discardEndOfLineComments, NULL, NULL},
-        {"test case 005 - make sure the three character comment parsing is not a bug", testCase_checkThreeCharactersCommentBug, NULL, NULL},
-        {"test case 006 - discard empty lines", testCase_discardEmptyLines, NULL, NULL},
-        {"test case 007 - simple macro definition (begin of line)", testCase_simpleMacroDefinitionBeginOfLine, NULL, NULL},
-        {"test case 008 - simple macro definition (middle of line)", testCase_simpleMacroDefinitionMiddleOfLine, NULL, NULL},
-        {"test case 009 - simple macro definition (after tabs and spaces)", testCase_simpleMacroDefinitionAfterTabsAndSpaces, NULL, NULL},
-        {"test case 010 - simple macro definition (space after pound)", testCase_simpleMacroDefinitionSpaceAfterPound, NULL, NULL},
-        {"test case 011 - valued macro definition (begin of line)", testCase_valuedMacroDefinitionBeginOfLine, NULL, NULL},
-        {"test case 012 - valued macro definition with spaces in the value", testCase_valuedMacroDefinitionSpacesInValue, NULL, NULL},
-        {"test case 013 - ifdef on existing macro", testCase_ifdefOnExistingMacro, NULL, NULL},
-        {"test case 014 - ifdef on non existing macro", testCase_ifdefOnNonExistingMacro, NULL, NULL},
-        {"test case 015 - ifndef on not existing macro", testCase_ifndefOnNotExistingMacro, NULL, NULL},
-        {"test case 016 - ifndef on existing macro", testCase_ifndefOnExistingMacro, NULL, NULL},
-        {"test case 017 - else on #ifdef conditional block", testCase_elseOnIfdefConditionalBlock, NULL, NULL},
-        {"test case 018 - else on #ifndef conditional block", testCase_elseOnIfndefConditionalBlock, NULL, NULL},
-        {"test case 019 - else ouside conditional block", testCase_elseOutsideConditionalBlock, NULL, NULL},
-        {"test case 020 - endif ouside conditional block", testCase_endifOutsideConditionalBlock, NULL, NULL},
+        {"test case 005 - discard multiple lines comments", testCase_discardMultipleLinesComments, NULL, NULL},
+        {"test case 006 - make sure the three character comment parsing is not a bug", testCase_checkThreeCharactersCommentBug, NULL, NULL},
+        {"test case 007 - discard empty lines", testCase_discardEmptyLines, NULL, NULL},
+        {"test case 008 - simple macro definition (begin of line)", testCase_simpleMacroDefinitionBeginOfLine, NULL, NULL},
+        {"test case 009 - simple macro definition (middle of line)", testCase_simpleMacroDefinitionMiddleOfLine, NULL, NULL},
+        {"test case 010 - simple macro definition (after tabs and spaces)", testCase_simpleMacroDefinitionAfterTabsAndSpaces, NULL, NULL},
+        {"test case 011 - simple macro definition (space after pound)", testCase_simpleMacroDefinitionSpaceAfterPound, NULL, NULL},
+        {"test case 012 - valued macro definition (begin of line)", testCase_valuedMacroDefinitionBeginOfLine, NULL, NULL},
+        {"test case 013 - valued macro definition with spaces in the value", testCase_valuedMacroDefinitionSpacesInValue, NULL, NULL},
+        {"test case 014 - ifdef on existing macro", testCase_ifdefOnExistingMacro, NULL, NULL},
+        {"test case 015 - ifdef on non existing macro", testCase_ifdefOnNonExistingMacro, NULL, NULL},
+        {"test case 016 - ifndef on not existing macro", testCase_ifndefOnNotExistingMacro, NULL, NULL},
+        {"test case 017 - ifndef on existing macro", testCase_ifndefOnExistingMacro, NULL, NULL},
+        {"test case 018 - else on #ifdef conditional block", testCase_elseOnIfdefConditionalBlock, NULL, NULL},
+        {"test case 019 - else on #ifndef conditional block", testCase_elseOnIfndefConditionalBlock, NULL, NULL},
+        {"test case 020 - else ouside conditional block", testCase_elseOutsideConditionalBlock, NULL, NULL},
+        {"test case 021 - endif ouside conditional block", testCase_endifOutsideConditionalBlock, NULL, NULL},
     };
 
     /*  set the test options */
