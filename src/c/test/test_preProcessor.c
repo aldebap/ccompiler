@@ -994,6 +994,50 @@ static void testCase_endifOutsideConditionalBlock()
 }
 
 /*
+    test case 022 - correctly parse CR + LF line delimited file
+*/
+
+static void testCase_correctlyParseCRLFLineDelimitedFile()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\r\n");
+    fprintf(sourceFile, "\r\n");
+    fprintf(sourceFile, "#define __SOURCE_TEST_H\r\n");
+    fprintf(sourceFile, "\r\n");
+    fprintf(sourceFile, "static int i = 1;\r\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 1;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
     entry function - run all test cases
 */
 
@@ -1021,6 +1065,7 @@ int runPreProcessorTests()
         {"test case 019 - else on #ifndef conditional block", testCase_elseOnIfndefConditionalBlock, NULL, NULL},
         {"test case 020 - else ouside conditional block", testCase_elseOutsideConditionalBlock, NULL, NULL},
         {"test case 021 - endif ouside conditional block", testCase_endifOutsideConditionalBlock, NULL, NULL},
+        {"test case 022 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
     };
 
     /*  set the test options */

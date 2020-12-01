@@ -166,6 +166,17 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
         {
             if (1 < i)
             {
+                /*  chomp the CR if a CR + LF is used as line delimiter */
+                if ('\r' == line[i - 2])
+                {
+                    line[i - 2] = '\n';
+                    line[i - 1] = '\0';
+                    i--;
+                }
+            }
+
+            if (1 < i)
+            {
                 /*  check if the line syntax is of a simple macro definition */
                 if (0 == regexec(&preProc.reSimpleMacroDefinition, line, 2, match, 0))
                 {
