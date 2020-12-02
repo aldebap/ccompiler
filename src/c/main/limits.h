@@ -27,4 +27,6 @@
 #define MAX_MACRO_SIZE 1024
 #define MAX_MACRO_VALUE_SIZE 1024
 
+#define MAX_NESTED_MACRO_CONDITIONALS 10
+
 #endif /* !defined(__LIMITS_H) */

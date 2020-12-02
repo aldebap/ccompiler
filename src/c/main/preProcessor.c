@@ -33,6 +33,7 @@ static struct TPreProcessor
 
     regex_t reCommentBegin;
     regex_t reCommentEnd;
+    regex_t reContinueNextLine;
     regex_t reSimpleMacroDefinition;
     regex_t reValuedMacroDefinition;
     regex_t reDefinedMacroConditional;
@@ -76,27 +77,31 @@ int initializePreProcessor(Options *_options)
     if (0 != result)
         return -1;
 
-    result = regcomp(&preProc.reSimpleMacroDefinition, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*[\n]$", REG_EXTENDED);
+    result = regcomp(&preProc.reContinueNextLine, "[\\][ \t]*\n$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
-    result = regcomp(&preProc.reValuedMacroDefinition, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]+([^ ^\t].*[^ ^\t])[ \t]*[\n]$", REG_EXTENDED);
+    result = regcomp(&preProc.reSimpleMacroDefinition, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*\n$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
-    result = regcomp(&preProc.reDefinedMacroConditional, "^[ \t]*#[ \t]*ifdef[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*[\n]$", REG_EXTENDED);
+    result = regcomp(&preProc.reValuedMacroDefinition, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]+([^ ^\t].*[^ ^\t])[ \t]*\n$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
-    result = regcomp(&preProc.reNotDefinedMacroConditional, "^[ \t]*#[ \t]*ifndef[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*[\n]$", REG_EXTENDED);
+    result = regcomp(&preProc.reDefinedMacroConditional, "^[ \t]*#[ \t]*ifdef[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*\n$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
-    result = regcomp(&preProc.reElseConditional, "^[ \t]*#[ \t]*else[ \t]*[\n]$", REG_EXTENDED);
+    result = regcomp(&preProc.reNotDefinedMacroConditional, "^[ \t]*#[ \t]*ifndef[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*\n$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
-    result = regcomp(&preProc.reEndConditional, "^[ \t]*#[ \t]*endif[ \t]*[\n]$", REG_EXTENDED);
+    result = regcomp(&preProc.reElseConditional, "^[ \t]*#[ \t]*else[ \t]*\n$", REG_EXTENDED);
+    if (0 != result)
+        return -1;
+
+    result = regcomp(&preProc.reEndConditional, "^[ \t]*#[ \t]*endif[ \t]*\n$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
@@ -158,6 +163,14 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 delimitedComment = 0;
                 i = commentStart;
             }
+            continue;
+        }
+
+        /*  check if the preprocessor line is to be continued in the next line */
+        if (0 == regexec(&preProc.reContinueNextLine, line, 1, match, 0))
+        {
+            line[i - (match[0].rm_eo - match[0].rm_so)] = '\0';
+            i -= (match[0].rm_eo - match[0].rm_so);
             continue;
         }
 
