@@ -12,22 +12,18 @@
 #include <cmocka.h>
 
 #include "options.h"
-#include "preProcessor.h"
+#include "macro.h"
 
 /*
     globals
 */
 
+TMacroList macroList;
+
 char testMacroName[70][27];
 char *testMacroNameList[70];
 char testMacroValue[70][27];
 char *testMacroValueList[70];
-
-/*
-    prototypes
-*/
-
-int addMacro(char *_macro, char *_value);
 
 /*
     mock for malloc() function
@@ -55,10 +51,10 @@ void *__wrap_realloc(void *_ptr, size_t _size)
 // TODO: should mock getMacro function here
 
 /*
-    test case 001 - initialize the preprocessor with success
+    test case 001 - initialize the macro list with success
 */
 
-static void testCase_initializePreProcessor()
+static void testCase_initializeMacroList()
 {
     /*  expected parameters for macro name list allocation */
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
@@ -74,7 +70,7 @@ static void testCase_initializePreProcessor()
     setDefaultOptions(&testOptions);
     testOptions.general.trace = 1;
 
-    assert_int_equal(initializePreProcessor(&testOptions), 0);
+    assert_int_equal(initializeMacroList(&macroList), 0);
 }
 
 /*
@@ -87,7 +83,7 @@ static void testCase_successfullyAddFirstMacro()
     expect_value(__wrap_malloc, _size, 21 * sizeof(char));
     will_return(__wrap_malloc, testMacroName[0]);
 
-    assert_int_equal(addMacro("__SIMPLE_MACRO_ONE_H", NULL), 0);
+    assert_int_equal(addMacro(&macroList, "__SIMPLE_MACRO_ONE_H", NULL), 0);
 }
 
 /*
@@ -96,7 +92,7 @@ static void testCase_successfullyAddFirstMacro()
 
 static void testCase_successfullyIgnoreAttemptToAddExistingMacro()
 {
-    assert_int_equal(addMacro("__SIMPLE_MACRO_ONE_H", NULL), 0);
+    assert_int_equal(addMacro(&macroList, "__SIMPLE_MACRO_ONE_H", NULL), 0);
 }
 
 /*
@@ -109,7 +105,7 @@ static void testCase_failInNameMemoryAllocation()
     expect_value(__wrap_malloc, _size, 21 * sizeof(char));
     will_return(__wrap_malloc, NULL);
 
-    assert_int_equal(addMacro("__SIMPLE_MACRO_TWO_H", NULL), -3);
+    assert_int_equal(addMacro(&macroList, "__SIMPLE_MACRO_TWO_H", NULL), -3);
 }
 
 /*
@@ -131,7 +127,7 @@ static void testCase_successfullyFulfillMacroArray()
         expect_value(__wrap_malloc, _size, 20 * sizeof(char));
         will_return(__wrap_malloc, testMacroName[i]);
 
-        assert_int_equal(addMacro(macroName, NULL), 0);
+        assert_int_equal(addMacro(&macroList, macroName, NULL), 0);
     }
 }
 
@@ -146,7 +142,7 @@ static void testCase_failInMemoryNameListReallocation()
     expect_value(__wrap_realloc, _size, 70 * sizeof(char *));
     will_return(__wrap_realloc, NULL);
 
-    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL), -1);
+    assert_int_equal(addMacro(&macroList, "__SIMPLE_MACRO_FIFTY_ONE_H", NULL), -1);
 }
 
 /*
@@ -165,7 +161,7 @@ static void testCase_failInMemoryValueListReallocation()
     expect_value(__wrap_realloc, _size, 70 * sizeof(char *));
     will_return(__wrap_realloc, NULL);
 
-    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL), -2);
+    assert_int_equal(addMacro(&macroList, "__SIMPLE_MACRO_FIFTY_ONE_H", NULL), -2);
 }
 
 /*
@@ -188,7 +184,7 @@ static void testCase_failInMemoryNameAllocation()
     expect_value(__wrap_malloc, _size, 27 * sizeof(char));
     will_return(__wrap_malloc, NULL);
 
-    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL), -3);
+    assert_int_equal(addMacro(&macroList, "__SIMPLE_MACRO_FIFTY_ONE_H", NULL), -3);
 }
 
 /*
@@ -201,7 +197,7 @@ static void testCase_successfullyReallocateMacroList()
     expect_value(__wrap_malloc, _size, 27 * sizeof(char));
     will_return(__wrap_malloc, testMacroName[50]);
 
-    assert_int_equal(addMacro("__SIMPLE_MACRO_FIFTY_ONE_H", NULL), 0);
+    assert_int_equal(addMacro(&macroList, "__SIMPLE_MACRO_FIFTY_ONE_H", NULL), 0);
 }
 
 /*
@@ -218,7 +214,7 @@ static void testCase_successfullyAddValuedMacro()
     expect_value(__wrap_malloc, _size, 4 * sizeof(char));
     will_return(__wrap_malloc, testMacroValue[51]);
 
-    assert_int_equal(addMacro("__VALUED_MACRO_FIFTY_TWO_H", "B52"), 0);
+    assert_int_equal(addMacro(&macroList, "__VALUED_MACRO_FIFTY_TWO_H", "B52"), 0);
 }
 
 /*
@@ -235,7 +231,7 @@ static void testCase_failInValueMemoryAllocation()
     expect_value(__wrap_malloc, _size, 9 * sizeof(char));
     will_return(__wrap_malloc, NULL);
 
-    assert_int_equal(addMacro("__VALUED_MACRO_FIFTY_THREE_H", "Herby 53"), -4);
+    assert_int_equal(addMacro(&macroList, "__VALUED_MACRO_FIFTY_THREE_H", "Herby 53"), -4);
 }
 
 /*
@@ -245,7 +241,7 @@ static void testCase_failInValueMemoryAllocation()
 int runAddMacroTests()
 {
     const struct CMUnitTest testCases[] = {
-        {"test case 001 - initialize the preprocessor with success", testCase_initializePreProcessor, NULL, NULL},
+        {"test case 001 - initialize the macro list with success", testCase_initializeMacroList, NULL, NULL},
         {"test case 002 - successfully add first macro", testCase_successfullyAddFirstMacro, NULL, NULL},
         {"test case 003 - successfully ignore attempt to add an existing macro", testCase_successfullyIgnoreAttemptToAddExistingMacro, NULL, NULL},
         {"test case 004 - attempt to add macro with fail in the memory for macro name allocation", testCase_failInNameMemoryAllocation, NULL, NULL},

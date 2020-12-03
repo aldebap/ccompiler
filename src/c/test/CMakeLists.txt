@@ -12,7 +12,7 @@ include_directories($ENV{SOURCE_DIRECTORY})
 
 #   compiler unit tests
 set(TEST_NAME "test_compiler")
-set(SOURCE_LIST ../main/compiler.c ../main/options.c ../main/preProcessor.c ../main/lexicalParser.c ../main/escapeSequence.c)
+set(SOURCE_LIST ../main/compiler.c ../main/options.c ../main/preProcessor.c ../main/macro.c ../main/lexicalParser.c ../main/escapeSequence.c)
 set(TEST_FLAGS "-Wl,--defsym,compileSourceFile=__wrap_compileSourceFile")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
@@ -21,7 +21,7 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 
 #   compileSourceFile unit tests
 set(TEST_NAME "test_compileSourceFile")
-set(SOURCE_LIST ../main/compiler.c ../main/preProcessor.c ../main/options.c)
+set(SOURCE_LIST ../main/compiler.c ../main/preProcessor.c ../main/macro.c ../main/options.c)
 set(TEST_FLAGS "-Wl,--defsym,initializePreProcessor=__wrap_initializePreProcessor -Wl,--defsym,preProcessor=__wrap_preProcessor -Wl,--defsym,lexicalParser=__wrap_lexicalParser")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
@@ -30,7 +30,7 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 
 #   initialize preProcessor unit tests
 set(TEST_NAME "test_initializePreProcessor")
-set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
+set(SOURCE_LIST ../main/preProcessor.c ../main/macro.c ../main/options.c)
 set(TEST_FLAGS "-Wl,--wrap,regcomp -Wl,--wrap,malloc")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
@@ -39,7 +39,7 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 
 #   preProcessor unit tests
 set(TEST_NAME "test_preProcessor")
-set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
+set(SOURCE_LIST ../main/preProcessor.c ../main/macro.c ../main/options.c)
 set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,getMacro=__wrap_getMacro -Wl,--defsym,replaceAllMacros=__wrap_replaceAllMacros")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
@@ -48,7 +48,7 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 
 #   addMacro unit tests
 set(TEST_NAME "test_addMacro")
-set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
+set(SOURCE_LIST ../main/macro.c ../main/options.c)
 set(TEST_FLAGS "-Wl,--wrap,realloc -Wl,--wrap,malloc")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
@@ -57,7 +57,7 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 
 #   getMacro unit tests
 set(TEST_NAME "test_getMacro")
-set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
+set(SOURCE_LIST ../main/macro.c ../main/options.c)
 set(TEST_FLAGS "")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
@@ -66,7 +66,7 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 
 #   replaceAllMacros unit tests
 set(TEST_NAME "test_replaceAllMacros")
-set(SOURCE_LIST ../main/preProcessor.c ../main/options.c)
+set(SOURCE_LIST ../main/macro.c ../main/options.c)
 set(TEST_FLAGS "-Wl,--wrap,realloc -Wl,--wrap,malloc")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})

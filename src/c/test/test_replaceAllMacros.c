@@ -13,23 +13,18 @@
 #include <cmocka.h>
 
 #include "options.h"
-#include "preProcessor.h"
+#include "macro.h"
 
 /*
     globals
 */
 
+TMacroList macroList;
+
 char testMacroName[70][27];
 char *testMacroNameList[70];
 char testMacroValue[70][27];
 char *testMacroValueList[70];
-
-/*
-    prototypes
-*/
-
-int addMacro(char *_macro, char *_value);
-int replaceAllMacros(char *_inputLine, char **_outputValue);
 
 /*
     mock for malloc() function
@@ -55,10 +50,10 @@ void *__wrap_realloc(void *_ptr, size_t _size)
 }
 
 /*
-    test case 001 - initialize the preprocessor with success
+    test case 001 - initialize the macro list with success
 */
 
-static void testCase_initializePreProcessor()
+static void testCase_initializeMacroList()
 {
     /*  expected parameters for macro name list allocation */
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
@@ -74,7 +69,7 @@ static void testCase_initializePreProcessor()
     setDefaultOptions(&testOptions);
     testOptions.general.trace = 1;
 
-    assert_int_equal(initializePreProcessor(&testOptions), 0);
+    assert_int_equal(initializeMacroList(&macroList), 0);
 }
 
 /*
@@ -99,8 +94,8 @@ static void testCase_successfullyDoNoReplacements()
 
     char *outputLine;
 
-    assert_int_equal(addMacro("__CONSTANT_ONE", "10"), 0);
-    assert_int_equal(replaceAllMacros("int array[__CONSTANT_TWO];\n", &outputLine), 0);
+    assert_int_equal(addMacro(&macroList, "__CONSTANT_ONE", "10"), 0);
+    assert_int_equal(replaceAllMacros(&macroList, "int array[__CONSTANT_TWO];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array[__CONSTANT_TWO];\n");
 }
 
@@ -122,8 +117,8 @@ static void testCase_successfullyStripMacroName()
 
     char *outputLine;
 
-    assert_int_equal(addMacro("__SIMPLE_MACRO", NULL), 0);
-    assert_int_equal(replaceAllMacros("int array[__SIMPLE_MACRO];\n", &outputLine), 0);
+    assert_int_equal(addMacro(&macroList, "__SIMPLE_MACRO", NULL), 0);
+    assert_int_equal(replaceAllMacros(&macroList, "int array[__SIMPLE_MACRO];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array[];\n");
 }
 
@@ -149,8 +144,8 @@ static void testCase_successfullyDoOneReplacement()
 
     char *outputLine;
 
-    assert_int_equal(addMacro("__CONSTANT_TWO", "20"), 0);
-    assert_int_equal(replaceAllMacros("int array[__CONSTANT_TWO];\n", &outputLine), 0);
+    assert_int_equal(addMacro(&macroList, "__CONSTANT_TWO", "20"), 0);
+    assert_int_equal(replaceAllMacros(&macroList, "int array[__CONSTANT_TWO];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array[20];\n");
 }
 
@@ -168,7 +163,7 @@ static void testCase_successfullyDoTwoReplacementsOfSameMacro()
 
     char *outputLine;
 
-    assert_int_equal(replaceAllMacros("int array1[ __CONSTANT_TWO ], array2[ __CONSTANT_TWO ];\n", &outputLine), 0);
+    assert_int_equal(replaceAllMacros(&macroList, "int array1[ __CONSTANT_TWO ], array2[ __CONSTANT_TWO ];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array1[ 20 ], array2[ 20 ];\n");
 }
 
@@ -186,7 +181,7 @@ static void testCase_successfullyDoTwoReplacementsOfDistinctMacros()
 
     char *outputLine;
 
-    assert_int_equal(replaceAllMacros("int array1[ __CONSTANT_ONE ], array2[ __CONSTANT_TWO ];\n", &outputLine), 0);
+    assert_int_equal(replaceAllMacros(&macroList, "int array1[ __CONSTANT_ONE ], array2[ __CONSTANT_TWO ];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array1[ 10 ], array2[ 20 ];\n");
 }
 
@@ -202,7 +197,7 @@ static void testCase_failInOutputMemoryAllocation()
 
     char *outputLine;
 
-    assert_int_equal(replaceAllMacros("int array[__CONSTANT_ONE];\n", &outputLine), -1);
+    assert_int_equal(replaceAllMacros(&macroList, "int array[__CONSTANT_ONE];\n", &outputLine), -1);
 }
 
 /*
@@ -232,8 +227,8 @@ static void testCase_successfullyDoOneReplacementsValueGreaterName()
 
     char *outputLine;
 
-    assert_int_equal(addMacro("MAX", "65535"), 0);
-    assert_int_equal(replaceAllMacros("int array[MAX];\n", &outputLine), 0);
+    assert_int_equal(addMacro(&macroList, "MAX", "65535"), 0);
+    assert_int_equal(replaceAllMacros(&macroList, "int array[MAX];\n", &outputLine), 0);
     assert_string_equal(outputLine, "int array[65535];\n");
 }
 
@@ -256,7 +251,7 @@ static void testCase_failInOutputMemoryReallocation()
 
     char *outputLine;
 
-    assert_int_equal(replaceAllMacros("int array[MAX];\n", &outputLine), -2);
+    assert_int_equal(replaceAllMacros(&macroList, "int array[MAX];\n", &outputLine), -2);
 }
 /*
     entry function - run all test cases
@@ -265,7 +260,7 @@ static void testCase_failInOutputMemoryReallocation()
 int runReplaceAllMacrosTests()
 {
     const struct CMUnitTest testCases[] = {
-        {"test case 001 - initialize the preprocessor with success", testCase_initializePreProcessor, NULL, NULL},
+        {"test case 001 - initialize the macro list with success", testCase_initializeMacroList, NULL, NULL},
         {"test case 002 - successfully return input line if it have no macro occurences", testCase_successfullyDoNoReplacements, NULL, NULL},
         {"test case 003 - successfully return input line striped from macro name when macro have no value", testCase_successfullyStripMacroName, NULL, NULL},
         {"test case 004 - successfully return input line if it have one macro occurence", testCase_successfullyDoOneReplacement, NULL, NULL},

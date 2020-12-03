@@ -11,13 +11,11 @@
 
 #include "limits.h"
 #include "options.h"
+#include "macro.h"
 
 /*
     constants
 */
-
-#define INITIAL_MACRO_LIST_SIZE 50
-#define MACRO_LIST_GROWTH_FACTOR 20
 
 #define NO_CONDITIONAL_BLOCK 0
 #define TRUE_CONDITIONAL_BLOCK 1
@@ -41,22 +39,8 @@ static struct TPreProcessor
     regex_t reElseConditional;
     regex_t reEndConditional;
 
-    struct
-    {
-        char **name;
-        char **value;
-        int size;
-        int elements;
-    } macroList;
+    TMacroList macroList;
 } preProc;
-
-/*
-    prototypes
-*/
-
-int addMacro(char *_macro, char *_value);
-int getMacro(char *_macro, char **_value);
-int replaceAllMacros(char *_inputLine, char **_outputValue);
 
 /*
     initialize the preprocessor
@@ -105,17 +89,9 @@ int initializePreProcessor(Options *_options)
     if (0 != result)
         return -1;
 
-    /*  alocate the macro list */
-    preProc.macroList.size = INITIAL_MACRO_LIST_SIZE;
-    preProc.macroList.elements = 0;
-
-    preProc.macroList.name = (char **)malloc(preProc.macroList.size * sizeof(char *));
-    if (NULL == preProc.macroList.name)
+    result = initializeMacroList(&preProc.macroList);
+    if (0 != result)
         return -2;
-
-    preProc.macroList.value = (char **)malloc(preProc.macroList.size * sizeof(char *));
-    if (NULL == preProc.macroList.value)
-        return -3;
 
     return 0;
 }
@@ -199,7 +175,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     strncpy(macro, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
                     macro[match[1].rm_eo - match[1].rm_so] = '\0';
 
-                    result = addMacro(macro, NULL);
+                    result = addMacro(&preProc.macroList, macro, NULL);
                     if (0 != result)
                         return result;
 
@@ -220,7 +196,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     strncpy(value, line + match[2].rm_so, match[2].rm_eo - match[2].rm_so);
                     value[match[2].rm_eo - match[2].rm_so] = '\0';
 
-                    result = addMacro(macro, value);
+                    result = addMacro(&preProc.macroList, macro, value);
                     if (0 != result)
                         return result;
 
@@ -240,7 +216,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         strncpy(macro, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
                         macro[match[1].rm_eo - match[1].rm_so] = '\0';
 
-                        result = getMacro(macro, &value);
+                        result = getMacro(&preProc.macroList, macro, &value);
                         if (0 == result)
                         {
                             conditional = TRUE_CONDITIONAL_BLOCK;
@@ -268,7 +244,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         strncpy(macro, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
                         macro[match[1].rm_eo - match[1].rm_so] = '\0';
 
-                        result = getMacro(macro, &value);
+                        result = getMacro(&preProc.macroList, macro, &value);
                         if (0 != result)
                         {
                             conditional = TRUE_CONDITIONAL_BLOCK;
@@ -333,7 +309,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 {
                     char *outputLine;
 
-                    if (0 == replaceAllMacros(line, &outputLine))
+                    if (0 == replaceAllMacros(&preProc.macroList, line, &outputLine))
                     {
                         fputs(outputLine, _fileOutput);
                         free(outputLine);
@@ -356,162 +332,6 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
             }
         }
     }
-
-    return 0;
-}
-
-/*
-    Add a macro to the list
-*/
-
-int addMacro(char *_macro, char *_value)
-{
-    /*  check if the macro is defined already */
-    char *value;
-
-    if (0 == getMacro(_macro, &value))
-    {
-        if (preProc.options->general.trace)
-            fprintf(stdout, "[trace] macro already defined: %s\n", _macro);
-
-        return 0;
-    }
-
-    /*  enlarge the list if all elements are in use */
-    if (preProc.macroList.elements >= preProc.macroList.size)
-    {
-        char **macroListName;
-        char **macroListValue;
-
-        macroListName = (char **)realloc(preProc.macroList.name, (preProc.macroList.size + MACRO_LIST_GROWTH_FACTOR) * sizeof(char *));
-        if (NULL == macroListName)
-            return -1;
-
-        macroListValue = (char **)realloc(preProc.macroList.value, (preProc.macroList.size + MACRO_LIST_GROWTH_FACTOR) * sizeof(char *));
-        if (NULL == macroListValue)
-            return -2;
-
-        preProc.macroList.name = macroListName;
-        preProc.macroList.value = macroListValue;
-        preProc.macroList.size += MACRO_LIST_GROWTH_FACTOR;
-    }
-
-    /*  allocate memory for the macro's name and store it's value */
-    preProc.macroList.name[preProc.macroList.elements] = (char *)malloc((strlen(_macro) + 1) * sizeof(char));
-    if (NULL == preProc.macroList.name[preProc.macroList.elements])
-        return -3;
-
-    strcpy(preProc.macroList.name[preProc.macroList.elements], _macro);
-
-    /*  allocate memory for the macro's value and store it's value */
-    if (NULL == _value)
-    {
-        preProc.macroList.value[preProc.macroList.elements] = NULL;
-
-        if (preProc.options->general.trace)
-            fprintf(stdout, "[trace] simple macro definition added (%d): %s\n", preProc.macroList.elements, _macro);
-    }
-    else
-    {
-        preProc.macroList.value[preProc.macroList.elements] = (char *)malloc((strlen(_value) + 1) * sizeof(char));
-        if (NULL == preProc.macroList.value[preProc.macroList.elements])
-            return -4;
-
-        strcpy(preProc.macroList.value[preProc.macroList.elements], _value);
-
-        if (preProc.options->general.trace)
-            fprintf(stdout, "[trace] valued macro definition added (%d): %s --> %s\n", preProc.macroList.elements, _macro, _value);
-    }
-
-    preProc.macroList.elements++;
-
-    return 0;
-}
-
-/*
-    Get the value of a macro from the list
-*/
-
-int getMacro(char *_macro, char **_value)
-{
-    /*  check if the macro is defined */
-    int i = 0;
-
-    for (; i < preProc.macroList.elements; i++)
-    {
-        if (0 == strcmp(_macro, preProc.macroList.name[i]))
-        {
-            *_value = preProc.macroList.value[i];
-
-            return 0;
-        }
-    }
-
-    return -1;
-}
-
-/*
-    Replace all occurrences of macros in the input line
-*/
-
-int replaceAllMacros(char *_inputLine, char **_outputValue)
-{
-    /*  allocate memory for the initial inputLine value */
-    *_outputValue = (char *)malloc((strlen(_inputLine) + 1) * sizeof(char));
-    if (NULL == *_outputValue)
-        return -1;
-
-    strcpy(*_outputValue, _inputLine);
-
-    /*  check if the macro is defined already */
-    int replacements = 0;
-
-    do
-    {
-        int i = 0;
-        replacements = 0;
-
-        for (; i < preProc.macroList.elements; i++)
-        {
-            char *macroOccurrence = strstr(*_outputValue, preProc.macroList.name[i]);
-
-            if (NULL != macroOccurrence)
-            {
-                int nameLength = strlen(preProc.macroList.name[i]);
-
-                if (NULL == preProc.macroList.value[i])
-                {
-                    /*  if macro have no value, remove the macro name from the line */
-                    memmove(macroOccurrence, macroOccurrence + nameLength, strlen(macroOccurrence + nameLength) + 1);
-                }
-                else
-                {
-                    /*  realloc memory if macro value is longer than macro name */
-                    int valueLength = strlen(preProc.macroList.value[i]);
-                    int lengthDifference = valueLength - nameLength;
-
-                    if (0 < lengthDifference)
-                    {
-                        char *auxValue = (char *)realloc(*_outputValue, (strlen(*_outputValue) + lengthDifference + 1) * sizeof(char));
-
-                        if (NULL == auxValue)
-                            return -2;
-
-                        *_outputValue = auxValue;
-                    }
-
-                    /*  replace the macro name by it's value */
-                    memmove(macroOccurrence + nameLength + lengthDifference, macroOccurrence + nameLength, strlen(macroOccurrence + nameLength) + 1);
-                    memmove(macroOccurrence, preProc.macroList.value[i], valueLength);
-                }
-
-                if (preProc.options->general.trace)
-                    fprintf(stdout, "[trace] macro %s replaced by it's value --> %s\n", preProc.macroList.name[i], *_outputValue);
-
-                replacements++;
-            }
-        }
-    } while (replacements > 0);
 
     return 0;
 }
