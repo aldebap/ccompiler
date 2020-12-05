@@ -3,9 +3,9 @@ name: CMake
 on: [push]
 
 env:
-  SOURCE_DIRECTORY: ${{ runner.workspace }}/src/c/main
-  TEST_DIRECTORY: ${{ runner.workspace }}/src/c/test
-  BUILD_DIRECTORY: ${{ runner.workspace }}/build
+  SOURCE_DIRECTORY: ${{ github.workspace }}/src/c/main
+  TEST_DIRECTORY: ${{ github.workspace }}/src/c/test
+  BUILD_DIRECTORY: ${{ github.workspace }}/build
   BUILD_TYPE: Debug
 
 jobs:
@@ -15,6 +15,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: mkdir
+      run: mkdir $BUILD_DIRECTORY
+      
     - name: Create Build Environment
       run: cmake -E make_directory $BUILD_DIRECTORY
 
