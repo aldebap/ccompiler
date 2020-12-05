@@ -3,9 +3,9 @@ name: CMake
 on: [push]
 
 env:
-  SOURCE_DIRECTORY: ${{ github.workspace }}/src/c/main
-  TEST_DIRECTORY: ${{ github.workspace }}/src/c/test
-  BUILD_DIRECTORY: ${{ github.workspace }}/build
+  SOURCE_DIRECTORY: ${{ runner.workspace }}/src/c/main
+  TEST_DIRECTORY: ${{ runner.workspace }}/src/c/test
+  BUILD_DIRECTORY: ${{ runner.workspace }}/build
   BUILD_TYPE: Debug
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: $BUILD_DIRECTORY
-      run: cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: make cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
     - name: Build
       working-directory: $BUILD_DIRECTORY
