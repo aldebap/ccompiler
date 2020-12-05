@@ -21,12 +21,12 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: $BUILD_DIRECTORY
-      run: cmake $GITHUB_WORKSPACE -DSOURCE_DIRECTORY=$SOURCE_DIRECTORY -DTEST_DIRECTORY=$TEST_DIRECTORY -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
     - name: Build
       working-directory: $BUILD_DIRECTORY
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE
+      run: cmake -DSOURCE_DIRECTORY=$SOURCE_DIRECTORY -DTEST_DIRECTORY=$TEST_DIRECTORY --build . --config $BUILD_TYPE
 
     - name: Test
       working-directory: $BUILD_DIRECTORY
