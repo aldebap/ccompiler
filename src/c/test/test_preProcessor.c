@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <cmocka.h>
 
+#include "macro.h"
 #include "options.h"
 #include "preProcessor.h"
 
@@ -21,8 +22,9 @@
     mock for addMacro() function
 */
 
-int __wrap_addMacro(char *_macro, char *_value)
+int __wrap_addMacro(TMacroList *_macroList, char *_macro, char *_value)
 {
+    check_expected(_macroList);
     check_expected(_macro);
     check_expected(_value);
 
@@ -33,8 +35,9 @@ int __wrap_addMacro(char *_macro, char *_value)
     mock for getMacro() function
 */
 
-int __wrap_getMacro(char *_macro, char **_value)
+int __wrap_getMacro(TMacroList *_macroList, char *_macro, char **_value)
 {
+    check_expected(_macroList);
     check_expected(_macro);
     check_expected(_value);
 
@@ -45,8 +48,9 @@ int __wrap_getMacro(char *_macro, char **_value)
     mock for replaceAllMacros() function
 */
 
-int __wrap_replaceAllMacros(char *_inputLine, char **_outputValue)
+int __wrap_replaceAllMacros(TMacroList *_macroList, char *_inputLine, char **_outputValue)
 {
+    check_expected(_macroList);
     check_expected(_inputLine);
     check_expected(_outputValue);
 
@@ -73,6 +77,7 @@ static void testCase_discardFullLineComments()
     fclose(sourceFile);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
@@ -120,10 +125,12 @@ static void testCase_discardBeginningOfLineComments()
     fclose(sourceFile);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, " static int i = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
 
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int j = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
@@ -171,10 +178,12 @@ static void testCase_discardMiddleOfLineComments()
     fclose(sourceFile);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int  i = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
 
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int j = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
@@ -222,10 +231,12 @@ static void testCase_discardEndOfLineComments()
     fclose(sourceFile);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0; \n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
 
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int j = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
@@ -275,6 +286,7 @@ static void testCase_discardMultipleLinesComments()
     fclose(sourceFile);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
@@ -322,6 +334,7 @@ static void testCase_checkThreeCharactersCommentBug()
     fclose(sourceFile);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
@@ -369,6 +382,7 @@ static void testCase_discardEmptyLines()
     fclose(sourceFile);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
@@ -423,6 +437,7 @@ static void testCase_simpleMacroDefinitionBeginOfLine()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SIMPLE_MACRO_ONE_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
@@ -460,6 +475,7 @@ static void testCase_simpleMacroDefinitionMiddleOfLine()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SIMPLE_MACRO_TWO_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
@@ -497,6 +513,7 @@ static void testCase_simpleMacroDefinitionAfterTabsAndSpaces()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SIMPLE_MACRO_THREE_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
@@ -534,6 +551,7 @@ static void testCase_simpleMacroDefinitionSpaceAfterPound()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SIMPLE_MACRO_FOUR_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
@@ -571,6 +589,7 @@ static void testCase_valuedMacroDefinitionBeginOfLine()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__VALUED_MACRO_ONE");
     expect_string(__wrap_addMacro, _value, "175");
     will_return(__wrap_addMacro, 0);
@@ -608,6 +627,7 @@ static void testCase_valuedMacroDefinitionSpacesInValue()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__VALUED_MACRO_TWO");
     expect_string(__wrap_addMacro, _value, "(2 * 5)");
     will_return(__wrap_addMacro, 0);
@@ -646,6 +666,7 @@ static void testCase_valuedMacroDefinitionInMultipleLines()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__VALUED_MACRO_THREE");
     expect_string(__wrap_addMacro, _value, "'3'");
     will_return(__wrap_addMacro, 0);
@@ -687,6 +708,7 @@ static void testCase_crazyMultipleLinesCommentAndMacro()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "FOO");
     expect_string(__wrap_addMacro, _value, "1020");
     will_return(__wrap_addMacro, 0);
@@ -729,16 +751,19 @@ static void testCase_ifdefOnExistingMacro()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
 
     /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
     expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
     expect_any(__wrap_getMacro, _value);
     will_return(__wrap_getMacro, 0);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
@@ -781,11 +806,13 @@ static void testCase_ifdefOnNonExistingMacro()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
 
     /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
     expect_string(__wrap_getMacro, _macro, "__SOURCE_CODE_H");
     expect_any(__wrap_getMacro, _value);
     will_return(__wrap_getMacro, -1);
@@ -828,16 +855,19 @@ static void testCase_ifndefOnNotExistingMacro()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
 
     /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
     expect_string(__wrap_getMacro, _macro, "__SOURCE_CODE_H");
     expect_any(__wrap_getMacro, _value);
     will_return(__wrap_getMacro, -1);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
@@ -880,11 +910,13 @@ static void testCase_ifndefOnExistingMacro()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
 
     /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
     expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
     expect_any(__wrap_getMacro, _value);
     will_return(__wrap_getMacro, 0);
@@ -930,16 +962,19 @@ static void testCase_elseOnIfdefConditionalBlock()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
 
     /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
     expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
     expect_any(__wrap_getMacro, _value);
     will_return(__wrap_getMacro, 0);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
@@ -985,16 +1020,19 @@ static void testCase_elseOnIfndefConditionalBlock()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
 
     /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
     expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
     expect_any(__wrap_getMacro, _value);
     will_return(__wrap_getMacro, 0);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 1;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
@@ -1098,11 +1136,13 @@ static void testCase_correctlyParseCRLFLineDelimitedFile()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
 
     /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
     expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 1;\n");
     expect_any(__wrap_replaceAllMacros, _outputValue);
     will_return(__wrap_replaceAllMacros, 0);
