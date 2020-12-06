@@ -37,12 +37,51 @@ int compiler(int _argc, char *_argv[])
         if (0 == strncmp("--help", _argv[i], 7))
         {
             fprintf(stdout, "Usage: %s [options] file...\n", _argv[0]);
-            fprintf(stdout, "  --help    Display this information.\n");
-            fprintf(stdout, "  -I <dir>  Add <dir> to the preprocessor's include search paths.\n");
-            fprintf(stdout, "  -E        Preprocess only; do not compile, assemble or link.\n");
-            fprintf(stdout, "  --trace   Display detailed trace information of compiler execution.\n");
+            fprintf(stdout, "  --help            Display this information.\n");
+            fprintf(stdout, "  -D<name>[=value]  Add <name> to the preprocessor's macro list with the optional value.\n");
+            fprintf(stdout, "  -I <dir>          Add <dir> to the preprocessor's include search paths.\n");
+            fprintf(stdout, "  -E                Preprocess only; do not compile, assemble or link.\n");
+            fprintf(stdout, "  --trace           Display detailed trace information of compiler execution.\n");
 
             return 0;
+        }
+        if (0 == strncmp("-D", _argv[i], 2))
+        {
+            if ('\0' == _argv[i][2])
+                fprintf(stderr, "%s: error: missing macro name after '%s'\n", _argv[0], _argv[i]);
+            else
+            {
+                char *equals = strchr(_argv[i] + 2, '=');
+                int result;
+
+                if (NULL == equals)
+                {
+                    char macro[MAX_MACRO_SIZE];
+
+                    strcpy(macro, _argv[i] + 2);
+                    fprintf(stdout, "[debug] simple madro definition: %s\n", macro);
+
+                    result = addMacro(&executionOptions.preprocessor.macroList, macro, NULL);
+                    if (0 != result)
+                        return result;
+                }
+                else
+                {
+                    char macro[MAX_MACRO_SIZE];
+                    char value[MAX_MACRO_VALUE_SIZE];
+
+                    strncpy(macro, _argv[i] + 2, equals - (_argv[i] + 2));
+                    macro[equals - (_argv[i] + 2)] = '\0';
+
+                    strcpy(value, equals + 1);
+
+                    result = addMacro(&executionOptions.preprocessor.macroList, macro, value);
+                    if (0 != result)
+                        return result;
+                }
+            }
+
+            continue;
         }
         if (0 == strncmp("-I", _argv[i], 3))
         {

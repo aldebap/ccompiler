@@ -13,7 +13,7 @@ include_directories($ENV{SOURCE_DIRECTORY})
 #   compiler unit tests
 set(TEST_NAME "test_compiler")
 set(SOURCE_LIST ../main/compiler.c ../main/options.c ../main/preProcessor.c ../main/macro.c ../main/lexicalParser.c ../main/escapeSequence.c)
-set(TEST_FLAGS "-Wl,--defsym,compileSourceFile=__wrap_compileSourceFile")
+set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,compileSourceFile=__wrap_compileSourceFile")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)

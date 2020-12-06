@@ -20,4 +20,6 @@ void setDefaultOptions(Options *_options)
 
     _options->general.preprocessOnly = 0;
     _options->general.trace = 0;
+
+    initializeMacroList(&_options->preprocessor.macroList);
 }

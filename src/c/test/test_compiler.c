@@ -32,6 +32,19 @@ int checkOptions(const LargestIntegralType _parameter, const LargestIntegralType
 }
 
 /*
+    mock for addMacro() function
+*/
+
+int __wrap_addMacro(TMacroList *_macroList, char *_macro, char *_value)
+{
+    check_expected(_macroList);
+    check_expected(_macro);
+    check_expected(_value);
+
+    return (int)mock();
+}
+
+/*
     wrap compile source function
 */
 
@@ -77,6 +90,73 @@ static void testCase_help()
     assert_string_equal(output, "Usage: compiler [options] file...\n");
 
     remove(redirectStdoutFileName);
+}
+
+/*
+    test case 002 - macro option without macro name
+*/
+
+static void testCase_macroOptionWithoutMacroName()
+{
+    char *argv[] = {"compiler", "-D", "sourceFile.c"};
+
+    /*  generate a source file */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[2], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  redirect stderr to a file and call compiler() function */
+    int originalStderr = dup(STDERR_FILENO);
+    char redirectStderrFileName[] = "redirectStderr";
+    FILE *stderrFile;
+
+    stderrFile = fopen(redirectStderrFileName, "w");
+    dup2(fileno(stderrFile), STDERR_FILENO);
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    fclose(stderrFile);
+    dup2(originalStderr, STDERR_FILENO);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    stderrFile = fopen(redirectStderrFileName, "r");
+    fgets(output, sizeof(output), stderrFile);
+    fclose(stderrFile);
+
+    fprintf(stdout, "[debug] output: %s\n", output);
+    assert_string_equal(output, "compiler: error: missing macro name after '-D'\n");
+
+    remove(redirectStderrFileName);
+    remove(argv[2]);
+}
+
+/*
+    test case 003 - macro option with simple macro definition
+*/
+
+static void testCase_macroOptionWithSimpleMacroDefinition()
+{
+    char *argv[] = {"compiler", "-D__SIMPLE_MACRO_ONE_H", "sourceFile.c"};
+
+    /*  generate a source file */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[2], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__SIMPLE_MACRO_ONE_H");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+
+    remove(argv[2]);
 }
 
 /*
@@ -381,6 +461,9 @@ int runCompilerTests()
 {
     const struct CMUnitTest testCases[] = {
         {"test case 001 - help", testCase_help, NULL, NULL},
+        {"test case 002 - macro option without macro name", testCase_macroOptionWithoutMacroName, NULL, NULL},
+        {"test case 003 - macro option with simple macro definition", testCase_macroOptionWithSimpleMacroDefinition, NULL, NULL},
+
         {"test case 002 - include directory option", testCase_includeDirectoryOption, NULL, NULL},
         {"test case 003 - preprocessor only option", testCase_preprocessorOnlyOption, NULL, NULL},
         {"test case 004 - trace on", testCase_traceOn, NULL, NULL},

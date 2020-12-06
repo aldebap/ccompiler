@@ -65,10 +65,12 @@ static void testCase_initializeMacroList()
     will_return(__wrap_malloc, testMacroValueList);
 
     /*  set the test options */
+    /*
     Options testOptions;
 
     setDefaultOptions(&testOptions);
     testOptions.general.trace = 1;
+    */
 
     assert_int_equal(initializeMacroList(&macroList), 0);
 }

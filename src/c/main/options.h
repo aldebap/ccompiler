@@ -5,6 +5,7 @@
 */
 
 #include "limits.h"
+#include "macro.h"
 
 #if !defined(__OPTIONS_H)
 
@@ -22,12 +23,22 @@ typedef struct GeneralOptions
 } GeneralOptions;
 
 /*
+    structure with preprocessor options
+*/
+
+typedef struct PreprocessorOptions
+{
+    TMacroList macroList;
+} PreprocessorOptions;
+
+/*
     structure with all groups of options
 */
 
 typedef struct Options
 {
     GeneralOptions general;
+    PreprocessorOptions preprocessor;
 } Options;
 
 /*
