@@ -55,6 +55,13 @@ void *__wrap_realloc(void *_ptr, size_t _size)
 
 static void testCase_initializeMacroList()
 {
+    /*  expected parameters for malloc (for setDefaultOptions call inside this very function) */
+    expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
+    will_return(__wrap_malloc, testMacroNameList);
+
+    expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
+    will_return(__wrap_malloc, testMacroValueList);
+
     /*  expected parameters for macro name list allocation */
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
     will_return(__wrap_malloc, testMacroNameList);

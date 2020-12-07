@@ -47,6 +47,10 @@ int __wrap_initializeMacroList(TMacroList *_macroList)
 
 static void testCase_success()
 {
+    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -120,6 +124,10 @@ static void testCase_success()
 
 static void testCase_failInFirstRegex()
 {
+    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -141,6 +149,10 @@ static void testCase_failInFirstRegex()
 
 static void testCase_failInSecondRegex()
 {
+    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -168,6 +180,10 @@ static void testCase_failInSecondRegex()
 
 static void testCase_failInThirdRegex()
 {
+    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -201,6 +217,10 @@ static void testCase_failInThirdRegex()
 
 static void testCase_failInFourthRegex()
 {
+    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -240,6 +260,10 @@ static void testCase_failInFourthRegex()
 
 static void testCase_failInFifthRegex()
 {
+    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -285,6 +309,10 @@ static void testCase_failInFifthRegex()
 
 static void testCase_failInSixthRegex()
 {
+    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -336,6 +364,10 @@ static void testCase_failInSixthRegex()
 
 static void testCase_failInSeventhRegex()
 {
+    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -393,6 +425,10 @@ static void testCase_failInSeventhRegex()
 
 static void testCase_failInEighthRegex()
 {
+    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -456,6 +492,10 @@ static void testCase_failInEighthRegex()
 
 static void testCase_failInNinethRegex()
 {
+    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -525,6 +565,10 @@ static void testCase_failInNinethRegex()
 
 static void testCase_failInMacroListInitialization()
 {
+    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");

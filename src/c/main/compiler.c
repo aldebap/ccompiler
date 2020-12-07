@@ -59,7 +59,6 @@ int compiler(int _argc, char *_argv[])
                     char macro[MAX_MACRO_SIZE];
 
                     strcpy(macro, _argv[i] + 2);
-                    fprintf(stdout, "[debug] simple madro definition: %s\n", macro);
 
                     result = addMacro(&executionOptions.preprocessor.macroList, macro, NULL);
                     if (0 != result)

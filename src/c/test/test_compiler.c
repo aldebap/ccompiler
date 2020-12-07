@@ -107,6 +107,16 @@ static void testCase_macroOptionWithoutMacroName()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
+    /*  set the expected values for the wrap lexicalParser() function */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
+    /*  expected parameters for compileSourceFile */
+    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
+    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    will_return(__wrap_compileSourceFile, 0);
+
     /*  redirect stderr to a file and call compiler() function */
     int originalStderr = dup(STDERR_FILENO);
     char redirectStderrFileName[] = "redirectStderr";
@@ -126,7 +136,6 @@ static void testCase_macroOptionWithoutMacroName()
     fgets(output, sizeof(output), stderrFile);
     fclose(stderrFile);
 
-    fprintf(stdout, "[debug] output: %s\n", output);
     assert_string_equal(output, "compiler: error: missing macro name after '-D'\n");
 
     remove(redirectStderrFileName);
@@ -148,6 +157,16 @@ static void testCase_macroOptionWithSimpleMacroDefinition()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
+    /*  set the expected values for the wrap lexicalParser() function */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
+    /*  expected parameters for compileSourceFile */
+    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
+    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    will_return(__wrap_compileSourceFile, 0);
+
     /*  expected parameters for addMacro */
     expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SIMPLE_MACRO_ONE_H");
@@ -160,7 +179,79 @@ static void testCase_macroOptionWithSimpleMacroDefinition()
 }
 
 /*
-    test case 002 - include directory option
+    test case 004 - macro option with empty value macro definition
+*/
+
+static void testCase_macroOptionWithEmptyValueMacroDefinition()
+{
+    char *argv[] = {"compiler", "-DMAXSHORT=", "sourceFile.c"};
+
+    /*  generate a source file */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[2], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  set the expected values for the wrap lexicalParser() function */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
+    /*  expected parameters for compileSourceFile */
+    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
+    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    will_return(__wrap_compileSourceFile, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "MAXSHORT");
+    expect_string(__wrap_addMacro, _value, "");
+    will_return(__wrap_addMacro, 0);
+
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+
+    remove(argv[2]);
+}
+
+/*
+    test case 005 - macro option with valued macro definition
+*/
+
+static void testCase_macroOptionWithValuedMacroDefinition()
+{
+    char *argv[] = {"compiler", "-DMAXINT=65535", "sourceFile.c"};
+
+    /*  generate a source file */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[2], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  set the expected values for the wrap lexicalParser() function */
+    Options testOptions;
+
+    setDefaultOptions(&testOptions);
+
+    /*  expected parameters for compileSourceFile */
+    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
+    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
+    will_return(__wrap_compileSourceFile, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "MAXINT");
+    expect_string(__wrap_addMacro, _value, "65535");
+    will_return(__wrap_addMacro, 0);
+
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+
+    remove(argv[2]);
+}
+
+/*
+    test case 006 - include directory option
 */
 
 static void testCase_includeDirectoryOption()
@@ -190,7 +281,7 @@ static void testCase_includeDirectoryOption()
 }
 
 /*
-    test case 003 - preprocessor only option
+    test case 007 - preprocessor only option
 */
 
 static void testCase_preprocessorOnlyOption()
@@ -220,7 +311,7 @@ static void testCase_preprocessorOnlyOption()
 }
 
 /*
-    test case 004 - trace on
+    test case 008 - trace on
 */
 
 static void testCase_traceOn()
@@ -250,7 +341,7 @@ static void testCase_traceOn()
 }
 
 /*
-    test case 005 - invalid argument
+    test case 009 - invalid argument
 */
 
 static void testCase_invalidArgument()
@@ -282,7 +373,7 @@ static void testCase_invalidArgument()
 }
 
 /*
-    test case 006 - no file names
+    test case 010 - no file names
 */
 
 static void testCase_noFileNames()
@@ -314,7 +405,7 @@ static void testCase_noFileNames()
 }
 
 /*
-    test case 007 - file not found
+    test case 011 - file not found
 */
 
 static void testCase_fileNotFound()
@@ -346,7 +437,7 @@ static void testCase_fileNotFound()
 }
 
 /*
-    test case 008 - not a regular file
+    test case 012 - not a regular file
 */
 
 static void testCase_notRegularFile()
@@ -378,7 +469,7 @@ static void testCase_notRegularFile()
 }
 
 /*
-    test case 009 - single file name
+    test case 013 - single file name
 */
 
 static void testCase_singleFileName()
@@ -407,7 +498,7 @@ static void testCase_singleFileName()
 }
 
 /*
-    test case 010 - multiple file names
+    test case 014 - multiple file names
 */
 
 static void testCase_multipleFileNames()
@@ -463,16 +554,17 @@ int runCompilerTests()
         {"test case 001 - help", testCase_help, NULL, NULL},
         {"test case 002 - macro option without macro name", testCase_macroOptionWithoutMacroName, NULL, NULL},
         {"test case 003 - macro option with simple macro definition", testCase_macroOptionWithSimpleMacroDefinition, NULL, NULL},
-
-        {"test case 002 - include directory option", testCase_includeDirectoryOption, NULL, NULL},
-        {"test case 003 - preprocessor only option", testCase_preprocessorOnlyOption, NULL, NULL},
-        {"test case 004 - trace on", testCase_traceOn, NULL, NULL},
-        {"test case 005 - invalid option argument", testCase_invalidArgument, NULL, NULL},
-        {"test case 006 - no file names", testCase_noFileNames, NULL, NULL},
-        {"test case 007 - file not found", testCase_fileNotFound, NULL, NULL},
-        {"test case 008 - not a regular file", testCase_notRegularFile, NULL, NULL},
-        {"test case 009 - single file name", testCase_singleFileName, NULL, NULL},
-        {"test case 010 - multiple file names", testCase_multipleFileNames, NULL, NULL},
+        {"test case 004 - macro option with empty value macro definition", testCase_macroOptionWithEmptyValueMacroDefinition, NULL, NULL},
+        {"test case 005 - macro option with valued macro definition", testCase_macroOptionWithValuedMacroDefinition, NULL, NULL},
+        {"test case 006 - include directory option", testCase_includeDirectoryOption, NULL, NULL},
+        {"test case 007 - preprocessor only option", testCase_preprocessorOnlyOption, NULL, NULL},
+        {"test case 008 - trace on", testCase_traceOn, NULL, NULL},
+        {"test case 009 - invalid option argument", testCase_invalidArgument, NULL, NULL},
+        {"test case 010 - no file names", testCase_noFileNames, NULL, NULL},
+        {"test case 011 - file not found", testCase_fileNotFound, NULL, NULL},
+        {"test case 012 - not a regular file", testCase_notRegularFile, NULL, NULL},
+        {"test case 013 - single file name", testCase_singleFileName, NULL, NULL},
+        {"test case 014 - multiple file names", testCase_multipleFileNames, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("compiler.c tests", testCases, NULL, NULL);
