@@ -1,11 +1,11 @@
-name: CMake
+name: Build all with CMake
 
 on: [push]
 
 env:
-  SOURCE_DIRECTORY: ${{ github.workspace }}/src/c/main
-  TEST_DIRECTORY: ${{ github.workspace }}/src/c/test
-  BUILD_DIRECTORY: ${{ github.workspace }}/build
+  SOURCE_PATH: ${{ github.workspace }}/src/c/main
+  TEST_PATH: ${{ github.workspace }}/src/c/test
+  BUILD_PATH: ${{ github.workspace }}/build
   BUILD_TYPE: Debug
 
 jobs:
@@ -16,24 +16,24 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: mkdir
-      run: mkdir $BUILD_DIRECTORY
+      run: mkdir $BUILD_PATH
       
     - name: Create Build Environment
-      run: cmake -E make_directory $BUILD_DIRECTORY
+      run: cmake -E make_directory $BUILD_PATH
 
     - name: Configure CMake
       shell: bash
-      working-directory: $BUILD_DIRECTORY
+      working-directory: $BUILD_PATH
       run: make cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
     - name: Build
-      working-directory: $BUILD_DIRECTORY
+      working-directory: $BUILD_PATH
       shell: bash
-      run: cmake -DSOURCE_DIRECTORY=$SOURCE_DIRECTORY -DTEST_DIRECTORY=$TEST_DIRECTORY --build . --config $BUILD_TYPE
+      run: cmake -DSOURCE_DIRECTORY=$SOURCE_PATH -DTEST_DIRECTORY=$TEST_PATH --build . --config $BUILD_TYPE
 
-    - name: Test
-      working-directory: $BUILD_DIRECTORY
-      shell: bash
+    #- name: Test
+    #  working-directory: $BUILD_PATH
+    #  shell: bash
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C $BUILD_TYPE
+    #  run: ctest -C $BUILD_TYPE
