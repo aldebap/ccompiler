@@ -64,14 +64,6 @@ static void testCase_initializeMacroList()
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
     will_return(__wrap_malloc, testMacroValueList);
 
-    /*  set the test options */
-    /*
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-    */
-
     assert_int_equal(initializeMacroList(&macroList), 0);
 }
 

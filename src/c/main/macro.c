@@ -39,6 +39,26 @@ int initializeMacroList(TMacroList *_macroList)
 }
 
 /*
+    copy macro list
+*/
+
+int copyMacroList(TMacroList *_macroListTarget, TMacroList *_macroListSource)
+{
+    /*  add every macro from source to target list */
+    int i = 0;
+    int result;
+
+    for (; i < _macroListSource->elements; i++)
+    {
+        result = addMacro(_macroListTarget, _macroListSource->name[i], _macroListSource->value[i]);
+        if (0 != result)
+            return -1;
+    }
+
+    return 0;
+}
+
+/*
     Add a macro to the list
 */
 
