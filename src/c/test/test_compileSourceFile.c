@@ -27,7 +27,7 @@ char preProcessorFileName[MAXPATHLEN];
     prototypes
 */
 
-int compileSourceFile(char *_fileName, Options *_options);
+int compileSourceFile(char *_fileName);
 
 /*
     Options value verification function
@@ -116,7 +116,7 @@ static void testCase_sourceFileNameDotC()
     strcpy(preProcessorFileName, "sourceFile.i");
     assert_int_not_equal(stat(preProcessorFileName, &preProcessorFileStatus), 0);
 
-    assert_int_equal(compileSourceFile(sourceFileName, &testOptions), 0);
+    assert_int_equal(compileSourceFile(sourceFileName), 0);
 
     remove(sourceFileName);
 }
@@ -157,7 +157,7 @@ static void testCase_sourceFileNameWithoutExtention()
     strcpy(preProcessorFileName, "sourceFile.i");
     assert_int_not_equal(stat(preProcessorFileName, &preProcessorFileStatus), 0);
 
-    assert_int_equal(compileSourceFile(sourceFileName, &testOptions), 0);
+    assert_int_equal(compileSourceFile(sourceFileName), 0);
 
     remove(sourceFileName);
 }

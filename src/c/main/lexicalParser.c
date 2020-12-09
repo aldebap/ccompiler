@@ -13,7 +13,7 @@
     Lexical parser
 */
 
-void lexicalParser(FILE *_fileInput, Options *_options)
+void lexicalParser(FILE *_fileInput)
 {
     int inputByte;
     unsigned char delimitedChar = 0;
@@ -34,7 +34,7 @@ void lexicalParser(FILE *_fileInput, Options *_options)
             delimitedChar = 1;
             i = j = 0;
 
-            if (_options->general.trace)
+            if (getOptions()->general.trace)
                 fprintf(stdout, "[trace] token: '\n");
             continue;
         }
@@ -62,7 +62,7 @@ void lexicalParser(FILE *_fileInput, Options *_options)
                 i = 0;
                 previousByte = 0;
 
-                if (_options->general.trace)
+                if (getOptions()->general.trace)
                 {
                     fprintf(stdout, "[trace] character: '%s'\n", token);
                     fprintf(stdout, "[trace] token: '\n");
@@ -77,7 +77,7 @@ void lexicalParser(FILE *_fileInput, Options *_options)
             delimitedString = 1;
             i = j = 0;
 
-            if (_options->general.trace)
+            if (getOptions()->general.trace)
                 fprintf(stdout, "[trace] token: \"\n");
             continue;
         }
@@ -105,7 +105,7 @@ void lexicalParser(FILE *_fileInput, Options *_options)
                 i = 0;
                 previousByte = 0;
 
-                if (_options->general.trace)
+                if (getOptions()->general.trace)
                 {
                     fprintf(stdout, "[trace] string: \"%s\"\n", token);
                     fprintf(stdout, "[trace] token: \"\n");
@@ -125,7 +125,7 @@ void lexicalParser(FILE *_fileInput, Options *_options)
                     previousByte = 0;
                     i = 0;
 
-                    if (_options->general.trace)
+                    if (getOptions()->general.trace)
                         fprintf(stdout, "[trace] token: %s\n", token);
                     continue;
                 }

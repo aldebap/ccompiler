@@ -20,12 +20,10 @@
     Options value verification function
 */
 
-int checkOptions(const LargestIntegralType _parameter, const LargestIntegralType _checkValue)
+int checkOptions(Options *_parameter, Options *_checkValue)
 {
-    Options *parameter = (Options *)_parameter;
-    Options *checkValue = (Options *)_checkValue;
-
-    if (parameter->general.trace != checkValue->general.trace)
+    // TODO: check all fields from Options !
+    if (_parameter->general.trace != _checkValue->general.trace)
         return 0;
 
     return 1;
@@ -48,10 +46,9 @@ int __wrap_addMacro(TMacroList *_macroList, char *_macro, char *_value)
     wrap compile source function
 */
 
-int __wrap_compileSourceFile(char *_fileName, Options *_options)
+int __wrap_compileSourceFile(char *_fileName)
 {
     check_expected(_fileName);
-    check_expected(_options);
 
 #ifdef DEBUG
 
@@ -114,7 +111,6 @@ static void testCase_macroOptionWithoutMacroName()
 
     /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
 
     /*  redirect stderr to a file and call compiler() function */
@@ -125,6 +121,7 @@ static void testCase_macroOptionWithoutMacroName()
     stderrFile = fopen(redirectStderrFileName, "w");
     dup2(fileno(stderrFile), STDERR_FILENO);
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
     fclose(stderrFile);
     dup2(originalStderr, STDERR_FILENO);
 
@@ -164,7 +161,6 @@ static void testCase_macroOptionWithSimpleMacroDefinition()
 
     /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
 
     /*  expected parameters for addMacro */
@@ -174,6 +170,7 @@ static void testCase_macroOptionWithSimpleMacroDefinition()
     will_return(__wrap_addMacro, 0);
 
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
 
     remove(argv[2]);
 }
@@ -200,7 +197,6 @@ static void testCase_macroOptionWithEmptyValueMacroDefinition()
 
     /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
 
     /*  expected parameters for addMacro */
@@ -210,6 +206,7 @@ static void testCase_macroOptionWithEmptyValueMacroDefinition()
     will_return(__wrap_addMacro, 0);
 
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
 
     remove(argv[2]);
 }
@@ -236,7 +233,6 @@ static void testCase_macroOptionWithValuedMacroDefinition()
 
     /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
 
     /*  expected parameters for addMacro */
@@ -246,6 +242,7 @@ static void testCase_macroOptionWithValuedMacroDefinition()
     will_return(__wrap_addMacro, 0);
 
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
 
     remove(argv[2]);
 }
@@ -271,11 +268,12 @@ static void testCase_includeDirectoryOption()
     setDefaultOptions(&testOptions);
     strcpy(testOptions.general.includePath, "/usr/bin:./include");
 
+    /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[3]);
-    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
 
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
 
     remove(argv[3]);
 }
@@ -301,11 +299,12 @@ static void testCase_preprocessorOnlyOption()
     setDefaultOptions(&testOptions);
     testOptions.general.preprocessOnly = 1;
 
+    /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
 
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
 
     remove(argv[2]);
 }
@@ -331,11 +330,12 @@ static void testCase_traceOn()
     setDefaultOptions(&testOptions);
     testOptions.general.trace = 1;
 
+    /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
 
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
 
     remove(argv[2]);
 }
@@ -483,13 +483,8 @@ static void testCase_singleFileName()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  set the expected values for the wrap lexicalParser() function */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
+    /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
-    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
 
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
@@ -520,21 +515,14 @@ static void testCase_multipleFileNames()
     fprintf(sourceFile, "/* test file 3 with just a comment */\n");
     fclose(sourceFile);
 
-    /*  set the expected values for the wrap lexicalParser() function */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
+    /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
-    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
 
     expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
 
     expect_string(__wrap_compileSourceFile, _fileName, argv[3]);
-    expect_check(__wrap_compileSourceFile, _options, checkOptions, &testOptions);
     will_return(__wrap_compileSourceFile, 0);
 
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);

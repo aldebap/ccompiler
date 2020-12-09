@@ -12,7 +12,7 @@
     prototypes
 */
 
-int initializePreProcessor(Options *_options);
+int initializePreProcessor();
 int preProcessor(FILE *_fileInput, FILE *_fileOutput);
 
 #endif /* !defined( __PREPROCESSOR_H ) */

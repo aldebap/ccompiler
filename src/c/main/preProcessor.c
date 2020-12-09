@@ -27,8 +27,6 @@
 
 static struct TPreProcessor
 {
-    Options *options;
-
     regex_t reCommentBegin;
     regex_t reCommentEnd;
     regex_t reContinueNextLine;
@@ -46,11 +44,9 @@ static struct TPreProcessor
     initialize the preprocessor
 */
 
-int initializePreProcessor(Options *_options)
+int initializePreProcessor()
 {
     int result;
-
-    preProc.options = _options;
 
     /*  compile all regex's for preprocessor syntax */
     result = regcomp(&preProc.reCommentBegin, "(/[*])$", REG_EXTENDED);
@@ -132,7 +128,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                 line[i - (match[1].rm_eo - match[1].rm_so)] = '\0';
 
                 /*  comments are discarded */
-                if (preProc.options->general.trace)
+                if (getOptions()->general.trace)
                     fprintf(stdout, "[trace] comment: %s\n", line + commentStart);
 
                 line[commentStart] = '\0';
@@ -221,7 +217,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         {
                             conditional = TRUE_CONDITIONAL_BLOCK;
 
-                            if (preProc.options->general.trace)
+                            if (getOptions()->general.trace)
                                 fprintf(stdout, "[trace] conditional block on defined macro: %s\n", macro);
                         }
                         else
@@ -249,7 +245,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         {
                             conditional = TRUE_CONDITIONAL_BLOCK;
 
-                            if (preProc.options->general.trace)
+                            if (getOptions()->general.trace)
                                 fprintf(stdout, "[trace] conditional block on not defined macro: %s\n", macro);
                         }
                         else
@@ -271,7 +267,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         else
                             conditional = TRUE_CONDITIONAL_BLOCK;
 
-                        if (preProc.options->general.trace)
+                        if (getOptions()->general.trace)
                             fprintf(stdout, "[trace] else of conditional block\n");
 
                         i = 0;
@@ -291,7 +287,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     {
                         conditional = NO_CONDITIONAL_BLOCK;
 
-                        if (preProc.options->general.trace)
+                        if (getOptions()->general.trace)
                             fprintf(stdout, "[trace] end of conditional block\n");
 
                         i = 0;
@@ -315,7 +311,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         free(outputLine);
                     }
 
-                    if (preProc.options->general.trace)
+                    if (getOptions()->general.trace)
                         fprintf(stdout, "[trace] original line: %s", line);
 
                     i = 0;

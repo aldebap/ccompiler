@@ -45,6 +45,7 @@ typedef struct Options
     prototypes
 */
 
+Options *getOptions();
 void setDefaultOptions(Options *_options);
 
 #endif /* !defined( __OPTIONS_H ) */

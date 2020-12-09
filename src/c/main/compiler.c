@@ -16,7 +16,7 @@
     prototypes
 */
 
-int compileSourceFile(char *_fileName, Options *_options);
+int compileSourceFile(char *_fileName);
 
 /*
     Parse command line arguments and run the compiler for selected source files
@@ -26,10 +26,7 @@ int compiler(int _argc, char *_argv[])
 {
     char *fileNameList[_argc];
     unsigned int fileNameListSize = 0;
-    Options executionOptions;
     unsigned int i = 1;
-
-    setDefaultOptions(&executionOptions);
 
     /*  parse the execution arguments */
     for (; i < _argc; i++)
@@ -60,7 +57,7 @@ int compiler(int _argc, char *_argv[])
 
                     strcpy(macro, _argv[i] + 2);
 
-                    result = addMacro(&executionOptions.preprocessor.macroList, macro, NULL);
+                    result = addMacro(&getOptions()->preprocessor.macroList, macro, NULL);
                     if (0 != result)
                         return result;
                 }
@@ -74,7 +71,7 @@ int compiler(int _argc, char *_argv[])
 
                     strcpy(value, equals + 1);
 
-                    result = addMacro(&executionOptions.preprocessor.macroList, macro, value);
+                    result = addMacro(&getOptions()->preprocessor.macroList, macro, value);
                     if (0 != result)
                         return result;
                 }
@@ -87,8 +84,8 @@ int compiler(int _argc, char *_argv[])
             if (i + 1 < _argc)
             {
                 /*  the following argument is the directory name */
-                strcpy(executionOptions.general.includePath, ":");
-                strcpy(executionOptions.general.includePath, _argv[++i]);
+                strcpy(getOptions()->general.includePath, ":");
+                strcpy(getOptions()->general.includePath, _argv[++i]);
 
                 continue;
             }
@@ -98,12 +95,12 @@ int compiler(int _argc, char *_argv[])
         }
         if (0 == strncmp("-E", _argv[i], 3))
         {
-            executionOptions.general.preprocessOnly = 1;
+            getOptions()->general.preprocessOnly = 1;
             continue;
         }
         if (0 == strncmp("--trace", _argv[i], 8))
         {
-            executionOptions.general.trace = 1;
+            getOptions()->general.trace = 1;
             continue;
         }
         if ('-' == _argv[i][0])
@@ -139,7 +136,7 @@ int compiler(int _argc, char *_argv[])
     /* compile each input files */
     for (i = 0; i < fileNameListSize; i++)
     {
-        int compilationResult = compileSourceFile(fileNameList[i], &executionOptions);
+        int compilationResult = compileSourceFile(fileNameList[i]);
     }
 
     return 0;
@@ -149,7 +146,7 @@ int compiler(int _argc, char *_argv[])
     Compile source code given it's file name
 */
 
-int compileSourceFile(char *_fileName, Options *_options)
+int compileSourceFile(char *_fileName)
 {
     /*  the preprocessor file name replace the .c extention for .i */
     unsigned char preProcessorFileName[1024];
@@ -171,17 +168,17 @@ int compileSourceFile(char *_fileName, Options *_options)
 
     sourceFile = fopen(_fileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
-    initializePreProcessor(_options);
+    initializePreProcessor();
     preProcessor(sourceFile, preProcessorFile);
     fclose(sourceFile);
     fclose(preProcessorFile);
 
-    if (1 == _options->general.preprocessOnly)
+    if (1 == getOptions()->general.preprocessOnly)
         return 0;
 
     /*  lexical parser pass */
     sourceFile = fopen(_fileName, "r");
-    lexicalParser(sourceFile, _options);
+    lexicalParser(sourceFile);
     fclose(sourceFile);
 
     /*  remove intermediate files */

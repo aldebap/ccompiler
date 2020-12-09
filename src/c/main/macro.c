@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "options.h"
 #include "macro.h"
 
 /*
@@ -69,8 +70,8 @@ int addMacro(TMacroList *_macroList, char *_macro, char *_value)
 
     if (0 == getMacro(_macroList, _macro, &value))
     {
-        //if (preProc.options->general.trace)
-        fprintf(stdout, "[trace] macro already defined: %s\n", _macro);
+        if (getOptions()->general.trace)
+            fprintf(stdout, "[trace] macro already defined: %s\n", _macro);
 
         return 0;
     }
@@ -106,8 +107,8 @@ int addMacro(TMacroList *_macroList, char *_macro, char *_value)
     {
         _macroList->value[_macroList->elements] = NULL;
 
-        //if (preProc.options->general.trace)
-        fprintf(stdout, "[trace] simple macro definition added (%d): %s\n", _macroList->elements, _macro);
+        if (getOptions()->general.trace)
+            fprintf(stdout, "[trace] simple macro definition added (%d): %s\n", _macroList->elements, _macro);
     }
     else
     {
@@ -117,8 +118,8 @@ int addMacro(TMacroList *_macroList, char *_macro, char *_value)
 
         strcpy(_macroList->value[_macroList->elements], _value);
 
-        //if (preProc.options->general.trace)
-        fprintf(stdout, "[trace] valued macro definition added (%d): %s --> %s\n", _macroList->elements, _macro, _value);
+        if (getOptions()->general.trace)
+            fprintf(stdout, "[trace] valued macro definition added (%d): %s --> %s\n", _macroList->elements, _macro, _value);
     }
 
     _macroList->elements++;
@@ -203,8 +204,8 @@ int replaceAllMacros(TMacroList *_macroList, char *_inputLine, char **_outputVal
                     memmove(macroOccurrence, _macroList->value[i], valueLength);
                 }
 
-                //if (preProc.options->general.trace)
-                fprintf(stdout, "[trace] macro %s replaced by it's value --> %s\n", _macroList->name[i], *_outputValue);
+                if (getOptions()->general.trace)
+                    fprintf(stdout, "[trace] macro %s replaced by it's value --> %s\n", _macroList->name[i], *_outputValue);
 
                 replacements++;
             }

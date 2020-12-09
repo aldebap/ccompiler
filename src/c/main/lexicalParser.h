@@ -12,6 +12,6 @@
     prototypes
 */
 
-void lexicalParser(FILE *_fileInput, Options *_options);
+void lexicalParser(FILE *_fileInput);
 
 #endif /* !defined( __LEXICALPARSER_H ) */
