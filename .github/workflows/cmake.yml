@@ -6,7 +6,8 @@ env:
   HOME_PATH: ${{ github.workspace }}
   SOURCE_PATH: ${HOME_PATH}/src/c/main
   TEST_PATH: ${HOME_PATH}/src/c/test
-  BUILD_PATH: ${HOME_PATH}/build
+  #BUILD_PATH: ${HOME_PATH}/build
+  BUILD_PATH: build
   BUILD_TYPE: Debug
 
 jobs:
@@ -14,16 +15,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Check out repository code
+      uses: actions/checkout@v2
 
     - name: mkdir
       shell: bash
-      working-directory: $HOME_PATH
-      run: mkdir $BUILD_PATH
+    #  working-directory: $HOME_PATH
+      run: mkdir ${{ BUILD_PATH }}
 
     - name: find for files
       shell: bash
-      working-directory: $HOME_PATH
+    #  working-directory: $HOME_PATH
       run: find . -print
 
     #- name: Create Build Environment

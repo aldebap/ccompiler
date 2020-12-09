@@ -1,4 +1,6 @@
 # C compiler
+![Build all with CMake](https://github.com/aldebap/ccompiler/workflows/Build%20all%20with%20CMake/badge.svg)
+
 Implementation of a C compiler (in C, obviously).
 
 The references from *Kernigham & Ritchie* "The C programming language" were used for the syntax implemented in this compiler.
