@@ -21,7 +21,7 @@ jobs:
     - name: mkdir
       shell: bash
     #  working-directory: $HOME_PATH
-      run: mkdir ${{ BUILD_PATH }}
+      run: mkdir $BUILD_PATH
 
     - name: find for files
       shell: bash
