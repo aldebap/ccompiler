@@ -3,9 +3,10 @@ name: Build all with CMake
 on: [push]
 
 env:
-  SOURCE_PATH: ${{ github.workspace }}/src/c/main
-  TEST_PATH: ${{ github.workspace }}/src/c/test
-  BUILD_PATH: ${{ github.workspace }}/build
+  HOME_PATH: ${{ github.workspace }}
+  SOURCE_PATH: ${HOME_PATH}/src/c/main
+  TEST_PATH: ${HOME_PATH}/src/c/test
+  BUILD_PATH: ${HOME_PATH}/build
   BUILD_TYPE: Debug
 
 jobs:
@@ -17,23 +18,28 @@ jobs:
 
     - name: mkdir
       shell: bash
-      working-directory: ${{ github.workspace }}
+      working-directory: $HOME_PATH
       run: mkdir $BUILD_PATH
-      
-    - name: Create Build Environment
-      shell: bash
-      working-directory: $BUILD_PATH
-      run: cmake -E make_directory $BUILD_PATH
 
-    - name: Configure CMake
+    - name: find for files
       shell: bash
-      working-directory: $BUILD_PATH
-      run: make cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      working-directory: $HOME_PATH
+      run: find . -print
 
-    - name: Build
-      shell: bash
-      working-directory: $BUILD_PATH
-      run: cmake -DSOURCE_DIRECTORY=$SOURCE_PATH -DTEST_DIRECTORY=$TEST_PATH --build . --config $BUILD_TYPE
+    #- name: Create Build Environment
+    #  shell: bash
+    #  working-directory: $BUILD_PATH
+    #  run: cmake -E make_directory $BUILD_PATH
+
+    #- name: Configure CMake
+    #  shell: bash
+    #  working-directory: $BUILD_PATH
+    #  run: make cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    #- name: Build
+    #  shell: bash
+    #  working-directory: $BUILD_PATH
+    #  run: cmake -DSOURCE_DIRECTORY=$SOURCE_PATH -DTEST_DIRECTORY=$TEST_PATH --build . --config $BUILD_TYPE
 
     #- name: Test
     #  working-directory: $BUILD_PATH
