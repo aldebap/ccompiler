@@ -24,7 +24,6 @@ jobs:
     - name: Create build environment
       shell: bash
       run: |
-        cd ${HOME_PATH}/${BUILD_PATH}
         cmake -E make_directory ${BUILD_PATH}
 
     - name: Build makefiles from CMake files
