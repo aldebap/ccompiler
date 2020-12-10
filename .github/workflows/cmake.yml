@@ -21,22 +21,28 @@ jobs:
     #  shell: bash
     #  run: mkdir $BUILD_PATH
 
-    - name: Install CLib package manager
-      shell: bash
-      run: |
-        echo ">>> Install libcurl"
-        sudo apt-get install libcurl4-gnutls-dev -qq
+    #- name: Install CLib package manager
+    #  shell: bash
+    #  run: |
+    #    echo ">>> Install libcurl"
+    #    sudo apt-get install libcurl4-gnutls-dev -qq
 
-        echo ">>> Download, build and install clib"
-        git clone https://github.com/clibs/clib.git /tmp/clib
-        cd /tmp/clib
-        make
-        sudo make install
+    #    echo ">>> Download, build and install clib"
+    #    git clone https://github.com/clibs/clib.git /tmp/clib
+    #    cd /tmp/clib
+    #    make
+    #    sudo make install
+
+    #- name: Install CMocka library
+    #  shell: bash
+    #  run: |
+    #    clib install cmocka
 
     - name: Install CMocka library
       shell: bash
       run: |
-        clib install cmocka
+        sudo apt-get update
+        sudo apt-get install install libcmocka-dev
 
     - name: Create build environment
       shell: bash
