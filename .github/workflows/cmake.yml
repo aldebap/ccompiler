@@ -24,13 +24,13 @@ jobs:
     - name: Create build environment
       shell: bash
       run: |
-        cmake -E make_directory ${BUILD_PATH}
+        cmake -E make_directory ${HOME_PATH}/${BUILD_PATH}
 
     - name: Build makefiles from CMake files
       shell: bash
       run: |
         cd ${HOME_PATH}/${BUILD_PATH}
-        make cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+        cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ${HOME_PATH}
 
     - name: Build target from source code
       shell: bash
