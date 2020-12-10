@@ -8,7 +8,8 @@ env:
   SOURCE_PATH: src/c/main
   TEST_PATH: ${HOME_PATH}/src/c/test
   #BUILD_PATH: ${HOME_PATH}/build
-  BUILD_PATH: ${{ SOURCE_PATH }}/build
+  #BUILD_PATH: ${{ SOURCE_PATH }}/build
+  BUILD_PATH: src/c/main/build
   BUILD_TYPE: Debug
 
 jobs:
