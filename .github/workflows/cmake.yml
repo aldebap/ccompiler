@@ -8,7 +8,7 @@ env:
   SOURCE_PATH: src/c/main
   TEST_PATH: ${HOME_PATH}/src/c/test
   #BUILD_PATH: ${HOME_PATH}/build
-  BUILD_PATH: ${SOURCE_PATH}/build
+  BUILD_PATH: ${{ SOURCE_PATH }}/build
   BUILD_TYPE: Debug
 
 jobs:
@@ -22,7 +22,9 @@ jobs:
     - name: Show build directory
       shell: bash
     #  working-directory: $SOURCE_PATH
-      run: echo ${BUILD_PATH}
+      run: |
+        echo HOME_PATH: ${HOME_PATH}
+        echo BUILD_PATH: ${BUILD_PATH}
 
     - name: Create build directory
       shell: bash
