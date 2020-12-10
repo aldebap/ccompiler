@@ -19,6 +19,11 @@ jobs:
     - name: Check out repository code
       uses: actions/checkout@v2
 
+    - name: Show build directory
+      shell: bash
+    #  working-directory: $SOURCE_PATH
+      run: echo ${BUILD_PATH}
+
     - name: Create build directory
       shell: bash
     #  working-directory: $SOURCE_PATH
