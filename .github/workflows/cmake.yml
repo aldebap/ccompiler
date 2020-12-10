@@ -38,11 +38,19 @@ jobs:
     #  run: |
     #    clib install cmocka
 
-    - name: Install CMocka library
+    #- name: Install CMocka library
+    #  shell: bash
+    #  run: |
+    #    sudo apt-get update
+    #    sudo apt-get install libcmocka-dev
+
+    - name: Build and install CMocka from source
       shell: bash
       run: |
-        sudo apt-get update
-        sudo apt-get install libcmocka-dev
+        git clone https://git.cryptomilk.org/projects/cmocka.git  /tmp/cmocka
+        cd /tmp/cmocka
+        make
+        sudo make install
 
     - name: Create build environment
       shell: bash
