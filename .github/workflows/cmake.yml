@@ -17,29 +17,27 @@ jobs:
     - name: Check out repository code
       uses: actions/checkout@v2
 
-    - name: Create build directory
-      shell: bash
-      run: mkdir $BUILD_PATH
+    #- name: Create build directory
+    #  shell: bash
+    #  run: mkdir $BUILD_PATH
 
-    - name: Build makefiles from CMake
+    - name: Create build environment
       shell: bash
-      working-directory: $BUILD_PATH
-      run: cmake $HOME_PATH
+      run: |
+        cd ${HOME_PATH}/${BUILD_PATH}
+        cmake -E make_directory ${BUILD_PATH}
+
+    - name: Build makefiles from CMake files
+      shell: bash
+      run: |
+        cd ${HOME_PATH}/${BUILD_PATH}
+        make cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
 
     - name: Build target from source code
       shell: bash
-      working-directory: $BUILD_PATH
-      run: cmake --build .
-
-    #- name: find for files
-    #  shell: bash
-    #  working-directory: $HOME_PATH
-    #  run: find . -print
-
-    #- name: Create Build Environment
-    #  shell: bash
-    #  working-directory: $BUILD_PATH
-    #  run: cmake -E make_directory $BUILD_PATH
+      run: |
+        cd ${HOME_PATH}/${BUILD_PATH}
+        cmake -DSOURCE_DIRECTORY=${SOURCE_PATH} -DTEST_DIRECTORY=${TEST_PATH} --build . --config ${BUILD_TYPE}
 
     #- name: Configure CMake
     #  shell: bash
