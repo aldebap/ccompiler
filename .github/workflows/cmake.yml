@@ -4,11 +4,8 @@ on: [push]
 
 env:
   HOME_PATH: ${{ github.workspace }}
-  #SOURCE_PATH: ${HOME_PATH}/src/c/main
   SOURCE_PATH: src/c/main
-  TEST_PATH: ${HOME_PATH}/src/c/test
-  #BUILD_PATH: ${HOME_PATH}/build
-  #BUILD_PATH: ${{ SOURCE_PATH }}/build
+  TEST_PATH: src/c/test
   BUILD_PATH: src/c/main/build
   BUILD_TYPE: Debug
 
@@ -20,25 +17,19 @@ jobs:
     - name: Check out repository code
       uses: actions/checkout@v2
 
-    - name: Show build directory
-      shell: bash
-    #  working-directory: $SOURCE_PATH
-      run: |
-        echo HOME_PATH: ${HOME_PATH}
-        echo BUILD_PATH: ${BUILD_PATH}
-
     - name: Create build directory
       shell: bash
-    #  working-directory: $SOURCE_PATH
       run: mkdir $BUILD_PATH
 
     - name: Build makefiles from CMake
       shell: bash
-      run: cmake
+      working-directory: $BUILD_PATH
+      run: cmake $HOME_PATH
 
     - name: Build target from source code
       shell: bash
-      run: cmake --build $BUILD_PATH
+      working-directory: $BUILD_PATH
+      run: cmake --build .
 
     #- name: find for files
     #  shell: bash
