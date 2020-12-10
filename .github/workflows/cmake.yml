@@ -21,6 +21,11 @@ jobs:
     #  shell: bash
     #  run: mkdir $BUILD_PATH
 
+    - name: Install CMocka library
+      shell: bash
+      run: |
+        clib install cmocka
+
     - name: Create build environment
       shell: bash
       run: |
