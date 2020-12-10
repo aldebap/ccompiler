@@ -24,14 +24,12 @@ jobs:
     - name: Install CLib package manager
       shell: bash
       run: |
-        echo "Install libcurl"
+        echo ">>> Install libcurl"
         sudo apt-get install libcurl4-gnutls-dev -qq
 
-        echo "Download, build and install clib"
-        cd /tmp
-        mkdir clib
-        cd clib
-        git clone https://github.com/clibs/clib.git
+        echo ">>> Download, build and install clib"
+        git clone https://github.com/clibs/clib.git /tmp/clib
+        cd /tmp/clib
         make
         sudo make install
 
