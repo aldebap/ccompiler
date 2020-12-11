@@ -63,8 +63,9 @@ jobs:
       shell: bash
       run: |
         cd ${HOME_PATH}/${BUILD_PATH}
-    #    cmake -DSOURCE_DIRECTORY="${HOME_PATH}/${SOURCE_PATH}" -DTEST_DIRECTORY="${HOME_PATH}/${TEST_PATH}" --build . --config ${BUILD_TYPE}
         cmake --build .
+
+    #    cmake -DSOURCE_DIRECTORY="${HOME_PATH}/${SOURCE_PATH}" -DTEST_DIRECTORY="${HOME_PATH}/${TEST_PATH}" --build . --config ${BUILD_TYPE}
 
     #- name: Test
     #  working-directory: $BUILD_PATH
