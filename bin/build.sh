@@ -26,6 +26,7 @@ then
     cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} "${HOME_PATH}"
 
     echo '>>>>> Building target from source code'
+    #cmake -DSOURCE_DIRECTORY="${HOME_PATH}/${SOURCE_PATH}" -DTEST_DIRECTORY="${HOME_PATH}/${TEST_PATH}" --build . --config ${BUILD_TYPE}
     cmake --build .
 else
     cd "${HOME_PATH}/${BUILD_PATH}"

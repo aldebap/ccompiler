@@ -17,10 +17,6 @@ jobs:
     - name: Check out repository code
       uses: actions/checkout@v2
       
-    #- name: Create build directory
-    #  shell: bash
-    #  run: mkdir $BUILD_PATH
-
     #- name: Install CLib package manager
     #  shell: bash
     #  run: |
@@ -67,17 +63,8 @@ jobs:
       shell: bash
       run: |
         cd ${HOME_PATH}/${BUILD_PATH}
-        cmake -DSOURCE_DIRECTORY="${HOME_PATH}/${SOURCE_PATH}" -DTEST_DIRECTORY="${HOME_PATH}/${TEST_PATH}" --build . --config ${BUILD_TYPE}
-
-    #- name: Configure CMake
-    #  shell: bash
-    #  working-directory: $BUILD_PATH
-    #  run: make cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-
-    #- name: Build
-    #  shell: bash
-    #  working-directory: $BUILD_PATH
-    #  run: cmake -DSOURCE_DIRECTORY=$SOURCE_PATH -DTEST_DIRECTORY=$TEST_PATH --build . --config $BUILD_TYPE
+    #    cmake -DSOURCE_DIRECTORY="${HOME_PATH}/${SOURCE_PATH}" -DTEST_DIRECTORY="${HOME_PATH}/${TEST_PATH}" --build . --config ${BUILD_TYPE}
+        cmake --build .
 
     #- name: Test
     #  working-directory: $BUILD_PATH
