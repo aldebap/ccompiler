@@ -3,29 +3,32 @@
 export  CURRENT_DIRECTORY="$( pwd )"
 export  BASE_DIR=$( dirname "${CURRENT_DIRECTORY}/$0" )
 export  BASE_DIR=$( dirname "${BASE_DIR}" )
-export  SOURCE_DIRECTORY="${BASE_DIR}/src/c/main"
-export  TEST_DIRECTORY="${BASE_DIR}/src/c/test"
+
+export  HOME_PATH="${BASE_DIR}"
+export  SOURCE_PATH="src/c/main"
+export  TEST_PATH="src/c/test"
+export  BUILD_PATH="build"
+export  BUILD_TYPE=debug
 
 cd "${SOURCE_DIRECTORY}"
 if [ "${1}" == "all" ]
 then
-    echo '>>>>> Creating build directory'
-
     if [ -d build ]
     then
         rm -rf build
     fi
 
-    mkdir build
-    cd build
+    echo '>>>>> Creating build directory'
+    cmake -E make_directory "${HOME_PATH}/${BUILD_PATH}"
+    cd "${HOME_PATH}/${BUILD_PATH}"
 
     echo '>>>>> Building makefiles from CMake'
-    cmake ../../../..
+    cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} "${HOME_PATH}"
 
     echo '>>>>> Building target from source code'
     cmake --build .
 else
-    cd build
+    cd "${HOME_PATH}/${BUILD_PATH}"
 
     echo '>>>>> Building target from source code'
     cmake --build .

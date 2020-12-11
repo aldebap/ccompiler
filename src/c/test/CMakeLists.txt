@@ -4,7 +4,7 @@
 
 #   add CMocka
 include_directories(${CMAKE_SOURCE_DIR}/../test/cmocka/include)
-include_directories($ENV{SOURCE_DIRECTORY})
+include_directories($ENV{HOME_PATH}/$ENV{SOURCE_PATH})
 
 #   add code coverage
 #set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/scripts/cmake)

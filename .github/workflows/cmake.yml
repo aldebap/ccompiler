@@ -6,7 +6,7 @@ env:
   HOME_PATH: ${{ github.workspace }}
   SOURCE_PATH: src/c/main
   TEST_PATH: src/c/test
-  BUILD_PATH: src/c/main/build
+  BUILD_PATH: build
   BUILD_TYPE: Debug
 
 jobs:
@@ -38,19 +38,19 @@ jobs:
     #  run: |
     #    clib install cmocka
 
-    #- name: Install CMocka library
-    #  shell: bash
-    #  run: |
-    #    sudo apt-get update
-    #    sudo apt-get install libcmocka-dev
-
-    - name: Build and install CMocka from source
+    - name: Install CMocka library
       shell: bash
       run: |
-        git clone https://git.cryptomilk.org/projects/cmocka.git  /tmp/cmocka
-        cd /tmp/cmocka
-        make
-        sudo make install
+        sudo apt-get update
+        sudo apt-get install libcmocka-dev
+
+    #- name: Build and install CMocka from source
+    #  shell: bash
+    #  run: |
+    #    git clone https://git.cryptomilk.org/projects/cmocka.git  /tmp/cmocka
+    #    cd /tmp/cmocka
+    #    make
+    #    sudo make install
 
     - name: Create build environment
       shell: bash
@@ -67,7 +67,7 @@ jobs:
       shell: bash
       run: |
         cd ${HOME_PATH}/${BUILD_PATH}
-        cmake -DSOURCE_DIRECTORY=${SOURCE_PATH} -DTEST_DIRECTORY=${TEST_PATH} --build . --config ${BUILD_TYPE}
+        cmake -DSOURCE_DIRECTORY="${HOME_PATH}/${SOURCE_PATH}" -DTEST_DIRECTORY="${HOME_PATH}/${TEST_PATH}" --build . --config ${BUILD_TYPE}
 
     #- name: Configure CMake
     #  shell: bash

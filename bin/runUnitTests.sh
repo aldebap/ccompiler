@@ -3,13 +3,16 @@
 export  CURRENT_DIRECTORY="$( pwd )"
 export  BASE_DIR=$( dirname "${CURRENT_DIRECTORY}/$0" )
 export  BASE_DIR=$( dirname "${BASE_DIR}" )
-#export  BIN_DIRECTORY="${BASE_DIR}/bin"
-export  BUILD_DIRECTORY="${BASE_DIR}/src/c/main/build/src/c/test"
+
+export  HOME_PATH="${BASE_DIR}"
+export  TEST_PATH="src/c/test"
+export  BUILD_PATH="build"
 
 export CMOCKA_MESSAGE_OUTPUT=STDOUT
 
 #   execute all unit tests in the build directory
-cd "${BUILD_DIRECTORY}"
+#cd "${BUILD_DIRECTORY}"
+cd "${HOME_PATH}/${BUILD_PATH}/${TEST_PATH}"
 
 for TEST in ./test*
 do
