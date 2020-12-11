@@ -2,6 +2,8 @@
 #
 #   oct-20-2020 by aldebap
 
+enable_testing()
+
 #   add CMocka
 include_directories(${CMAKE_SOURCE_DIR}/../test/cmocka/include)
 include_directories($ENV{HOME_PATH}/$ENV{SOURCE_PATH})
@@ -18,7 +20,7 @@ set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,compileSource
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
-
+add_test(${TEST_NAME} ${TEST_NAME})
 #   compileSourceFile unit tests
 set(TEST_NAME "test_compileSourceFile")
 set(SOURCE_LIST ../main/compiler.c ../main/preProcessor.c ../main/macro.c ../main/options.c)
@@ -27,6 +29,7 @@ set(TEST_FLAGS "-Wl,--defsym,initializePreProcessor=__wrap_initializePreProcesso
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
 
 #   initialize preProcessor unit tests
 set(TEST_NAME "test_initializePreProcessor")
@@ -36,6 +39,7 @@ set(TEST_FLAGS "-Wl,--wrap,regcomp -Wl,--defsym,initializeMacroList=__wrap_initi
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
 
 #   preProcessor unit tests
 set(TEST_NAME "test_preProcessor")
@@ -45,6 +49,7 @@ set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,getMacro=__wr
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
 
 #   initialize macroList unit tests
 set(TEST_NAME "test_initializeMacroList")
@@ -54,6 +59,7 @@ set(TEST_FLAGS "-Wl,--wrap,malloc")
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
 
 #   copyMacroList unit tests
 set(TEST_NAME "test_copyMacroList")
@@ -63,6 +69,7 @@ set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro")
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
 
 #   addMacro unit tests
 set(TEST_NAME "test_addMacro")
@@ -72,6 +79,7 @@ set(TEST_FLAGS "-Wl,--wrap,realloc -Wl,--wrap,malloc")
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
 
 #   getMacro unit tests
 set(TEST_NAME "test_getMacro")
@@ -81,6 +89,7 @@ set(TEST_FLAGS "")
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
 
 #   replaceAllMacros unit tests
 set(TEST_NAME "test_replaceAllMacros")
@@ -90,6 +99,7 @@ set(TEST_FLAGS "-Wl,--wrap,realloc -Wl,--wrap,malloc")
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
 
 #   escapeSequence unit tests
 set(TEST_NAME "test_escapeSequence")
@@ -99,6 +109,7 @@ set(TEST_FLAGS "")
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
 
 #   coverage settings
 #set(COVERAGE_EXCLUDES include/)

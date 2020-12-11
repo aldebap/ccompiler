@@ -11,6 +11,7 @@ export  BUILD_PATH="build"
 export  BUILD_TYPE=debug
 
 cd "${SOURCE_DIRECTORY}"
+
 if [ "${1}" == "all" ]
 then
     if [ -d build ]
@@ -34,4 +35,5 @@ else
     echo '>>>>> Building target from source code'
     cmake --build .
 fi
+
 cd "${CURRENT_DIRECTORY}"
