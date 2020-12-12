@@ -10,25 +10,17 @@ export  BUILD_PATH="build"
 
 export CMOCKA_MESSAGE_OUTPUT=STDOUT
 
+cd "${HOME_PATH}/${BUILD_PATH}"
+
+rm -rf *.c *.i 2> /dev/null
+
 if [ "${1}" == "detailed" ]
 then
-    #   execute all unit tests in the build directory
-    cd "${HOME_PATH}/${BUILD_PATH}/${TEST_PATH}"
-
-    for TEST in ./test*
-    do
-        echo ">>>>> running unit test program: ${TEST}"
-        echo
-
-        ./${TEST}
-
-        echo "------------"
-        echo
-    done
-
-    cd "${CURRENT_DIRECTORY}"
+    #   execute all unit tests using ctest in a verbose way
+    ctest --verbose
 else
     #   execute all unit tests using ctest
-    cd "${HOME_PATH}/${BUILD_PATH}"
     ctest
 fi
+
+cd "${CURRENT_DIRECTORY}"

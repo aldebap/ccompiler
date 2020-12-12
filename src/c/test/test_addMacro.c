@@ -18,12 +18,12 @@
     globals
 */
 
-TMacroList macroList;
+static TMacroList macroList;
 
-char testMacroName[70][27];
-char *testMacroNameList[70];
-char testMacroValue[70][27];
-char *testMacroValueList[70];
+static char testMacroName[70][27];
+static char *testMacroNameList[70];
+static char testMacroValue[70][27];
+static char *testMacroValueList[70];
 
 /*
     mock for malloc() function

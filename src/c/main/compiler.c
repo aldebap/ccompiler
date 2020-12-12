@@ -84,8 +84,8 @@ int compiler(int _argc, char *_argv[])
             if (i + 1 < _argc)
             {
                 /*  the following argument is the directory name */
-                strcpy(getOptions()->general.includePath, ":");
-                strcpy(getOptions()->general.includePath, _argv[++i]);
+                strcat(getOptions()->general.includePath, ":");
+                strcat(getOptions()->general.includePath, _argv[++i]);
 
                 continue;
             }

@@ -67,10 +67,11 @@ jobs:
 
     #    cmake -DSOURCE_DIRECTORY="${HOME_PATH}/${SOURCE_PATH}" -DTEST_DIRECTORY="${HOME_PATH}/${TEST_PATH}" --build . --config ${BUILD_TYPE}
 
-    - name: Test
+    - name: Execute all unit tests using CTest
       shell: bash
       run: |
         cd ${HOME_PATH}/${BUILD_PATH}
+        export CMOCKA_MESSAGE_OUTPUT=STDOUT
         ctest
 
     #  working-directory: $BUILD_PATH

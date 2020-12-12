@@ -30,28 +30,11 @@ char preProcessorFileName[MAXPATHLEN];
 int compileSourceFile(char *_fileName);
 
 /*
-    Options value verification function
-*/
-
-int checkOptions(const LargestIntegralType _parameter, const LargestIntegralType _checkValue)
-{
-    Options *parameter = (Options *)_parameter;
-    Options *checkValue = (Options *)_checkValue;
-
-    if (parameter->general.trace != checkValue->general.trace)
-        return 0;
-
-    return 1;
-}
-
-/*
     wrap initialize preprocessor function
 */
 
-int __wrap_initializePreProcessor(Options *_options)
+int __wrap_initializePreProcessor()
 {
-    check_expected(_options);
-
     return (int)mock();
 }
 
@@ -74,10 +57,9 @@ void __wrap_preProcessor(FILE *_fileInput, FILE *_fileOutput)
     wrap lexical parser function
 */
 
-void __wrap_lexicalParser(FILE *_fileInput, Options *_options)
+void __wrap_lexicalParser(FILE *_fileInput)
 {
     check_expected_ptr(_fileInput);
-    check_expected(_options);
 }
 
 /*
@@ -95,12 +77,7 @@ static void testCase_sourceFileNameDotC()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  set the expected values for the wrap initializePreProcessor */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
-    expect_check(__wrap_initializePreProcessor, _options, checkOptions, &testOptions);
+    /*  set the return value for wrap initializePreProcessor() functions */
     will_return(__wrap_initializePreProcessor, 0);
 
     /*  set the expected values for the wrap preProcessor and wrap lexicalParser() functions */
@@ -108,7 +85,6 @@ static void testCase_sourceFileNameDotC()
     expect_any(__wrap_preProcessor, _fileOutput);
 
     expect_any(__wrap_lexicalParser, _fileInput);
-    expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
 
     /*  make sure preprocessor file doesn't exist prior to call compileSourceFile */
     struct stat preProcessorFileStatus;
@@ -136,12 +112,7 @@ static void testCase_sourceFileNameWithoutExtention()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  set the expected values for the wrap initializePreProcessor */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-
-    expect_check(__wrap_initializePreProcessor, _options, checkOptions, &testOptions);
+    /*  set the return value for wrap initializePreProcessor() functions */
     will_return(__wrap_initializePreProcessor, 0);
 
     /*  set the expected values for the wrap preProcessor and wrap lexicalParser() functions */
@@ -149,7 +120,6 @@ static void testCase_sourceFileNameWithoutExtention()
     expect_any(__wrap_preProcessor, _fileOutput);
 
     expect_any(__wrap_lexicalParser, _fileInput);
-    expect_check(__wrap_lexicalParser, _options, checkOptions, &testOptions);
 
     /*  make sure preprocessor file doesn't exist prior to call compileSourceFile */
     struct stat preProcessorFileStatus;
