@@ -53,6 +53,48 @@ int checkOptions(Options *_parameter, Options *_checkValue)
 }
 
 /*
+    mock for fprintf() function
+*/
+
+int __wrap_fprintf(FILE *_stream, const char *_format, ...)
+{
+    check_expected(_stream);
+    check_expected(_format);
+
+    /*  based on format string, count the number of additional arguments expected */
+    char *indicator = "%s";
+    char *formatString = (char *)_format;
+    char *argIndicator;
+    int numAdditionalArgs = 0;
+
+    do
+    {
+        argIndicator = strstr(formatString, indicator);
+        if (NULL != argIndicator)
+        {
+            numAdditionalArgs++;
+            formatString = argIndicator + strlen(indicator);
+        }
+    } while (NULL != argIndicator);
+
+    printf("[debug] fprintf additional arguments: %d\n", numAdditionalArgs);
+
+    /*  add a check for every additional argument */
+    va_list argList;
+
+    //va_start(argList, numAdditionalArgs);
+    va_start(argList, _format);
+
+    for (int i = 0; i < numAdditionalArgs; i++)
+    {
+        _check_expected(__func__, "_additionalArg", __FILE__, __LINE__, cast_to_largest_integral_type(va_arg(argList, char *)));
+    }
+    va_end(argList);
+
+    return (int)mock();
+}
+
+/*
     mock for addMacro() function
 */
 
@@ -88,18 +130,52 @@ static void testCase_help()
 {
     char *argv[] = {"compiler", "--help"};
 
+    /*  expected parameters for fprintf */
+    expect_any(__wrap_fprintf, _stream);
+    expect_string_count(__wrap_fprintf, _format, "Usage: %s [options] file...\n", 1);
+    _expect_string("__wrap_fprintf", "_additionalArg", __FILE__, __LINE__, (const char *)(argv[0]), 1);
+    will_return(__wrap_fprintf, 28);
+
+    expect_any(__wrap_fprintf, _stream);
+    expect_string(__wrap_fprintf, _format, "  --help            Display this information.\n");
+    will_return(__wrap_fprintf, 46);
+
+    expect_any(__wrap_fprintf, _stream);
+    expect_string(__wrap_fprintf, _format, "  -D<name>[=value]  Add <name> to the preprocessor's macro list with the optional value.\n");
+    will_return(__wrap_fprintf, 89);
+
+    expect_any(__wrap_fprintf, _stream);
+    expect_string(__wrap_fprintf, _format, "  -I <dir>          Add <dir> to the preprocessor's include search paths.\n");
+    will_return(__wrap_fprintf, 74);
+
+    expect_any(__wrap_fprintf, _stream);
+    expect_string(__wrap_fprintf, _format, "  -E                Preprocess only; do not compile, assemble or link.\n");
+    will_return(__wrap_fprintf, 71);
+
+    expect_any(__wrap_fprintf, _stream);
+    expect_string(__wrap_fprintf, _format, "  --trace           Display detailed trace information of compiler execution.\n");
+    will_return(__wrap_fprintf, 78);
+
+    /*  flush stdout buffers prior to redirect it to a file */
+    //    fflush(stdout);
+
     /*  redirect stdout to a file and call compiler() function */
+    /*
     int originalStdout = dup(STDOUT_FILENO);
     char redirectStdoutFileName[] = "redirectStdout";
     FILE *stdoutFile;
 
     stdoutFile = fopen(redirectStdoutFileName, "w");
     dup2(fileno(stdoutFile), STDOUT_FILENO);
+    */
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    /*
     fclose(stdoutFile);
     dup2(originalStdout, STDOUT_FILENO);
+    */
 
     /*  check the results from redirected file */
+    /*
     char output[1024];
     size_t outputSize;
 
@@ -111,6 +187,7 @@ static void testCase_help()
     assert_string_equal(output, "Usage: compiler [options] file...\n");
 
     remove(redirectStdoutFileName);
+    */
 }
 
 /*
@@ -541,8 +618,7 @@ static void testCase_multipleFileNames()
 int runCompilerTests()
 {
     const struct CMUnitTest testCases[] = {
-        //  TODO: need to figure out how to solve this test case - it only faild when running from ctest !!!
-        /* {"test case 001 - help", testCase_help, NULL, NULL}, */
+        {"test case 001 - help", testCase_help, NULL, NULL},
         {"test case 002 - macro option without macro name", testCase_macroOptionWithoutMacroName, NULL, NULL},
         {"test case 003 - macro option with simple macro definition", testCase_macroOptionWithSimpleMacroDefinition, NULL, NULL},
         {"test case 004 - macro option with empty value macro definition", testCase_macroOptionWithEmptyValueMacroDefinition, NULL, NULL},

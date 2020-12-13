@@ -17,10 +17,10 @@ rm -rf *.c *.i 2> /dev/null
 if [ "${1}" == "detailed" ]
 then
     #   execute all unit tests using ctest in a verbose way
-    ctest --verbose
+    ctest --output-on-failure
 else
     #   execute all unit tests using ctest
-    ctest
+    ctest --quiet
 fi
 
 cd "${CURRENT_DIRECTORY}"

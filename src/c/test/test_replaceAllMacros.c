@@ -19,12 +19,17 @@
     globals
 */
 
-TMacroList macroList;
+static Options testOptions;
+static char optionsMacroName[70][27];
+static char *optionsMacroNameList[70];
+static char optionsMacroValue[70][27];
+static char *optionsMacroValueList[70];
 
-char testMacroName[70][27];
-char *testMacroNameList[70];
-char testMacroValue[70][27];
-char *testMacroValueList[70];
+static TMacroList macroList;
+static char testMacroName[70][27];
+static char *testMacroNameList[70];
+static char testMacroValue[70][27];
+static char *testMacroValueList[70];
 
 /*
     mock for malloc() function
@@ -55,12 +60,19 @@ void *__wrap_realloc(void *_ptr, size_t _size)
 
 static void testCase_initializeMacroList()
 {
-    /*  expected parameters for malloc (for setDefaultOptions call inside this very function) */
-    expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
-    will_return(__wrap_malloc, testMacroNameList);
+    /*  expected parameters for single Options allocation */
+    expect_value(__wrap_malloc, _size, sizeof(Options));
+    will_return(__wrap_malloc, &testOptions);
 
+    /*  expected parameters for Options macro name list allocation */
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
-    will_return(__wrap_malloc, testMacroValueList);
+    will_return(__wrap_malloc, optionsMacroNameList);
+
+    /*  expected parameters for Options macro value list allocation */
+    expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
+    will_return(__wrap_malloc, optionsMacroValueList);
+
+    assert_ptr_equal(getOptions(), &testOptions);
 
     /*  expected parameters for macro name list allocation */
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
@@ -69,12 +81,6 @@ static void testCase_initializeMacroList()
     /*  expected parameters for macro value list allocation */
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
     will_return(__wrap_malloc, testMacroValueList);
-
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
 
     assert_int_equal(initializeMacroList(&macroList), 0);
 }
