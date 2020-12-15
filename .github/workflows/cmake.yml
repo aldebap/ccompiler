@@ -34,19 +34,16 @@ jobs:
     #  run: |
     #    clib install cmocka
 
-    - name: Install CMocka library
+    - name: Install splint code validation tool
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get install libcmocka-dev
+        sudo apt-get install splint
 
-    #- name: Build and install CMocka from source
-    #  shell: bash
-    #  run: |
-    #    git clone https://git.cryptomilk.org/projects/cmocka.git  /tmp/cmocka
-    #    cd /tmp/cmocka
-    #    make
-    #    sudo make install
+    - name: Install CMocka library
+      shell: bash
+      run: |
+        sudo apt-get install libcmocka-dev
 
     - name: Create build environment
       shell: bash
@@ -59,12 +56,19 @@ jobs:
         cd ${HOME_PATH}/${BUILD_PATH}
         cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ${HOME_PATH}
 
+    - name: Validate all source code with splint
+      shell: bash
+      run: |
+        cd ${HOME_PATH}/${SOURCE_PATH}
+        echo >>>>> Validating all source code with splint
+        cd ${HOME_PATH}/${TEST_PATH}
+        echo >>>>> Validating all test code with splint
+
     - name: Build target from source code
       shell: bash
       run: |
         cd ${HOME_PATH}/${BUILD_PATH}
         cmake --build .
-
     #    cmake -DSOURCE_DIRECTORY="${HOME_PATH}/${SOURCE_PATH}" -DTEST_DIRECTORY="${HOME_PATH}/${TEST_PATH}" --build . --config ${BUILD_TYPE}
 
     - name: Execute all unit tests using CTest
@@ -73,8 +77,4 @@ jobs:
         cd ${HOME_PATH}/${BUILD_PATH}
         export CMOCKA_MESSAGE_OUTPUT=STDOUT
         ctest
-
-    #  working-directory: $BUILD_PATH
-      # Execute tests defined by the CMake configuration.  
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
     #  run: ctest -C $BUILD_TYPE
