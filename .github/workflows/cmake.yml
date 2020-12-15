@@ -60,9 +60,9 @@ jobs:
       shell: bash
       run: |
         cd ${HOME_PATH}/${SOURCE_PATH}
-        echo >>>>> Validating all source code with splint
+        echo ">>>>> Validating all source code with splint"
         cd ${HOME_PATH}/${TEST_PATH}
-        echo >>>>> Validating all test code with splint
+        echo ">>>>> Validating all test code with splint"
 
     - name: Build target from source code
       shell: bash
