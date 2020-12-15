@@ -85,9 +85,15 @@ int initializePreProcessor()
     if (0 != result)
         return -1;
 
+    /*  initialize macro list */
     result = initializeMacroList(&preProc.macroList);
     if (0 != result)
         return -2;
+
+    /*  copy all macros from Options to preprocessor list */
+    result = copyMacroList(&preProc.macroList, &getOptions()->preprocessor.macroList);
+    if (0 != result)
+        return -3;
 
     return 0;
 }

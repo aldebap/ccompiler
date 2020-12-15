@@ -42,6 +42,18 @@ int __wrap_initializeMacroList(TMacroList *_macroList)
 }
 
 /*
+    mock for copyMacroList() function
+*/
+
+int __wrap_copyMacroList(TMacroList *_macroListTarget, TMacroList *_macroListSource)
+{
+    check_expected(_macroListTarget);
+    check_expected(_macroListSource);
+
+    return (int)mock();
+}
+
+/*
     test case 001 - initialize the preprocessor with success
 */
 
@@ -105,17 +117,16 @@ static void testCase_success()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, 0);
 
-    /*  expected parameters for macro name list allocation */
+    /*  expected parameters for macro list initialization */
     expect_any(__wrap_initializeMacroList, _macroList);
     will_return(__wrap_initializeMacroList, 0);
 
-    /*  set the test options */
-    Options testOptions;
+    /*  expected parameters for copy macro list */
+    expect_any(__wrap_copyMacroList, _macroListTarget);
+    expect_any(__wrap_copyMacroList, _macroListSource);
+    will_return(__wrap_copyMacroList, 0);
 
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(&testOptions), 0);
+    assert_int_equal(initializePreProcessor(), 0);
 }
 
 /*
@@ -124,23 +135,13 @@ static void testCase_success()
 
 static void testCase_failInFirstRegex()
 {
-    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
-    expect_any(__wrap_initializeMacroList, _macroList);
-    will_return(__wrap_initializeMacroList, 0);
-
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, REG_BADPAT);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(&testOptions), -1);
+    assert_int_equal(initializePreProcessor(), -1);
 }
 
 /*
@@ -149,10 +150,6 @@ static void testCase_failInFirstRegex()
 
 static void testCase_failInSecondRegex()
 {
-    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
-    expect_any(__wrap_initializeMacroList, _macroList);
-    will_return(__wrap_initializeMacroList, 0);
-
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -165,13 +162,7 @@ static void testCase_failInSecondRegex()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, REG_BADPAT);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(&testOptions), -1);
+    assert_int_equal(initializePreProcessor(), -1);
 }
 
 /*
@@ -180,10 +171,6 @@ static void testCase_failInSecondRegex()
 
 static void testCase_failInThirdRegex()
 {
-    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
-    expect_any(__wrap_initializeMacroList, _macroList);
-    will_return(__wrap_initializeMacroList, 0);
-
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -202,13 +189,7 @@ static void testCase_failInThirdRegex()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, REG_BADPAT);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(&testOptions), -1);
+    assert_int_equal(initializePreProcessor(), -1);
 }
 
 /*
@@ -217,10 +198,6 @@ static void testCase_failInThirdRegex()
 
 static void testCase_failInFourthRegex()
 {
-    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
-    expect_any(__wrap_initializeMacroList, _macroList);
-    will_return(__wrap_initializeMacroList, 0);
-
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -245,13 +222,7 @@ static void testCase_failInFourthRegex()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, REG_BADPAT);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(&testOptions), -1);
+    assert_int_equal(initializePreProcessor(), -1);
 }
 
 /*
@@ -260,10 +231,6 @@ static void testCase_failInFourthRegex()
 
 static void testCase_failInFifthRegex()
 {
-    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
-    expect_any(__wrap_initializeMacroList, _macroList);
-    will_return(__wrap_initializeMacroList, 0);
-
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -294,13 +261,7 @@ static void testCase_failInFifthRegex()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, REG_BADPAT);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(&testOptions), -1);
+    assert_int_equal(initializePreProcessor(), -1);
 }
 
 /*
@@ -309,10 +270,6 @@ static void testCase_failInFifthRegex()
 
 static void testCase_failInSixthRegex()
 {
-    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
-    expect_any(__wrap_initializeMacroList, _macroList);
-    will_return(__wrap_initializeMacroList, 0);
-
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -349,13 +306,7 @@ static void testCase_failInSixthRegex()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, REG_BADPAT);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(&testOptions), -1);
+    assert_int_equal(initializePreProcessor(), -1);
 }
 
 /*
@@ -364,10 +315,6 @@ static void testCase_failInSixthRegex()
 
 static void testCase_failInSeventhRegex()
 {
-    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
-    expect_any(__wrap_initializeMacroList, _macroList);
-    will_return(__wrap_initializeMacroList, 0);
-
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -410,13 +357,7 @@ static void testCase_failInSeventhRegex()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, REG_BADPAT);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(&testOptions), -1);
+    assert_int_equal(initializePreProcessor(), -1);
 }
 
 /*
@@ -425,10 +366,6 @@ static void testCase_failInSeventhRegex()
 
 static void testCase_failInEighthRegex()
 {
-    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
-    expect_any(__wrap_initializeMacroList, _macroList);
-    will_return(__wrap_initializeMacroList, 0);
-
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -477,13 +414,7 @@ static void testCase_failInEighthRegex()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, REG_BADPAT);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(&testOptions), -1);
+    assert_int_equal(initializePreProcessor(), -1);
 }
 
 /*
@@ -492,10 +423,6 @@ static void testCase_failInEighthRegex()
 
 static void testCase_failInNinethRegex()
 {
-    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
-    expect_any(__wrap_initializeMacroList, _macroList);
-    will_return(__wrap_initializeMacroList, 0);
-
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -550,13 +477,7 @@ static void testCase_failInNinethRegex()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, REG_BADPAT);
 
-    /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(&testOptions), -1);
+    assert_int_equal(initializePreProcessor(), -1);
 }
 
 /*
@@ -565,10 +486,6 @@ static void testCase_failInNinethRegex()
 
 static void testCase_failInMacroListInitialization()
 {
-    /*  expected parameters for macro name list allocation (for setDefaultOptions call inside this very function) */
-    expect_any(__wrap_initializeMacroList, _macroList);
-    will_return(__wrap_initializeMacroList, 0);
-
     /*  expected parameters for comment begin */
     expect_any(__wrap_regcomp, _regex);
     expect_string(__wrap_regcomp, _pattern, "(/[*])$");
@@ -627,13 +544,79 @@ static void testCase_failInMacroListInitialization()
     expect_any(__wrap_initializeMacroList, _macroList);
     will_return(__wrap_initializeMacroList, -1);
 
-    /*  set the test options */
-    Options testOptions;
+    assert_int_equal(initializePreProcessor(), -2);
+}
 
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
+/*
+    test case 012 - initialize the preprocessor with fail in the copy macro list
+*/
 
-    assert_int_equal(initializePreProcessor(&testOptions), -2);
+static void testCase_failInCopyMacroList()
+{
+    /*  expected parameters for comment begin */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "(/[*])$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for comment end */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "([*]/)$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for continue next line indicator */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "[\\][ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for simple macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for valued macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]+([^ ^\t].*[^ ^\t])[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for valued macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*ifdef[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for valued macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*ifndef[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for valued macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*else[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for valued macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*endif[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for macro name list allocation */
+    expect_any(__wrap_initializeMacroList, _macroList);
+    will_return(__wrap_initializeMacroList, 0);
+
+    /*  expected parameters for copy macro list */
+    expect_any(__wrap_copyMacroList, _macroListTarget);
+    expect_any(__wrap_copyMacroList, _macroListSource);
+    will_return(__wrap_copyMacroList, -1);
+
+    assert_int_equal(initializePreProcessor(), -3);
 }
 
 /*
@@ -654,6 +637,7 @@ int runInitializePreProcessorTests()
         {"test case 009 - initialize the preprocessor with fail in the eighth regex", testCase_failInEighthRegex, NULL, NULL},
         {"test case 010 - initialize the preprocessor with fail in the nineth regex", testCase_failInNinethRegex, NULL, NULL},
         {"test case 011 - initialize the preprocessor with fail in the macroList initialization", testCase_failInMacroListInitialization, NULL, NULL},
+        {"test case 012 - initialize the preprocessor with fail in the copy macro list", testCase_failInCopyMacroList, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("initializePreProcessor.c tests", testCases, NULL, NULL);
