@@ -1069,7 +1069,7 @@ static void testCase_elseOutsideConditionalBlock()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), -1);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), -2);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -1101,7 +1101,7 @@ static void testCase_endifOutsideConditionalBlock()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), -1);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), -4);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -1155,6 +1155,10 @@ static void testCase_correctlyParseCRLFLineDelimitedFile()
     remove(sourceFileName);
     remove(preProcessorFileName);
 }
+
+//  TODO: add test cases for multiple elses for a same #ifdef / #ifndef
+//  TODO: add test cases for nested #ifdef / #ifndef
+//  TODO: add test cases for nested #ifdef / #ifndef beyond limit
 
 /*
     entry function - run all test cases
