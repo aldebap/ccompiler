@@ -11,6 +11,7 @@
 
 #include "limits.h"
 #include "options.h"
+#include "preProcessor.h"
 #include "macro.h"
 
 /*
@@ -188,7 +189,12 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
 
                     result = addMacro(&preProc.macroList, macro, NULL);
                     if (0 != result)
-                        return result;
+                    {
+                        if (getOptions()->general.trace)
+                            fprintf(stdout, "[trace] error attempting to add macro to list: %d\n", result);
+
+                        return PREPROC_INTERNAL_ERROR_ADDING_MACRO;
+                    }
 
                     i = 0;
                     continue;
@@ -209,7 +215,12 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
 
                     result = addMacro(&preProc.macroList, macro, value);
                     if (0 != result)
-                        return result;
+                    {
+                        if (getOptions()->general.trace)
+                            fprintf(stdout, "[trace] error attempting to add macro to list: %d\n", result);
+
+                        return PREPROC_INTERNAL_ERROR_ADDING_MACRO;
+                    }
 
                     i = 0;
                     continue;
@@ -221,7 +232,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (MAX_NESTED_MACRO_CONDITIONALS <= preProc.conditionalIndex)
                     {
                         fprintf(stderr, "preprocessor: too many conditional blocks\n");
-                        return -1;
+                        return PREPROC_CONDITIONAL_BLOCKS_LIMIT_EXCEEDED;
                     }
 
                     preProc.conditionalIndex++;
@@ -257,7 +268,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (MAX_NESTED_MACRO_CONDITIONALS <= preProc.conditionalIndex)
                     {
                         fprintf(stderr, "preprocessor: too many conditional blocks\n");
-                        return -1;
+                        return PREPROC_CONDITIONAL_BLOCKS_LIMIT_EXCEEDED;
                     }
 
                     preProc.conditionalIndex++;
@@ -293,14 +304,14 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (0 == preProc.conditionalIndex)
                     {
                         fprintf(stderr, "preprocessor: #else outside conditional block\n");
-                        return -2;
+                        return PREPROC_ELSE_OUTSIDE_CONDITIONAL_BLOCK;
                     }
 
                     //  TODO: need to save a state indicating that the block have an else, to avoid multiple elses to the same if
                     if (ELSE_FOUND == preProc.conditional[preProc.conditionalIndex - 1].elseFound)
                     {
                         fprintf(stderr, "preprocessor: only one else allowed for a conditional block\n");
-                        return -3;
+                        return PREPROC_MORE_THAN_ONE_ELSE_FOR_CONDITIONAL_BLOCK;
                     }
 
                     if (TRUE_CONDITIONAL_BLOCK == preProc.conditional[preProc.conditionalIndex - 1].state)
@@ -323,7 +334,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (0 == preProc.conditionalIndex)
                     {
                         fprintf(stderr, "preprocessor: #endif outside conditional block\n");
-                        return -4;
+                        return PREPROC_ENDIF_OUTSIDE_CONDITIONAL_BLOCK;
                     }
 
                     preProc.conditionalIndex--;

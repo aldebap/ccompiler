@@ -565,6 +565,8 @@ static void testCase_simpleMacroDefinitionSpaceAfterPound()
     remove(preProcessorFileName);
 }
 
+//  TODO: add test scenario for addMacro fail
+
 /*
     test case 012 - valued macro definition (begin of line)
 */
@@ -1069,7 +1071,7 @@ static void testCase_elseOutsideConditionalBlock()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), -2);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_ELSE_OUTSIDE_CONDITIONAL_BLOCK);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
@@ -1101,7 +1103,7 @@ static void testCase_endifOutsideConditionalBlock()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), -4);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_ENDIF_OUTSIDE_CONDITIONAL_BLOCK);
 
     fclose(sourceFile);
     fclose(preProcessorFile);
