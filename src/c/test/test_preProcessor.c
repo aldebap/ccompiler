@@ -565,10 +565,46 @@ static void testCase_simpleMacroDefinitionSpaceAfterPound()
     remove(preProcessorFileName);
 }
 
-//  TODO: add test scenario for addMacro fail
+/*
+    test case 012 - simple macro definition with fail adding macro to list
+*/
+
+static void testCase_failAddingMacroToList()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __SIMPLE_MACRO_ONE_H\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__SIMPLE_MACRO_ONE_H");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, -1);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_INTERNAL_ERROR_ADDING_MACRO);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
 
 /*
-    test case 012 - valued macro definition (begin of line)
+    test case 013 - valued macro definition (begin of line)
 */
 
 static void testCase_valuedMacroDefinitionBeginOfLine()
@@ -606,7 +642,7 @@ static void testCase_valuedMacroDefinitionBeginOfLine()
 }
 
 /*
-    test case 013 - valued macro definition with spaces in the value
+    test case 014 - valued macro definition with spaces in the value
 */
 
 static void testCase_valuedMacroDefinitionSpacesInValue()
@@ -644,7 +680,7 @@ static void testCase_valuedMacroDefinitionSpacesInValue()
 }
 
 /*
-    test case 014 - macro definition whose value continue in the next line
+    test case 015 - macro definition whose value continue in the next line
 */
 
 static void testCase_valuedMacroDefinitionInMultipleLines()
@@ -683,7 +719,7 @@ static void testCase_valuedMacroDefinitionInMultipleLines()
 }
 
 /*
-    test case 015 - crazy GNU multiple lines comment and macro definition example
+    test case 016 - crazy GNU multiple lines comment and macro definition example
 */
 
 static void testCase_crazyMultipleLinesCommentAndMacro()
@@ -725,7 +761,7 @@ static void testCase_crazyMultipleLinesCommentAndMacro()
 }
 
 /*
-    test case 016 - ifdef on existing macro
+    test case 017 - ifdef on existing macro
 */
 
 static void testCase_ifdefOnExistingMacro()
@@ -780,7 +816,7 @@ static void testCase_ifdefOnExistingMacro()
 }
 
 /*
-    test case 017 - ifdef on non existing macro
+    test case 018 - ifdef on non existing macro
 */
 
 static void testCase_ifdefOnNonExistingMacro()
@@ -829,7 +865,7 @@ static void testCase_ifdefOnNonExistingMacro()
 }
 
 /*
-    test case 018 - ifndef on not existing macro
+    test case 019 - ifndef on not existing macro
 */
 
 static void testCase_ifndefOnNotExistingMacro()
@@ -884,7 +920,7 @@ static void testCase_ifndefOnNotExistingMacro()
 }
 
 /*
-    test case 019 - ifndef on existing macro
+    test case 020 - ifndef on existing macro
 */
 
 static void testCase_ifndefOnExistingMacro()
@@ -933,7 +969,7 @@ static void testCase_ifndefOnExistingMacro()
 }
 
 /*
-    test case 020 - else on #ifdef conditional block
+    test case 021 - else on #ifdef conditional block
 */
 
 static void testCase_elseOnIfdefConditionalBlock()
@@ -991,7 +1027,7 @@ static void testCase_elseOnIfdefConditionalBlock()
 }
 
 /*
-    test case 021 - else on #ifndef conditional block
+    test case 022 - else on #ifndef conditional block
 */
 
 static void testCase_elseOnIfndefConditionalBlock()
@@ -1049,7 +1085,7 @@ static void testCase_elseOnIfndefConditionalBlock()
 }
 
 /*
-    test case 022 - else ouside conditional block
+    test case 023 - else ouside conditional block
 */
 
 static void testCase_elseOutsideConditionalBlock()
@@ -1059,7 +1095,7 @@ static void testCase_elseOutsideConditionalBlock()
     FILE *sourceFile;
 
     sourceFile = fopen(sourceFileName, "w");
-    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "/* #else outside a conditional block */\n");
     fprintf(sourceFile, "\n");
     fprintf(sourceFile, "#else /* #ifdef __SOURCE_CODE_H */\n");
     fclose(sourceFile);
@@ -1081,7 +1117,7 @@ static void testCase_elseOutsideConditionalBlock()
 }
 
 /*
-    test case 023 - endif ouside conditional block
+    test case 024 - endif ouside conditional block
 */
 
 static void testCase_endifOutsideConditionalBlock()
@@ -1091,7 +1127,7 @@ static void testCase_endifOutsideConditionalBlock()
     FILE *sourceFile;
 
     sourceFile = fopen(sourceFileName, "w");
-    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "/* #endif outside a conditional block */\n");
     fprintf(sourceFile, "\n");
     fprintf(sourceFile, "#endif /* #ifdef __SOURCE_CODE_H */\n");
     fclose(sourceFile);
@@ -1113,7 +1149,54 @@ static void testCase_endifOutsideConditionalBlock()
 }
 
 /*
-    test case 024 - correctly parse CR + LF line delimited file
+    test case 025 - missing endif for conditional block
+*/
+
+static void testCase_missingEndifForConditionalBlock()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* missing #endif for conditional block */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_MISSING_ENDIF_FOR_CONDITIONAL_BLOCK);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 026 - correctly parse CR + LF line delimited file
 */
 
 static void testCase_correctlyParseCRLFLineDelimitedFile()
@@ -1180,19 +1263,22 @@ int runPreProcessorTests()
         {"test case 009 - simple macro definition (middle of line)", testCase_simpleMacroDefinitionMiddleOfLine, NULL, NULL},
         {"test case 010 - simple macro definition (after tabs and spaces)", testCase_simpleMacroDefinitionAfterTabsAndSpaces, NULL, NULL},
         {"test case 011 - simple macro definition (space after pound)", testCase_simpleMacroDefinitionSpaceAfterPound, NULL, NULL},
-        {"test case 012 - valued macro definition (begin of line)", testCase_valuedMacroDefinitionBeginOfLine, NULL, NULL},
-        {"test case 013 - valued macro definition with spaces in the value", testCase_valuedMacroDefinitionSpacesInValue, NULL, NULL},
-        {"test case 014 - macro definition whose value continue in the next line", testCase_valuedMacroDefinitionInMultipleLines, NULL, NULL},
-        {"test case 015 - crazy GNU multiple lines comment and macro definition example", testCase_crazyMultipleLinesCommentAndMacro, NULL, NULL},
-        {"test case 016 - ifdef on existing macro", testCase_ifdefOnExistingMacro, NULL, NULL},
-        {"test case 017 - ifdef on non existing macro", testCase_ifdefOnNonExistingMacro, NULL, NULL},
-        {"test case 018 - ifndef on not existing macro", testCase_ifndefOnNotExistingMacro, NULL, NULL},
-        {"test case 019 - ifndef on existing macro", testCase_ifndefOnExistingMacro, NULL, NULL},
-        {"test case 020 - else on #ifdef conditional block", testCase_elseOnIfdefConditionalBlock, NULL, NULL},
-        {"test case 021 - else on #ifndef conditional block", testCase_elseOnIfndefConditionalBlock, NULL, NULL},
-        {"test case 022 - else ouside conditional block", testCase_elseOutsideConditionalBlock, NULL, NULL},
-        {"test case 023 - endif ouside conditional block", testCase_endifOutsideConditionalBlock, NULL, NULL},
-        {"test case 024 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
+        {"test case 012 - simple macro definition with fail adding macro to list", testCase_failAddingMacroToList, NULL, NULL},
+        {"test case 013 - valued macro definition (begin of line)", testCase_valuedMacroDefinitionBeginOfLine, NULL, NULL},
+        {"test case 014 - valued macro definition with spaces in the value", testCase_valuedMacroDefinitionSpacesInValue, NULL, NULL},
+        {"test case 015 - macro definition whose value continue in the next line", testCase_valuedMacroDefinitionInMultipleLines, NULL, NULL},
+        {"test case 016 - crazy GNU multiple lines comment and macro definition example", testCase_crazyMultipleLinesCommentAndMacro, NULL, NULL},
+        {"test case 017 - ifdef on existing macro", testCase_ifdefOnExistingMacro, NULL, NULL},
+        {"test case 018 - ifdef on non existing macro", testCase_ifdefOnNonExistingMacro, NULL, NULL},
+        {"test case 019 - ifndef on not existing macro", testCase_ifndefOnNotExistingMacro, NULL, NULL},
+        {"test case 020 - ifndef on existing macro", testCase_ifndefOnExistingMacro, NULL, NULL},
+        {"test case 021 - else on #ifdef conditional block", testCase_elseOnIfdefConditionalBlock, NULL, NULL},
+        {"test case 022 - else on #ifndef conditional block", testCase_elseOnIfndefConditionalBlock, NULL, NULL},
+        {"test case 023 - else ouside conditional block", testCase_elseOutsideConditionalBlock, NULL, NULL},
+        {"test case 024 - endif ouside conditional block", testCase_endifOutsideConditionalBlock, NULL, NULL},
+        //TODO: to enable this test, preproc instance needs to be initialized and finalided for every single test scenario
+        //{"test case 025 - missing endif for conditional block", testCase_missingEndifForConditionalBlock, NULL, NULL},
+        {"test case 026 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
     };
 
     /*  set the test options */

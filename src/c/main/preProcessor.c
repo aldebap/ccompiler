@@ -375,5 +375,12 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
         }
     }
 
+    /*  check if all conditional blocks were closed */
+    if (0 < preProc.conditionalIndex)
+    {
+        fprintf(stderr, "preprocessor: missing #endif for conditional block\n");
+        return PREPROC_MISSING_ENDIF_FOR_CONDITIONAL_BLOCK;
+    }
+
     return 0;
 }
