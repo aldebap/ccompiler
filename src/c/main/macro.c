@@ -40,6 +40,26 @@ int initializeMacroList(TMacroList *_macroList)
 }
 
 /*
+    destroy a macro list
+*/
+
+void destroyMacroList(TMacroList *_macroList)
+{
+    /*  release the memory for every macro and value in the list */
+    int i = 0;
+
+    for (; i < _macroList->elements; i++)
+    {
+        free(_macroList->name[i]);
+        free(_macroList->value[i]);
+    }
+
+    /*  release the memory for macro and value lists */
+    free(_macroList->name);
+    free(_macroList->value);
+}
+
+/*
     copy macro list
 */
 

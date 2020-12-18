@@ -64,6 +64,16 @@ target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
 add_test(${TEST_NAME} ${TEST_NAME})
 
+#   destroy macroList unit tests
+set(TEST_NAME "test_destroyMacroList")
+set(SOURCE_LIST ../main/macro.c ../main/options.c)
+set(TEST_FLAGS "-Wl,--wrap,malloc -Wl,--wrap,free")
+
+add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
+target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
+target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
+
 #   copyMacroList unit tests
 set(TEST_NAME "test_copyMacroList")
 set(SOURCE_LIST ../main/macro.c ../main/options.c)

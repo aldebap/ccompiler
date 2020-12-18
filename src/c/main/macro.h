@@ -25,6 +25,7 @@ typedef struct
 */
 
 int initializeMacroList(TMacroList *_macroList);
+void destroyMacroList(TMacroList *_macroList);
 int copyMacroList(TMacroList *_macroListTarget, TMacroList *_macroListSource);
 int addMacro(TMacroList *_macroList, char *_macro, char *_value);
 int getMacro(TMacroList *_macroList, char *_macro, char **_value);
