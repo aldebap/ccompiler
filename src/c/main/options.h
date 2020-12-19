@@ -45,7 +45,8 @@ typedef struct Options
     prototypes
 */
 
+int initializeOptions(Options *_options);
+void destroyOptions(Options *_options);
 Options *getOptions();
-void setDefaultOptions(Options *_options);
 
 #endif /* !defined( __OPTIONS_H ) */

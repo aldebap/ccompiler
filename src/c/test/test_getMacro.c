@@ -27,10 +27,7 @@ TMacroList macroList;
 static void testCase_initializeMacroList()
 {
     /*  set the test options */
-    Options testOptions;
-
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
+    getOptions()->general.trace = 1;
 
     assert_int_equal(initializeMacroList(&macroList), 0);
 }

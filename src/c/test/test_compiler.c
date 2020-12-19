@@ -131,7 +131,7 @@ static void testCase_macroOptionWithoutMacroName()
     /*  set the expected values for the wrap lexicalParser() function */
     Options testOptions;
 
-    setDefaultOptions(&testOptions);
+    initializeOptions(&testOptions);
 
     /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[2]);

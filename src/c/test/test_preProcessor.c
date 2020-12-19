@@ -1282,12 +1282,9 @@ int runPreProcessorTests()
     };
 
     /*  set the test options */
-    Options testOptions;
+    getOptions()->general.trace = 1;
 
-    setDefaultOptions(&testOptions);
-    testOptions.general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(&testOptions), 0);
+    assert_int_equal(initializePreProcessor(), 0);
 
     return cmocka_run_group_tests_name("preProcessor.c tests", testCases, NULL, NULL);
 }
