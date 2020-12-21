@@ -168,7 +168,6 @@ int compileSourceFile(char *_fileName)
 
     sourceFile = fopen(_fileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
-    initializePreProcessor();
     preProcessor(sourceFile, preProcessorFile);
     fclose(sourceFile);
     fclose(preProcessorFile);

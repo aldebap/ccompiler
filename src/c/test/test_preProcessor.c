@@ -1276,15 +1276,12 @@ int runPreProcessorTests()
         {"test case 022 - else on #ifndef conditional block", testCase_elseOnIfndefConditionalBlock, NULL, NULL},
         {"test case 023 - else ouside conditional block", testCase_elseOutsideConditionalBlock, NULL, NULL},
         {"test case 024 - endif ouside conditional block", testCase_endifOutsideConditionalBlock, NULL, NULL},
-        //TODO: to enable this test, preproc instance needs to be initialized and finalided for every single test scenario
-        //{"test case 025 - missing endif for conditional block", testCase_missingEndifForConditionalBlock, NULL, NULL},
+        {"test case 025 - missing endif for conditional block", testCase_missingEndifForConditionalBlock, NULL, NULL},
         {"test case 026 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
     };
 
     /*  set the test options */
     getOptions()->general.trace = 1;
-
-    assert_int_equal(initializePreProcessor(), 0);
 
     return cmocka_run_group_tests_name("preProcessor.c tests", testCases, NULL, NULL);
 }

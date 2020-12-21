@@ -30,15 +30,6 @@ char preProcessorFileName[MAXPATHLEN];
 int compileSourceFile(char *_fileName);
 
 /*
-    wrap initialize preprocessor function
-*/
-
-int __wrap_initializePreProcessor()
-{
-    return (int)mock();
-}
-
-/*
     wrap preprocessor function
 */
 
@@ -77,9 +68,6 @@ static void testCase_sourceFileNameDotC()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  set the return value for wrap initializePreProcessor() functions */
-    will_return(__wrap_initializePreProcessor, 0);
-
     /*  set the expected values for the wrap preProcessor and wrap lexicalParser() functions */
     expect_any(__wrap_preProcessor, _fileInput);
     expect_any(__wrap_preProcessor, _fileOutput);
@@ -111,9 +99,6 @@ static void testCase_sourceFileNameWithoutExtention()
     sourceFile = fopen(sourceFileName, "w");
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
-
-    /*  set the return value for wrap initializePreProcessor() functions */
-    will_return(__wrap_initializePreProcessor, 0);
 
     /*  set the expected values for the wrap preProcessor and wrap lexicalParser() functions */
     expect_any(__wrap_preProcessor, _fileInput);

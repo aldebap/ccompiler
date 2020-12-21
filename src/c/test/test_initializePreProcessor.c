@@ -18,6 +18,12 @@
 #include "preProcessor.h"
 
 /*
+    prototypes
+*/
+
+int initializePreProcessor();
+
+/*
     mock for regcomp() function
 */
 

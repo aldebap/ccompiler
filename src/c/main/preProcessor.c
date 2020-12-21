@@ -110,6 +110,27 @@ int initializePreProcessor()
 }
 
 /*
+    destroy the preprocessor
+*/
+
+void destroyPreProcessor()
+{
+    /*  release the memory for every regex for preprocessor syntax */
+    regfree(&preProc.reCommentBegin);
+    regfree(&preProc.reCommentEnd);
+    regfree(&preProc.reContinueNextLine);
+    regfree(&preProc.reSimpleMacroDefinition);
+    regfree(&preProc.reValuedMacroDefinition);
+    regfree(&preProc.reDefinedMacroConditional);
+    regfree(&preProc.reNotDefinedMacroConditional);
+    regfree(&preProc.reElseConditional);
+    regfree(&preProc.reEndConditional);
+
+    /*  destroy macro list */
+    destroyMacroList(&preProc.macroList);
+}
+
+/*
     the "C" preprocessor
 */
 
@@ -120,6 +141,9 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
     unsigned char delimitedComment = 0;
     unsigned int commentStart = 0;
     int inputByte;
+
+    if (0 != initializePreProcessor())
+        return PREPROC_INTERNAL_ERROR_INITIALIZING;
 
     while (EOF != (inputByte = getc(_fileInput)))
     {
@@ -193,6 +217,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         if (getOptions()->general.trace)
                             fprintf(stdout, "[trace] error attempting to add macro to list: %d\n", result);
 
+                        destroyPreProcessor();
                         return PREPROC_INTERNAL_ERROR_ADDING_MACRO;
                     }
 
@@ -219,6 +244,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                         if (getOptions()->general.trace)
                             fprintf(stdout, "[trace] error attempting to add macro to list: %d\n", result);
 
+                        destroyPreProcessor();
                         return PREPROC_INTERNAL_ERROR_ADDING_MACRO;
                     }
 
@@ -232,6 +258,8 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (MAX_NESTED_MACRO_CONDITIONALS <= preProc.conditionalIndex)
                     {
                         fprintf(stderr, "preprocessor: too many conditional blocks\n");
+                        destroyPreProcessor();
+
                         return PREPROC_CONDITIONAL_BLOCKS_LIMIT_EXCEEDED;
                     }
 
@@ -268,6 +296,8 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (MAX_NESTED_MACRO_CONDITIONALS <= preProc.conditionalIndex)
                     {
                         fprintf(stderr, "preprocessor: too many conditional blocks\n");
+                        destroyPreProcessor();
+
                         return PREPROC_CONDITIONAL_BLOCKS_LIMIT_EXCEEDED;
                     }
 
@@ -304,6 +334,8 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (0 == preProc.conditionalIndex)
                     {
                         fprintf(stderr, "preprocessor: #else outside conditional block\n");
+                        destroyPreProcessor();
+
                         return PREPROC_ELSE_OUTSIDE_CONDITIONAL_BLOCK;
                     }
 
@@ -311,6 +343,8 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (ELSE_FOUND == preProc.conditional[preProc.conditionalIndex - 1].elseFound)
                     {
                         fprintf(stderr, "preprocessor: only one else allowed for a conditional block\n");
+                        destroyPreProcessor();
+
                         return PREPROC_MORE_THAN_ONE_ELSE_FOR_CONDITIONAL_BLOCK;
                     }
 
@@ -334,6 +368,8 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     if (0 == preProc.conditionalIndex)
                     {
                         fprintf(stderr, "preprocessor: #endif outside conditional block\n");
+                        destroyPreProcessor();
+
                         return PREPROC_ENDIF_OUTSIDE_CONDITIONAL_BLOCK;
                     }
 
@@ -379,8 +415,13 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
     if (0 < preProc.conditionalIndex)
     {
         fprintf(stderr, "preprocessor: missing #endif for conditional block\n");
+        destroyPreProcessor();
+
         return PREPROC_MISSING_ENDIF_FOR_CONDITIONAL_BLOCK;
     }
+
+    /*  destroy all preprocessor data */
+    destroyPreProcessor();
 
     return 0;
 }
