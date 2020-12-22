@@ -1318,7 +1318,148 @@ static void testCase_missingEndifForConditionalBlock()
 }
 
 /*
-    test case 028 - correctly parse CR + LF line delimited file
+    test case 028 - nested #ifdef into #ifdef conditional block
+*/
+
+static void testCaseNestedIfdefIntoIfdefConditionalBlock()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "#define __NESTED_TEST\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 0;\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST */\n");
+    fprintf(sourceFile, "#else /* #ifdef __SOURCE_TEST_H */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 1;\n");
+    fprintf(sourceFile, "#endif /* #ifdef __SOURCE_TEST_H */\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 029 - nested #ifndef into #ifdef conditional block
+*/
+
+static void testCaseNestedIfndefIntoIfdefConditionalBlock()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifndef __NESTED_TEST\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 0;\n");
+    fprintf(sourceFile, "#endif /* #ifndef __NESTED_TEST */\n");
+    fprintf(sourceFile, "#else /* #ifdef __SOURCE_TEST_H */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 1;\n");
+    fprintf(sourceFile, "#endif /* #ifdef __SOURCE_TEST_H */\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 030 - correctly parse CR + LF line delimited file
 */
 
 static void testCase_correctlyParseCRLFLineDelimitedFile()
@@ -1400,7 +1541,9 @@ int runPreProcessorTests()
         {"test case 025 - else ouside conditional block", testCase_elseOutsideConditionalBlock, NULL, NULL},
         {"test case 026 - endif ouside conditional block", testCase_endifOutsideConditionalBlock, NULL, NULL},
         {"test case 027 - missing endif for conditional block", testCase_missingEndifForConditionalBlock, NULL, NULL},
-        {"test case 028 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
+        {"test case 028 - nested #ifdef into #ifdef conditional block", testCaseNestedIfdefIntoIfdefConditionalBlock, NULL, NULL},
+        {"test case 029 - nested #ifndef into #ifdef conditional block", testCaseNestedIfndefIntoIfdefConditionalBlock, NULL, NULL},
+        {"test case 030 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
     };
 
     /*  set the test options */
