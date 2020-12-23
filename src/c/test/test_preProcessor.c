@@ -1441,6 +1441,83 @@ static void testCaseNestedIfndefIntoIfdefConditionalBlock()
     expect_any(__wrap_getMacro, _macroList);
     expect_string(__wrap_getMacro, _macro, "__NESTED_TEST");
     expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, -1);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 030 - nested #ifdef with else into #ifdef conditional block
+*/
+
+static void testCaseNestedIfdefWithElseIntoIfdefConditionalBlock()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "#define __NESTED_TEST\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 0;\n");
+    fprintf(sourceFile, "#else /* #ifdef __NESTED_TEST */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 1;\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST */\n");
+    fprintf(sourceFile, "#else /* #ifdef __SOURCE_TEST_H */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 2;\n");
+    fprintf(sourceFile, "#endif /* #ifdef __SOURCE_TEST_H */\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST");
+    expect_any(__wrap_getMacro, _value);
     will_return(__wrap_getMacro, 0);
 
     /*  expected parameters for replaceAllMacros */
@@ -1459,7 +1536,486 @@ static void testCaseNestedIfndefIntoIfdefConditionalBlock()
 }
 
 /*
-    test case 030 - correctly parse CR + LF line delimited file
+    test case 031 - nested #ifndef with else into #ifdef conditional block
+*/
+
+static void testCaseNestedIfndefWithElseIntoIfdefConditionalBlock()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "#define __NESTED_TEST\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __SOURCE_TEST_H\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifndef __NESTED_TEST\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 0;\n");
+    fprintf(sourceFile, "#else /* #ifndef __NESTED_TEST */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 1;\n");
+    fprintf(sourceFile, "#endif /* #ifndef __NESTED_TEST */\n");
+    fprintf(sourceFile, "#else /* #ifdef __SOURCE_TEST_H */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 2;\n");
+    fprintf(sourceFile, "#endif /* #ifdef __SOURCE_TEST_H */\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__SOURCE_TEST_H");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__SOURCE_TEST_H");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 1;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 032 - max of nested #ifdef conditional blocks
+*/
+
+static void testCaseMaxNestedConditionalBlocks()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __NESTED_TEST01\n");
+    fprintf(sourceFile, "#define __NESTED_TEST02\n");
+    fprintf(sourceFile, "#define __NESTED_TEST03\n");
+    fprintf(sourceFile, "#define __NESTED_TEST04\n");
+    fprintf(sourceFile, "#define __NESTED_TEST05\n");
+    fprintf(sourceFile, "#define __NESTED_TEST06\n");
+    fprintf(sourceFile, "#define __NESTED_TEST07\n");
+    fprintf(sourceFile, "#define __NESTED_TEST08\n");
+    fprintf(sourceFile, "#define __NESTED_TEST09\n");
+    fprintf(sourceFile, "#define __NESTED_TEST10\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST01\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST02\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST03\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST04\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST05\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST06\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST07\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST08\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST09\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST10\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 0;\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST10 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST09 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST08 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST07 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST06 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST05 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST04 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST03 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST02 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST01 */\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST01");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST02");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST03");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST04");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST05");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST06");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST07");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST08");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST09");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST10");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST01");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST02");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST03");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST04");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST05");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST06");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST07");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST08");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST09");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST10");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
+    expect_string(__wrap_replaceAllMacros, _inputLine, "static int i = 0;\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 033 - excess of nested #ifdef conditional blocks
+*/
+
+static void testCaseExcessNestedConditionalBlocks()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* simple macro definition */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#define __NESTED_TEST01\n");
+    fprintf(sourceFile, "#define __NESTED_TEST02\n");
+    fprintf(sourceFile, "#define __NESTED_TEST03\n");
+    fprintf(sourceFile, "#define __NESTED_TEST04\n");
+    fprintf(sourceFile, "#define __NESTED_TEST05\n");
+    fprintf(sourceFile, "#define __NESTED_TEST06\n");
+    fprintf(sourceFile, "#define __NESTED_TEST07\n");
+    fprintf(sourceFile, "#define __NESTED_TEST08\n");
+    fprintf(sourceFile, "#define __NESTED_TEST09\n");
+    fprintf(sourceFile, "#define __NESTED_TEST10\n");
+    fprintf(sourceFile, "#define __NESTED_TEST11\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST01\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST02\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST03\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST04\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST05\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST06\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST07\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST08\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST09\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST10\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#ifdef __NESTED_TEST11\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "static int i = 0;\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST11 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST10 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST09 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST08 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST07 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST06 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST05 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST04 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST03 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST02 */\n");
+    fprintf(sourceFile, "#endif /* #ifdef __NESTED_TEST01 */\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST01");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST02");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST03");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST04");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST05");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST06");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST07");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST08");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST09");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST10");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for addMacro */
+    expect_any(__wrap_addMacro, _macroList);
+    expect_string(__wrap_addMacro, _macro, "__NESTED_TEST11");
+    expect_value(__wrap_addMacro, _value, NULL);
+    will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST01");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST02");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST03");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST04");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST05");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST06");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST07");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST08");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST09");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    /*  expected parameters for getMacro */
+    expect_any(__wrap_getMacro, _macroList);
+    expect_string(__wrap_getMacro, _macro, "__NESTED_TEST10");
+    expect_any(__wrap_getMacro, _value);
+    will_return(__wrap_getMacro, 0);
+
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_CONDITIONAL_BLOCKS_LIMIT_EXCEEDED);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 034 - correctly parse CR + LF line delimited file
 */
 
 static void testCase_correctlyParseCRLFLineDelimitedFile()
@@ -1504,9 +2060,6 @@ static void testCase_correctlyParseCRLFLineDelimitedFile()
     remove(preProcessorFileName);
 }
 
-//  TODO: add test cases for nested #ifdef / #ifndef
-//  TODO: add test cases for nested #ifdef / #ifndef beyond limit
-
 /*
     entry function - run all test cases
 */
@@ -1543,7 +2096,11 @@ int runPreProcessorTests()
         {"test case 027 - missing endif for conditional block", testCase_missingEndifForConditionalBlock, NULL, NULL},
         {"test case 028 - nested #ifdef into #ifdef conditional block", testCaseNestedIfdefIntoIfdefConditionalBlock, NULL, NULL},
         {"test case 029 - nested #ifndef into #ifdef conditional block", testCaseNestedIfndefIntoIfdefConditionalBlock, NULL, NULL},
-        {"test case 030 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
+        {"test case 030 - nested #ifdef with else into #ifdef conditional block", testCaseNestedIfdefWithElseIntoIfdefConditionalBlock, NULL, NULL},
+        {"test case 031 - nested #ifndef with else into #ifdef conditional block", testCaseNestedIfndefWithElseIntoIfdefConditionalBlock, NULL, NULL},
+        {"test case 032 - max of nested #ifdef conditional blocks", testCaseMaxNestedConditionalBlocks, NULL, NULL},
+        {"test case 033 - excess of nested #ifdef conditional blocks", testCaseExcessNestedConditionalBlocks, NULL, NULL},
+        {"test case 034 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
     };
 
     /*  set the test options */
