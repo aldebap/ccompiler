@@ -35,6 +35,8 @@ int initializeOptions(Options *_options)
 
     _options->general.preprocessOnly = 0;
     _options->general.trace = 0;
+
+    return 0;
 }
 
 /*
