@@ -92,7 +92,7 @@ static void testCase_failInMemoryNameValueAllocation()
 int runInitializeMacroListTests()
 {
     const struct CMUnitTest testCases[] = {
-        {"test case 001 - initialize preprocessor with success", testCase_success, NULL, NULL},
+        {"test case 001 - initialize the macroList with success", testCase_success, NULL, NULL},
         {"test case 002 - initialize the macroList with fail in the memory for macro name list allocation", testCase_failInMemoryNameListAllocation, NULL, NULL},
         {"test case 003 - initialize the macroList with fail in the memory for macro value list allocation", testCase_failInMemoryNameValueAllocation, NULL, NULL},
     };

@@ -68,7 +68,7 @@ static void testCase_failInMemoryPathListAllocation()
 int runInitializePathListTests()
 {
     const struct CMUnitTest testCases[] = {
-        {"test case 001 - initialize preprocessor with success", testCase_success, NULL, NULL},
+        {"test case 001 - initialize the pathList with success", testCase_success, NULL, NULL},
         {"test case 002 - initialize the pathList with fail in the memory for path list allocation", testCase_failInMemoryPathListAllocation, NULL, NULL},
     };
 

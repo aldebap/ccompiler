@@ -632,7 +632,7 @@ static void testCase_failInCopyMacroList()
 int runInitializePreProcessorTests()
 {
     const struct CMUnitTest testCases[] = {
-        {"test case 001 - initialize preprocessor with success", testCase_success, NULL, NULL},
+        {"test case 001 - initialize the preprocessor with success", testCase_success, NULL, NULL},
         {"test case 002 - initialize the preprocessor with fail in the first regex", testCase_failInFirstRegex, NULL, NULL},
         {"test case 003 - initialize the preprocessor with fail in the second regex", testCase_failInSecondRegex, NULL, NULL},
         {"test case 004 - initialize the preprocessor with fail in the third regex", testCase_failInThirdRegex, NULL, NULL},
