@@ -26,6 +26,6 @@ typedef struct
 int initializePathList(TPathList *_pathList);
 void destroyPathList(TPathList *_pathList);
 int addPath(TPathList *_pathList, char *_path);
-int findFile(TPathList *_pathList, char *_fileName, char **_path);
+int findFile(TPathList *_pathList, char *_fileName, char *_path);
 
 #endif /* !defined( __PATH_H ) */

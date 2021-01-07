@@ -165,6 +165,16 @@ target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
 add_test(${TEST_NAME} ${TEST_NAME})
 
+#   find file unit tests
+set(TEST_NAME "test_findFile")
+set(SOURCE_LIST ../main/path.c ../main/macro.c ../main/options.c)
+set(TEST_FLAGS "-Wl,--wrap,malloc")
+
+add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
+target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
+target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
+
 #   escapeSequence unit tests
 set(TEST_NAME "test_escapeSequence")
 set(SOURCE_LIST ../main/escapeSequence.c)

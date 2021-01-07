@@ -4,6 +4,7 @@
     dec-27-2020 by aldebap
 */
 
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -88,7 +89,41 @@ int addPath(TPathList *_pathList, char *_path)
     Find a file in all directories of path list
 */
 
-int findFile(TPathList *_pathList, char *_fileName, char **_path)
+int findFile(TPathList *_pathList, char *_fileName, char *_path)
 {
-    return 0;
+    /*  search for the file in every path in the list */
+    char searchFileName[1024];
+    struct stat searchFileAttributes;
+
+    for (int i = 0; i < _pathList->elements; i++)
+    {
+        /*  set the full path name to the file based on the path being slash terminated (or not) */
+        if ('/' == _pathList->path[i][strlen(_pathList->path[i]) - 1])
+        {
+            sprintf(searchFileName, "%s%s", _pathList->path[i], _fileName);
+            fprintf(stdout, "[debug] slash termindated path: search file name: %s", searchFileName);
+        }
+        else
+        {
+            sprintf(searchFileName, "%s/%s", _pathList->path[i], _fileName);
+            fprintf(stdout, "[debug] not slash termindated path: search file name: %s", searchFileName);
+        }
+
+        /*  check if the full path name exists */
+        if (-1 == stat(searchFileName, &searchFileAttributes))
+        {
+            continue;
+        }
+
+        /*  check if it's a regular file */
+        if (!S_ISREG(searchFileAttributes.st_mode))
+        {
+            continue;
+        }
+
+        strcpy(_path, searchFileName);
+        return 0;
+    }
+
+    return -1;
 }
