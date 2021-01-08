@@ -44,6 +44,8 @@ int __wrap_stat(const char *_file, struct stat *_buf)
     check_expected(_file);
     check_expected(_buf);
 
+    _buf->st_mode = 0;
+
     if (0 == strcmp(_file, "/usr/include/stdio.h"))
     {
         _buf->st_mode = __S_IFREG;
