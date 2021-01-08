@@ -4,11 +4,13 @@
     jan-06-2021 by aldebap
 */
 
+#include <sys/stat.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <cmocka.h>
 
@@ -31,6 +33,28 @@ void *__wrap_malloc(size_t _size)
     check_expected(_size);
 
     return (void *)mock();
+}
+
+/*
+    mock for stat() function
+*/
+
+int __wrap_stat(const char *_file, struct stat *_buf)
+{
+    check_expected(_file);
+    check_expected(_buf);
+
+    if (0 == strcmp(_file, "/usr/include/stdio.h"))
+    {
+        _buf->st_mode = __S_IFREG;
+    }
+
+    if (0 == strcmp(_file, "./headerTest.h"))
+    {
+        _buf->st_mode = __S_IFREG;
+    }
+
+    return (int)mock();
 }
 
 /*
@@ -70,6 +94,11 @@ static void testCase_successfullyAddTwoPaths()
 
 static void testCase_successfullyFindFileInNotShashTerminatedPath()
 {
+    /*  expected parameters for stat() */
+    expect_string(__wrap_stat, _file, "/usr/include/stdio.h");
+    expect_any(__wrap_stat, _buf);
+    will_return(__wrap_stat, 0);
+
     char filePath[30];
 
     assert_int_equal(findFile(&pathList, "stdio.h", filePath), 0);
@@ -99,6 +128,16 @@ static void testCase_successfullyFindFileInShashTerminatedPath()
 
     fclose(headerFile);
 
+    /*  expected parameters for stat() */
+    expect_string(__wrap_stat, _file, "/usr/include/headerTest.h");
+    expect_any(__wrap_stat, _buf);
+    will_return(__wrap_stat, -1);
+
+    /*  expected parameters for stat() */
+    expect_string(__wrap_stat, _file, "./headerTest.h");
+    expect_any(__wrap_stat, _buf);
+    will_return(__wrap_stat, 0);
+
     char filePath[30];
 
     assert_int_equal(findFile(&pathList, headerFileName, filePath), 0);
@@ -110,6 +149,16 @@ static void testCase_successfullyFindFileInShashTerminatedPath()
 
 static void testCase_failSearchingFileNotInPath()
 {
+    /*  expected parameters for stat() */
+    expect_string(__wrap_stat, _file, "/usr/include/acme_xpto.h");
+    expect_any(__wrap_stat, _buf);
+    will_return(__wrap_stat, -1);
+
+    /*  expected parameters for stat() */
+    expect_string(__wrap_stat, _file, "./acme_xpto.h");
+    expect_any(__wrap_stat, _buf);
+    will_return(__wrap_stat, -1);
+
     char filePath[30];
 
     assert_int_equal(findFile(&pathList, "acme_xpto.h", filePath), -1);

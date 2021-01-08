@@ -101,12 +101,10 @@ int findFile(TPathList *_pathList, char *_fileName, char *_path)
         if ('/' == _pathList->path[i][strlen(_pathList->path[i]) - 1])
         {
             sprintf(searchFileName, "%s%s", _pathList->path[i], _fileName);
-            fprintf(stdout, "[debug] slash termindated path: search file name: %s", searchFileName);
         }
         else
         {
             sprintf(searchFileName, "%s/%s", _pathList->path[i], _fileName);
-            fprintf(stdout, "[debug] not slash termindated path: search file name: %s", searchFileName);
         }
 
         /*  check if the full path name exists */

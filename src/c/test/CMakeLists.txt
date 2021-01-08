@@ -168,7 +168,7 @@ add_test(${TEST_NAME} ${TEST_NAME})
 #   find file unit tests
 set(TEST_NAME "test_findFile")
 set(SOURCE_LIST ../main/path.c ../main/macro.c ../main/options.c)
-set(TEST_FLAGS "-Wl,--wrap,malloc")
+set(TEST_FLAGS "-Wl,--wrap,malloc -Wl,--wrap,stat")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
