@@ -29,9 +29,15 @@ int initializeOptions(Options *_options)
     if (0 != result)
         return -1;
 
+    result = initializePathList(&_options->general.includePathList);
+    if (0 != result)
+        return -2;
+
     /*  set default values for general options */
     //  TODO: the include path should be dependent on OS
-    strcpy(_options->general.includePath, "/usr/include");
+    result = addPath(&_options->general.includePathList, "/usr/include");
+    if (0 != result)
+        return -3;
 
     _options->general.preprocessOnly = 0;
     _options->general.trace = 0;
@@ -47,6 +53,7 @@ void destroyOptions(Options *_options)
 {
     /*  destroy all elements */
     destroyMacroList(&_options->preprocessor.macroList);
+    destroyPathList(&_options->general.includePathList);
 
     if (_options == singletonOptionsInstance)
     {

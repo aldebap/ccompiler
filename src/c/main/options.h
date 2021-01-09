@@ -6,6 +6,7 @@
 
 #include "limits.h"
 #include "macro.h"
+#include "path.h"
 
 #if !defined(__OPTIONS_H)
 
@@ -17,7 +18,7 @@
 
 typedef struct GeneralOptions
 {
-    char includePath[MAX_INCLUDE_PATH_SIZE];
+    TPathList includePathList;
     unsigned char preprocessOnly;
     unsigned char trace;
 } GeneralOptions;

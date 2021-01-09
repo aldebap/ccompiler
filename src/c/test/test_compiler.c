@@ -16,27 +16,45 @@
 #include "compiler.h"
 #include "options.h"
 
+//  TODO: test cases should be using this function to check for correct use of Options mathods/values
 /*
     Options value verification function
 */
 
 int checkOptions(Options *_parameter, Options *_checkValue)
 {
-    /*  compare all general attributes */
-    if (0 != strcmp(_parameter->general.includePath, _checkValue->general.includePath))
-        return 1;
+    /*  check if all paths from parameter exists in checkValue */
+    int i = 0;
+
+    for (; i < _parameter->general.includePathList.elements; i++)
+    {
+        int pathFound = 0;
+
+        for (int j = 0; j < _checkValue->general.includePathList.elements; j++)
+        {
+            if (0 == strcmp(_parameter->general.includePathList.path[i], _checkValue->general.includePathList.path[j]))
+            {
+                pathFound = 1;
+                break;
+            }
+        }
+
+        if (0 == pathFound)
+            return -1;
+    }
+
+    /*  compare all other general attributes */
     if (_parameter->general.preprocessOnly != _checkValue->general.preprocessOnly)
         return 2;
     if (_parameter->general.trace != _checkValue->general.trace)
         return 3;
 
     /*  compare all preprocessor attributes */
-    int i = 0;
 
     if (_parameter->preprocessor.macroList.elements != _checkValue->preprocessor.macroList.elements)
         return 4;
 
-    for (; i < _parameter->preprocessor.macroList.elements; i++)
+    for (i = 0; i < _parameter->preprocessor.macroList.elements; i++)
     {
         if (0 != strcmp(_parameter->preprocessor.macroList.name[i], _checkValue->preprocessor.macroList.name[i]))
             return 5;
@@ -287,7 +305,21 @@ static void testCase_includeDirectoryOption()
     will_return(__wrap_compileSourceFile, 0);
 
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
-    assert_string_equal(getOptions()->general.includePath, "/usr/include:./include");
+
+    /*  check if the path from -I option exists in options pathList */
+    int i = 0;
+    int pathFound = 0;
+
+    for (; i < getOptions()->general.includePathList.elements; i++)
+    {
+        if (0 == strcmp(getOptions()->general.includePathList.path[i], argv[2]))
+        {
+            pathFound = 1;
+            break;
+        }
+    }
+
+    assert_int_equal(pathFound, 1);
 
     remove(argv[3]);
 }

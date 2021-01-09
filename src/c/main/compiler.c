@@ -84,8 +84,8 @@ int compiler(int _argc, char *_argv[])
             if (i + 1 < _argc)
             {
                 /*  the following argument is the directory name */
-                strcat(getOptions()->general.includePath, ":");
-                strcat(getOptions()->general.includePath, _argv[++i]);
+                if (0 != addPath(&getOptions()->general.includePathList, _argv[++i]))
+                    fprintf(stderr, "%s: error: fail attempting to add include path\n", _argv[0]);
 
                 continue;
             }

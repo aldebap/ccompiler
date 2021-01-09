@@ -24,6 +24,8 @@ static char optionsMacroName[70][27];
 static char *optionsMacroNameList[70];
 static char optionsMacroValue[70][27];
 static char *optionsMacroValueList[70];
+static char *optionsPathList[20];
+static char *optionsPathName[20][70];
 
 static TMacroList macroList;
 static char testMacroName[70][27];
@@ -68,6 +70,14 @@ static void testCase_initializeMacroList()
     /*  expected parameters for Options macro value list allocation */
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
     will_return(__wrap_malloc, optionsMacroValueList);
+
+    /*  expected parameters for Options path list allocation */
+    expect_value(__wrap_malloc, _size, 20 * sizeof(char *));
+    will_return(__wrap_malloc, optionsPathList);
+
+    /*  expected parameters for Options path list allocation */
+    expect_value(__wrap_malloc, _size, 13 * sizeof(char)); /* 13 == sizeof( "/usr/include" ) */
+    will_return(__wrap_malloc, optionsPathName[0]);
 
     assert_ptr_equal(getOptions(), &testOptions);
 
