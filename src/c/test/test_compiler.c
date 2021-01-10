@@ -84,6 +84,18 @@ int __wrap_addMacro(TMacroList *_macroList, char *_macro, char *_value)
 }
 
 /*
+    mock for addPath() function
+*/
+
+int __wrap_addPath(TPathList *_pathList, char *_path)
+{
+    check_expected(_pathList);
+    check_expected(_path);
+
+    return (int)mock();
+}
+
+/*
     wrap compile source function
 */
 
@@ -146,10 +158,20 @@ static void testCase_macroOptionWithoutMacroName()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
+    /*  expected parameters for addPath (inside initializeOptions())*/
+    expect_any(__wrap_addPath, _pathList);
+    expect_string(__wrap_addPath, _path, "/usr/include");
+    will_return(__wrap_addPath, 0);
+
     /*  set the expected values for the wrap lexicalParser() function */
     Options testOptions;
 
     initializeOptions(&testOptions);
+
+    /*  expected parameters for addPath (inside getOptions())*/
+    expect_any(__wrap_addPath, _pathList);
+    expect_string(__wrap_addPath, _path, "/usr/include");
+    will_return(__wrap_addPath, 0);
 
     /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
@@ -300,6 +322,11 @@ static void testCase_includeDirectoryOption()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
+    /*  expected parameters for addPath */
+    expect_any(__wrap_addPath, _pathList);
+    expect_string(__wrap_addPath, _path, argv[2]);
+    will_return(__wrap_addPath, 0);
+
     /*  expected parameters for compileSourceFile */
     expect_string(__wrap_compileSourceFile, _fileName, argv[3]);
     will_return(__wrap_compileSourceFile, 0);
@@ -307,6 +334,7 @@ static void testCase_includeDirectoryOption()
     assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
 
     /*  check if the path from -I option exists in options pathList */
+    /*
     int i = 0;
     int pathFound = 0;
 
@@ -320,6 +348,7 @@ static void testCase_includeDirectoryOption()
     }
 
     assert_int_equal(pathFound, 1);
+    */
 
     remove(argv[3]);
 }

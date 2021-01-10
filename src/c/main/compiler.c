@@ -6,11 +6,18 @@
 
 #include <sys/stat.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "options.h"
 #include "lexicalParser.h"
 #include "preProcessor.h"
+
+/*
+    constants
+*/
+
+#define INCLUDE_PATH_ENV_VARIABLE "CPATH"
 
 /*
     prototypes
@@ -133,7 +140,20 @@ int compiler(int _argc, char *_argv[])
         return -1;
     }
 
-    /* compile each input files */
+    /*  if the include path variable is set, add it's paths to options */
+    char *includePathEnv;
+
+    includePathEnv = getenv(INCLUDE_PATH_ENV_VARIABLE);
+    if (NULL != includePathEnv)
+    {
+        int result;
+
+        result = addPath(&getOptions()->general.includePathList, includePathEnv);
+        if (0 != result)
+            fprintf(stderr, "%s: error: fail attempting to add include path from env variable\n", _argv[0]);
+    }
+
+    /* compile each input file */
     for (i = 0; i < fileNameListSize; i++)
     {
         int compilationResult = compileSourceFile(fileNameList[i]);
