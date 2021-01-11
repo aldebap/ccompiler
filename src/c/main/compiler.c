@@ -144,7 +144,7 @@ int compiler(int _argc, char *_argv[])
     char *includePathEnv;
 
     includePathEnv = getenv(INCLUDE_PATH_ENV_VARIABLE);
-    if (NULL != includePathEnv)
+    if (NULL != includePathEnv && 0 < strlen(includePathEnv))
     {
         int result;
 

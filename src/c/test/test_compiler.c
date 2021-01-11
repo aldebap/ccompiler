@@ -9,6 +9,7 @@
 #include <setjmp.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <cmocka.h>
@@ -16,7 +17,7 @@
 #include "compiler.h"
 #include "options.h"
 
-//  TODO: test cases should be using this function to check for correct use of Options mathods/values
+//  TODO: test cases should be using this function to check for correct use of Options methods/values
 /*
     Options value verification function
 */
@@ -107,7 +108,7 @@ int __wrap_compileSourceFile(char *_fileName)
 
     fprintf(stderr, "[debug] __wrap_compileSourceFile(%s, executionOptions)\n", _fileName);
 #endif
-    return mock();
+    return (int)mock();
 }
 
 /*
@@ -335,6 +336,7 @@ static void testCase_includeDirectoryOption()
 
     /*  check if the path from -I option exists in options pathList */
     /*
+    TODO: this sort of test should be in integrated tests, not in unitary
     int i = 0;
     int pathFound = 0;
 
@@ -354,7 +356,57 @@ static void testCase_includeDirectoryOption()
 }
 
 /*
-    test case 007 - preprocessor only option
+    test case 007 - fail adding include directory option
+*/
+
+static void testCase_failAddingIncludeDirectoryOption()
+{
+    char *argv[] = {"compiler", "-I", "./include", "sourceFile.c"};
+
+    /*  generate a source file */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[3], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for addPath */
+    expect_any(__wrap_addPath, _pathList);
+    expect_string(__wrap_addPath, _path, argv[2]);
+    will_return(__wrap_addPath, -2);
+
+    /*  expected parameters for compileSourceFile */
+    expect_string(__wrap_compileSourceFile, _fileName, argv[3]);
+    will_return(__wrap_compileSourceFile, 0);
+
+    /*  redirect stderr to a file and call compiler() function */
+    int originalStderr = dup(STDERR_FILENO);
+    char redirectStderrFileName[] = "redirectStderr";
+    FILE *stderrFile;
+
+    stderrFile = fopen(redirectStderrFileName, "w");
+    dup2(fileno(stderrFile), STDERR_FILENO);
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+
+    fclose(stderrFile);
+    dup2(originalStderr, STDERR_FILENO);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    stderrFile = fopen(redirectStderrFileName, "r");
+    fgets(output, sizeof(output), stderrFile);
+    fclose(stderrFile);
+
+    assert_string_equal(output, "compiler: error: fail attempting to add include path\n");
+
+    remove(redirectStderrFileName);
+    remove(argv[3]);
+}
+
+/*
+    test case 008 - preprocessor only option
 */
 
 static void testCase_preprocessorOnlyOption()
@@ -379,7 +431,7 @@ static void testCase_preprocessorOnlyOption()
 }
 
 /*
-    test case 008 - trace on
+    test case 009 - trace on
 */
 
 static void testCase_traceOn()
@@ -404,7 +456,7 @@ static void testCase_traceOn()
 }
 
 /*
-    test case 009 - invalid argument
+    test case 010 - invalid argument
 */
 
 static void testCase_invalidArgument()
@@ -436,7 +488,7 @@ static void testCase_invalidArgument()
 }
 
 /*
-    test case 010 - no file names
+    test case 011 - no file names
 */
 
 static void testCase_noFileNames()
@@ -468,7 +520,7 @@ static void testCase_noFileNames()
 }
 
 /*
-    test case 011 - file not found
+    test case 012 - file not found
 */
 
 static void testCase_fileNotFound()
@@ -500,7 +552,7 @@ static void testCase_fileNotFound()
 }
 
 /*
-    test case 012 - not a regular file
+    test case 013 - not a regular file
 */
 
 static void testCase_notRegularFile()
@@ -532,7 +584,149 @@ static void testCase_notRegularFile()
 }
 
 /*
-    test case 013 - single file name
+    test case 014 - undefined CPATH env variable
+*/
+
+static void testCase_undefinedCPathEnv()
+{
+    char *argv[] = {"compiler", "sourceFile.c"};
+
+    /*  set the include path variable to NULL */
+    char testIncludePathEnv[1024] = "CPATH=";
+    char *includePathEnv;
+
+    includePathEnv = getenv("CPATH");
+    putenv(testIncludePathEnv);
+
+    /*  generate a source file */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[1], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for compileSourceFile */
+    expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
+    will_return(__wrap_compileSourceFile, 0);
+
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+
+    /*  set the include path variable back to it's original value */
+    if (NULL != includePathEnv)
+    {
+        putenv(strcat(testIncludePathEnv, includePathEnv));
+    }
+
+    remove(argv[1]);
+}
+
+/*
+    test case 015 - successfully add CPATH env variable value to include path list
+*/
+
+static void testCase_successfullyAddCPathEnvValue()
+{
+    char *argv[] = {"compiler", "sourceFile.c"};
+
+    /*  set the include path variable */
+    char testIncludePathEnv[1024] = "CPATH=";
+    char *includePathEnv;
+
+    includePathEnv = getenv("CPATH");
+    putenv("CPATH=/usr/include");
+
+    /*  generate a source file */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[1], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for addPath */
+    expect_any(__wrap_addPath, _pathList);
+    expect_string(__wrap_addPath, _path, "/usr/include");
+    will_return(__wrap_addPath, 0);
+
+    /*  expected parameters for compileSourceFile */
+    expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
+    will_return(__wrap_compileSourceFile, 0);
+
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+
+    /*  set the include path variable back to it's original value */
+    if (NULL != includePathEnv)
+    {
+        putenv(strcat(testIncludePathEnv, includePathEnv));
+    }
+
+    remove(argv[1]);
+}
+
+/*
+    test case 016 - fail adding CPATH env variable value to include path list
+*/
+
+static void testCase_failAddingCPathEnvValue()
+{
+    char *argv[] = {"compiler", "sourceFile.c"};
+
+    /*  set the include path variable */
+    char testIncludePathEnv[1024] = "CPATH=";
+    char *includePathEnv;
+
+    includePathEnv = getenv("CPATH");
+    putenv("CPATH=/usr/include");
+
+    /*  generate a source file */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[1], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for addPath */
+    expect_any(__wrap_addPath, _pathList);
+    expect_string(__wrap_addPath, _path, "/usr/include");
+    will_return(__wrap_addPath, -2);
+
+    /*  expected parameters for compileSourceFile */
+    expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
+    will_return(__wrap_compileSourceFile, 0);
+
+    /*  redirect stderr to a file and call compiler() function */
+    int originalStderr = dup(STDERR_FILENO);
+    char redirectStderrFileName[] = "redirectStderr";
+    FILE *stderrFile;
+
+    stderrFile = fopen(redirectStderrFileName, "w");
+    dup2(fileno(stderrFile), STDERR_FILENO);
+    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+
+    fclose(stderrFile);
+    dup2(originalStderr, STDERR_FILENO);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    stderrFile = fopen(redirectStderrFileName, "r");
+    fgets(output, sizeof(output), stderrFile);
+    fclose(stderrFile);
+
+    assert_string_equal(output, "compiler: error: fail attempting to add include path from env variable\n");
+
+    /*  set the include path variable back to it's original value */
+    if (NULL != includePathEnv)
+    {
+        putenv(strcat(testIncludePathEnv, includePathEnv));
+    }
+
+    remove(redirectStderrFileName);
+    remove(argv[1]);
+}
+
+/*
+    test case 017 - single file name
 */
 
 static void testCase_singleFileName()
@@ -556,7 +750,7 @@ static void testCase_singleFileName()
 }
 
 /*
-    test case 014 - multiple file names
+    test case 018 - multiple file names
 */
 
 static void testCase_multipleFileNames()
@@ -609,14 +803,18 @@ int runCompilerTests()
         {"test case 004 - macro option with empty value macro definition", testCase_macroOptionWithEmptyValueMacroDefinition, NULL, NULL},
         {"test case 005 - macro option with valued macro definition", testCase_macroOptionWithValuedMacroDefinition, NULL, NULL},
         {"test case 006 - include directory option", testCase_includeDirectoryOption, NULL, NULL},
-        {"test case 007 - preprocessor only option", testCase_preprocessorOnlyOption, NULL, NULL},
-        {"test case 008 - trace on", testCase_traceOn, NULL, NULL},
-        {"test case 009 - invalid option argument", testCase_invalidArgument, NULL, NULL},
-        {"test case 010 - no file names", testCase_noFileNames, NULL, NULL},
-        {"test case 011 - file not found", testCase_fileNotFound, NULL, NULL},
-        {"test case 012 - not a regular file", testCase_notRegularFile, NULL, NULL},
-        {"test case 013 - single file name", testCase_singleFileName, NULL, NULL},
-        {"test case 014 - multiple file names", testCase_multipleFileNames, NULL, NULL},
+        {"test case 007 - fail adding include directory option", testCase_failAddingIncludeDirectoryOption, NULL, NULL},
+        {"test case 008 - preprocessor only option", testCase_preprocessorOnlyOption, NULL, NULL},
+        {"test case 009 - trace on", testCase_traceOn, NULL, NULL},
+        {"test case 010 - invalid option argument", testCase_invalidArgument, NULL, NULL},
+        {"test case 011 - no file names", testCase_noFileNames, NULL, NULL},
+        {"test case 012 - file not found", testCase_fileNotFound, NULL, NULL},
+        {"test case 013 - not a regular file", testCase_notRegularFile, NULL, NULL},
+        {"test case 014 - undefined CPATH env variable", testCase_undefinedCPathEnv, NULL, NULL},
+        {"test case 015 - successfully add CPATH env variable value to include path list", testCase_successfullyAddCPathEnvValue, NULL, NULL},
+
+        {"test case 017 - single file name", testCase_singleFileName, NULL, NULL},
+        {"test case 018 - multiple file names", testCase_multipleFileNames, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("compiler.c tests", testCases, NULL, NULL);
