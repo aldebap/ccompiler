@@ -140,6 +140,23 @@ static void testCase_successfullyReallocatePathList()
 }
 
 /*
+    test case 007 - successfully add multiple paths separated by colon
+*/
+
+static void testCase_successfullyAddMultiplePaths()
+{
+    /*  expected parameters for path allocation */
+    expect_value(__wrap_malloc, _size, 19 * sizeof(char));
+    will_return(__wrap_malloc, testPath[21]);
+
+    /*  expected parameters for path allocation */
+    expect_value(__wrap_malloc, _size, 25 * sizeof(char));
+    will_return(__wrap_malloc, testPath[22]);
+
+    assert_int_equal(addPath(&pathList, "/usr/local/include:/usr/share/glibc/include"), 0);
+}
+
+/*
     entry function - run all test cases
 */
 
@@ -152,6 +169,7 @@ int runAddPathTests()
         {"test case 004 - successfully add paths to fulfill initial array", testCase_successfullyFulfillPathArray, NULL, NULL},
         {"test case 005 - attempt to add path with fail in the memory for path list reallocation", testCase_failInMemoryPathListReallocation, NULL, NULL},
         {"test case 006 - successfully add a path with path list reallocation ", testCase_successfullyReallocatePathList, NULL, NULL},
+        {"test case 007 - successfully add multiple paths separated by colon", testCase_successfullyAddMultiplePaths, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("addPath.c tests", testCases, NULL, NULL);

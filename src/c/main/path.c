@@ -19,6 +19,9 @@
 #define INITIAL_PATH_LIST_SIZE 20
 #define MACRO_PATH_GROWTH_FACTOR 10
 
+//  TODO: this definition should be OS dependant
+#define PATH_SEPARATOR ':'
+
 /*
     initialize a path list
 */
@@ -60,27 +63,51 @@ void destroyPathList(TPathList *_pathList)
 
 int addPath(TPathList *_pathList, char *_path)
 {
-    /*  enlarge the list if all elements are in use */
-    if (_pathList->elements >= _pathList->size)
+    /*  copy input path to the auxiliary path */
+    char pathBuffer[MAX_INCLUDE_PATH_SIZE];
+    char *pathAux = pathBuffer;
+
+    strcpy(pathAux, _path);
+
+    for (;;)
     {
-        char **pathListName;
+        if ('\0' == *pathAux)
+            break;
 
-        pathListName = (char **)realloc(_pathList->path, (_pathList->size + MACRO_PATH_GROWTH_FACTOR) * sizeof(char *));
-        if (NULL == pathListName)
-            return -1;
+        /*  if there's a path separator, add to the list the path before it */
+        char *endOfPath = strchr(pathAux, PATH_SEPARATOR);
 
-        _pathList->path = pathListName;
-        _pathList->size += MACRO_PATH_GROWTH_FACTOR;
+        if (NULL != endOfPath)
+            *endOfPath = '\0';
+
+        /*  enlarge the list if all elements are in use */
+        if (_pathList->elements >= _pathList->size)
+        {
+            char **pathListName;
+
+            pathListName = (char **)realloc(_pathList->path, (_pathList->size + MACRO_PATH_GROWTH_FACTOR) * sizeof(char *));
+            if (NULL == pathListName)
+                return -1;
+
+            _pathList->path = pathListName;
+            _pathList->size += MACRO_PATH_GROWTH_FACTOR;
+        }
+
+        /*  allocate memory for the path */
+        _pathList->path[_pathList->elements] = (char *)malloc((strlen(pathAux) + 1) * sizeof(char));
+        if (NULL == _pathList->path[_pathList->elements])
+            return -2;
+
+        strcpy(_pathList->path[_pathList->elements], pathAux);
+
+        _pathList->elements++;
+
+        /*  if there's another path, point to it */
+        if (NULL == endOfPath)
+            break;
+
+        pathAux = endOfPath + 1;
     }
-
-    /*  allocate memory for the path */
-    _pathList->path[_pathList->elements] = (char *)malloc((strlen(_path) + 1) * sizeof(char));
-    if (NULL == _pathList->path[_pathList->elements])
-        return -2;
-
-    strcpy(_pathList->path[_pathList->elements], _path);
-
-    _pathList->elements++;
 
     return 0;
 }
