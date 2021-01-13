@@ -29,4 +29,6 @@
 
 #define MAX_NESTED_MACRO_CONDITIONALS 10
 
+#define MAX_INCLUDE_FILENAME_SIZE 1024
+
 #endif /* !defined(__LIMITS_H) */

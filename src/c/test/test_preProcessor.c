@@ -2015,7 +2015,58 @@ static void testCaseExcessNestedConditionalBlocks()
 }
 
 /*
-    test case 034 - correctly parse CR + LF line delimited file
+    test case 034 - successfully include header file
+*/
+
+static void testCase_successfullyIncludeHeaderFile()
+{
+    /*  generate a header file */
+    char headerFileName[] = "sourceTest.h";
+    FILE *headerFile;
+
+    headerFile = fopen(headerFileName, "w");
+    fprintf(headerFile, "/* include header file */\n");
+    fprintf(headerFile, "\n");
+    fprintf(headerFile, "void function(int _parameter);\n");
+    fclose(headerFile);
+
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* source file that include's a header file */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#include \"sourceTest.h\"\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
+    expect_string(__wrap_replaceAllMacros, _inputLine, "void function(int _parameter);\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    assert_int_equal(addPath(&getOptions()->general.includePathList, "./"), 0);
+    //TODO: should mock findFile
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+
+    //  TODO: initialize and destroy the preprocessor should be responsability of the caller, to allow recursion to work
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 035 - correctly parse CR + LF line delimited file
 */
 
 static void testCase_correctlyParseCRLFLineDelimitedFile()
@@ -2100,7 +2151,8 @@ int runPreProcessorTests()
         {"test case 031 - nested #ifndef with else into #ifdef conditional block", testCaseNestedIfndefWithElseIntoIfdefConditionalBlock, NULL, NULL},
         {"test case 032 - max of nested #ifdef conditional blocks", testCaseMaxNestedConditionalBlocks, NULL, NULL},
         {"test case 033 - excess of nested #ifdef conditional blocks", testCaseExcessNestedConditionalBlocks, NULL, NULL},
-        {"test case 034 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
+        {"test case 034 - successfully include header file", testCase_successfullyIncludeHeaderFile, NULL, NULL},
+        {"test case 035 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
     };
 
     /*  set the test options */
