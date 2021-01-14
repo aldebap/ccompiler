@@ -68,7 +68,7 @@ add_test(${TEST_NAME} ${TEST_NAME})
 #   preProcessor unit tests
 set(TEST_NAME "test_preProcessor")
 set(SOURCE_LIST ../main/preProcessor.c ../main/macro.c ../main/path.c ../main/options.c)
-set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,getMacro=__wrap_getMacro -Wl,--defsym,replaceAllMacros=__wrap_replaceAllMacros")
+set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,getMacro=__wrap_getMacro -Wl,--defsym,replaceAllMacros=__wrap_replaceAllMacros -Wl,--defsym,findFile=__wrap_findFile")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)

@@ -185,13 +185,27 @@ int compileSourceFile(char *_fileName)
     /*  preprocessor pass */
     FILE *sourceFile;
     FILE *preProcessorFile;
+    int result;
+
+    result = initializePreProcessor();
+    if (0 != result)
+        return -1;
 
     sourceFile = fopen(_fileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
-    preProcessor(sourceFile, preProcessorFile);
+
+    result = preProcessor(sourceFile, preProcessorFile);
+
     fclose(sourceFile);
     fclose(preProcessorFile);
 
+    /*  destroy all preprocessor data */
+    destroyPreProcessor();
+
+    if (0 != result)
+        return result;
+
+    /*  stop here if preprocessor only option is on */
     if (1 == getOptions()->general.preprocessOnly)
         return 0;
 
@@ -202,4 +216,6 @@ int compileSourceFile(char *_fileName)
 
     /*  remove intermediate files */
     remove(preProcessorFileName);
+
+    return 0;
 }
