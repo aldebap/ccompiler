@@ -2142,7 +2142,6 @@ static void testCase_successfullyIncludeHeaderFile()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(addPath(&getOptions()->general.includePathList, "./"), 0);
-    //TODO: should mock findFile
     assert_int_equal(initializePreProcessor(), 0);
     assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
@@ -2160,7 +2159,40 @@ static void testCase_successfullyIncludeHeaderFile()
 
 static void testCase_failFindingIncludeHeaderFile()
 {
-    // TODO: create this test scenario
+    /*  generate a source file */
+    char headerFileName[] = "sourceTest.h";
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* source file that include's a header file */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#include \"sourceTest.h\"\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for findFile */
+    expect_any(__wrap_findFile, _pathList);
+    expect_string(__wrap_findFile, _fileName, headerFileName);
+    expect_any(__wrap_findFile, _path);
+    will_return(__wrap_findFile, -1);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    assert_int_equal(addPath(&getOptions()->general.includePathList, "./"), 0);
+    assert_int_equal(initializePreProcessor(), 0);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_INCLUDE_FILE_NOT_FOUND);
+    destroyPreProcessor();
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
 }
 
 /*
