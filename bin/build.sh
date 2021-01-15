@@ -10,9 +10,25 @@ export  TEST_PATH="src/c/test"
 export  BUILD_PATH="build"
 export  BUILD_TYPE=debug
 
-cd "${SOURCE_DIRECTORY}"
+#   check if the Makefile is outdated and a full build is required
 
-if [ "${1}" == "all" ]
+export  BUILD_MODE='incremental'
+
+if [ -d "${HOME_PATH}/${BUILD_PATH}" -o -f "${HOME_PATH}/${BUILD_PATH}/Makefile" ]
+then
+    export  MAKEFILE_TIMESTAMP=$( date -r "${HOME_PATH}/${BUILD_PATH}/Makefile" +"%Y-%m-%d %H:%M:%S" )
+
+    if [ $( find . -name CMakeLists.txt -newermt "${MAKEFILE_TIMESTAMP}" | wc -l ) -gt 0 ]
+    then
+        export  BUILD_MODE='full'
+    fi
+fi
+
+#   invoke cmake to do building
+
+#cd "${SOURCE_DIRECTORY}"
+
+if [ "${1}" == 'all' -o "${BUILD_MODE}" == 'full' ]
 then
     if [ -d build ]
     then
