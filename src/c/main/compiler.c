@@ -91,7 +91,7 @@ int compiler(int _argc, char *_argv[])
             if (i + 1 < _argc)
             {
                 /*  the following argument is the directory name */
-                if (0 != addPath(&getOptions()->general.includePathList, _argv[++i]))
+                if (0 != addPath(&getOptions()->general.systemIncludePathList, _argv[++i]))
                     fprintf(stderr, "%s: error: fail attempting to add include path\n", _argv[0]);
 
                 continue;
@@ -148,7 +148,7 @@ int compiler(int _argc, char *_argv[])
     {
         int result;
 
-        result = addPath(&getOptions()->general.includePathList, includePathEnv);
+        result = addPath(&getOptions()->general.systemIncludePathList, includePathEnv);
         if (0 != result)
             fprintf(stderr, "%s: error: fail attempting to add include path from env variable\n", _argv[0]);
     }

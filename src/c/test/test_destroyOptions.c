@@ -42,10 +42,13 @@ static void testCase_destroySingletonInstance()
     /*  expected parameters for free (destroyMacroList) */
     expect_any(__wrap_free, _ptr);
 
-    /*  expected parameters for free (destroyPathList) */
+    /*  expected parameters for free (destroyPathList for systemIncludePathList) */
     expect_any(__wrap_free, _ptr);
 
-    /*  expected parameters for free (destroyPathList) */
+    /*  expected parameters for free (destroyPathList for systemIncludePathList) */
+    expect_any(__wrap_free, _ptr);
+
+    /*  expected parameters for free (destroyPathList for includePathList) */
     expect_any(__wrap_free, _ptr);
 
     /*  expected parameters for destroyOptions */
@@ -66,10 +69,13 @@ static void testCase_destroyDistinctInstance()
     /*  expected parameters for free (destroyMacroList) */
     expect_any(__wrap_free, _ptr);
 
-    /*  expected parameters for free (destroyPathList) */
+    /*  expected parameters for free (destroyPathList for systemIncludePathList) */
     expect_any(__wrap_free, _ptr);
 
-    /*  expected parameters for free (destroyPathList) */
+    /*  expected parameters for free (destroyPathList for systemIncludePathList) */
+    expect_any(__wrap_free, _ptr);
+
+    /*  expected parameters for free (destroyPathList for includePathList) */
     expect_any(__wrap_free, _ptr);
 
     Options testOptions;

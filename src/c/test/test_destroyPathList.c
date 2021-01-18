@@ -69,7 +69,11 @@ static void testCase_initializePathList()
     expect_value(__wrap_malloc, _size, 50 * sizeof(char *));
     will_return(__wrap_malloc, optionsMacroValueList);
 
-    /*  expected parameters for Options path list allocation */
+    /*  expected parameters for Options path list allocation (for systemIncludePathList) */
+    expect_value(__wrap_malloc, _size, 20 * sizeof(char *));
+    will_return(__wrap_malloc, optionsPathList);
+
+    /*  expected parameters for Options path list allocation (for includePathList) */
     expect_value(__wrap_malloc, _size, 20 * sizeof(char *));
     will_return(__wrap_malloc, optionsPathList);
 

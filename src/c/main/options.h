@@ -18,6 +18,7 @@
 
 typedef struct GeneralOptions
 {
+    TPathList systemIncludePathList;
     TPathList includePathList;
     unsigned char preprocessOnly;
     unsigned char trace;

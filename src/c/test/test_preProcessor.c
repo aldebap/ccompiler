@@ -2097,7 +2097,25 @@ static void testCaseExcessNestedConditionalBlocks()
 }
 
 /*
-    test case 034 - successfully include header file
+    test case 034 - successfully include system header file
+*/
+
+static void testCase_successfullyIncludeSystemHeaderFile()
+{
+    //  TODO: add scenarios for system headers
+}
+
+/*
+    test case 035 - fail finding for include system header file
+*/
+
+static void testCase_failFindingIncludeSystemHeaderFile()
+{
+    //  TODO: add scenarios for system headers
+}
+
+/*
+    test case 036 - successfully include header file
 */
 
 static void testCase_successfullyIncludeHeaderFile()
@@ -2154,7 +2172,7 @@ static void testCase_successfullyIncludeHeaderFile()
 }
 
 /*
-    test case 035 - fail finding for include header file
+    test case 037 - fail finding for include header file
 */
 
 static void testCase_failFindingIncludeHeaderFile()
@@ -2196,7 +2214,7 @@ static void testCase_failFindingIncludeHeaderFile()
 }
 
 /*
-    test case 036 - correctly parse CR + LF line delimited file
+    test case 038 - correctly parse CR + LF line delimited file
 */
 
 static void testCase_correctlyParseCRLFLineDelimitedFile()
@@ -2283,9 +2301,11 @@ int runPreProcessorTests()
         {"test case 031 - nested #ifndef with else into #ifdef conditional block", testCaseNestedIfndefWithElseIntoIfdefConditionalBlock, NULL, NULL},
         {"test case 032 - max of nested #ifdef conditional blocks", testCaseMaxNestedConditionalBlocks, NULL, NULL},
         {"test case 033 - excess of nested #ifdef conditional blocks", testCaseExcessNestedConditionalBlocks, NULL, NULL},
-        {"test case 034 - successfully include header file", testCase_successfullyIncludeHeaderFile, NULL, NULL},
-        {"test case 035 - fail finding for include header file", testCase_failFindingIncludeHeaderFile, NULL, NULL},
-        {"test case 036 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
+        {"test case 034 - successfully include system header file", testCase_successfullyIncludeSystemHeaderFile, NULL, NULL},
+        {"test case 035 - fail finding for include system header file", testCase_failFindingIncludeSystemHeaderFile, NULL, NULL},
+        {"test case 036 - successfully include header file", testCase_successfullyIncludeHeaderFile, NULL, NULL},
+        {"test case 037 - fail finding for include header file", testCase_failFindingIncludeHeaderFile, NULL, NULL},
+        {"test case 038 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
     };
 
     /*  set the test options */

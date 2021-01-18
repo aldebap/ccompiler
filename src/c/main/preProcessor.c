@@ -38,6 +38,7 @@ static struct TPreProcessor
     regex_t reNotDefinedMacroConditional;
     regex_t reElseConditional;
     regex_t reEndConditional;
+    regex_t reIncludeSystemHeaderFile;
     regex_t reIncludeHeaderFile;
     //  TODO: there's #include <filename> and #include "filename" so, more to implement here
 
@@ -96,6 +97,10 @@ int initializePreProcessor()
     if (0 != result)
         return -1;
 
+    result = regcomp(&preProc.reIncludeSystemHeaderFile, "^[ \t]*#[ \t]*include[ \t]+<[ \t]*([^ ^\t]+)[ \t]*>[ \t]*\n$", REG_EXTENDED);
+    if (0 != result)
+        return -1;
+
     result = regcomp(&preProc.reIncludeHeaderFile, "^[ \t]*#[ \t]*include[ \t]+\"[ \t]*([^ ^\t]+)[ \t]*\"[ \t]*\n$", REG_EXTENDED);
     if (0 != result)
         return -1;
@@ -131,6 +136,7 @@ void destroyPreProcessor()
     regfree(&preProc.reNotDefinedMacroConditional);
     regfree(&preProc.reElseConditional);
     regfree(&preProc.reEndConditional);
+    regfree(&preProc.reIncludeSystemHeaderFile);
     regfree(&preProc.reIncludeHeaderFile);
 
     /*  destroy macro list */
@@ -374,6 +380,40 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
 
                     if (getOptions()->general.trace)
                         fprintf(stdout, "[trace] end of conditional block\n");
+
+                    i = 0;
+                    continue;
+                }
+
+                /*  check if the line syntax is of a system include header file */
+                if (0 == regexec(&preProc.reIncludeSystemHeaderFile, line, 2, match, 0))
+                {
+                    char includeFileName[MAX_INCLUDE_FILENAME_SIZE];
+                    int result;
+
+                    strncpy(includeFileName, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
+                    includeFileName[match[1].rm_eo - match[1].rm_so] = '\0';
+
+                    /*  try to find the system include file */
+                    char includeFilePath[MAX_INCLUDE_FILENAME_SIZE];
+
+                    result = findFile(&getOptions()->general.systemIncludePathList, includeFileName, includeFilePath);
+                    if (0 != result)
+                    {
+                        fprintf(stderr, "preprocessor: system include file not found: %s\n", includeFileName);
+
+                        return PREPROC_SYSTEM_INCLUDE_FILE_NOT_FOUND;
+                    }
+
+                    /*  recursivelly invoke preprocessor for header file */
+                    FILE *headerFile;
+
+                    headerFile = fopen(includeFilePath, "r");
+                    preProcessor(headerFile, _fileOutput);
+                    fclose(headerFile);
+
+                    if (getOptions()->general.trace)
+                        fprintf(stdout, "[trace] preprocessing include header file: %s\n", includeFileName);
 
                     i = 0;
                     continue;
