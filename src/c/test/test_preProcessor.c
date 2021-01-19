@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <cmocka.h>
 
@@ -2102,7 +2103,62 @@ static void testCaseExcessNestedConditionalBlocks()
 
 static void testCase_successfullyIncludeSystemHeaderFile()
 {
-    //  TODO: add scenarios for system headers
+    /*  create a distinc directory and add it to system header path */
+    char systemHeaderDir[] = "./sys";
+
+    assert_int_equal(mkdir(systemHeaderDir, S_IRWXU | S_IRWXG | S_IROTH), 0);
+    assert_int_equal(addPath(&getOptions()->general.systemIncludePathList, systemHeaderDir), 0);
+
+    /*  generate a header file */
+    char headerFileName[] = "./sys/sourceTest.h";
+    FILE *headerFile;
+
+    headerFile = fopen(headerFileName, "w");
+    fprintf(headerFile, "/* system include header file */\n");
+    fprintf(headerFile, "\n");
+    fprintf(headerFile, "void function(int _parameter);\n");
+    fclose(headerFile);
+
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* source file that include's a header file */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#include \"sourceTest.h\"\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for findFile */
+    expect_any(__wrap_findFile, _pathList);
+    expect_string(__wrap_findFile, _fileName, "sourceTest.h");
+    expect_any(__wrap_findFile, _path);
+    will_return(__wrap_findFile, 0);
+
+    /*  expected parameters for replaceAllMacros */
+    expect_any(__wrap_replaceAllMacros, _macroList);
+    expect_string(__wrap_replaceAllMacros, _inputLine, "void function(int _parameter);\n");
+    expect_any(__wrap_replaceAllMacros, _outputValue);
+    will_return(__wrap_replaceAllMacros, 0);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    assert_int_equal(addPath(&getOptions()->general.includePathList, "./"), 0);
+    assert_int_equal(initializePreProcessor(), 0);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    destroyPreProcessor();
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+    rmdir(systemHeaderDir);
 }
 
 /*
