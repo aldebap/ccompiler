@@ -71,8 +71,11 @@ int __wrap_findFile(TPathList *_pathList, char *_fileName, char *_path)
     check_expected(_fileName);
     check_expected(_path);
 
-    if (0 == strcmp(_fileName, "sourceTest.h"))
-        strcpy(_path, "./sourceTest.h");
+    if (0 == strcmp(_fileName, "sysHeaderTest.h"))
+        strcpy(_path, "./sysHeaderTest.h");
+
+    if (0 == strcmp(_fileName, "headerTest.h"))
+        strcpy(_path, "./headerTest.h");
 
     return (int)mock();
 }
@@ -2103,14 +2106,13 @@ static void testCaseExcessNestedConditionalBlocks()
 
 static void testCase_successfullyIncludeSystemHeaderFile()
 {
-    /*  create a distinc directory and add it to system header path */
-    char systemHeaderDir[] = "./sys";
+    /*  add a distinc directory to system header path */
+    char systemHeaderDir[] = "sys";
 
-    assert_int_equal(mkdir(systemHeaderDir, S_IRWXU | S_IRWXG | S_IROTH), 0);
     assert_int_equal(addPath(&getOptions()->general.systemIncludePathList, systemHeaderDir), 0);
 
     /*  generate a header file */
-    char headerFileName[] = "./sys/sourceTest.h";
+    char headerFileName[] = "sysHeaderTest.h";
     FILE *headerFile;
 
     headerFile = fopen(headerFileName, "w");
@@ -2126,12 +2128,12 @@ static void testCase_successfullyIncludeSystemHeaderFile()
     sourceFile = fopen(sourceFileName, "w");
     fprintf(sourceFile, "/* source file that include's a header file */\n");
     fprintf(sourceFile, "\n");
-    fprintf(sourceFile, "#include \"sourceTest.h\"\n");
+    fprintf(sourceFile, "#include <sysHeaderTest.h>\n");
     fclose(sourceFile);
 
     /*  expected parameters for findFile */
     expect_any(__wrap_findFile, _pathList);
-    expect_string(__wrap_findFile, _fileName, "sourceTest.h");
+    expect_string(__wrap_findFile, _fileName, "sysHeaderTest.h");
     expect_any(__wrap_findFile, _path);
     will_return(__wrap_findFile, 0);
 
@@ -2148,7 +2150,6 @@ static void testCase_successfullyIncludeSystemHeaderFile()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    assert_int_equal(addPath(&getOptions()->general.includePathList, "./"), 0);
     assert_int_equal(initializePreProcessor(), 0);
     assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
@@ -2156,9 +2157,9 @@ static void testCase_successfullyIncludeSystemHeaderFile()
     fclose(sourceFile);
     fclose(preProcessorFile);
 
+    remove(headerFileName);
     remove(sourceFileName);
     remove(preProcessorFileName);
-    rmdir(systemHeaderDir);
 }
 
 /*
@@ -2167,7 +2168,38 @@ static void testCase_successfullyIncludeSystemHeaderFile()
 
 static void testCase_failFindingIncludeSystemHeaderFile()
 {
-    //  TODO: add scenarios for system headers
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* source file that include's a header file */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#include <sysHeaderMissing.h>\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for findFile */
+    expect_any(__wrap_findFile, _pathList);
+    expect_string(__wrap_findFile, _fileName, "sysHeaderMissing.h");
+    expect_any(__wrap_findFile, _path);
+    will_return(__wrap_findFile, -1);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    assert_int_equal(initializePreProcessor(), 0);
+    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_SYSTEM_INCLUDE_FILE_NOT_FOUND);
+    destroyPreProcessor();
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
 }
 
 /*
@@ -2177,7 +2209,7 @@ static void testCase_failFindingIncludeSystemHeaderFile()
 static void testCase_successfullyIncludeHeaderFile()
 {
     /*  generate a header file */
-    char headerFileName[] = "sourceTest.h";
+    char headerFileName[] = "headerTest.h";
     FILE *headerFile;
 
     headerFile = fopen(headerFileName, "w");
@@ -2193,7 +2225,7 @@ static void testCase_successfullyIncludeHeaderFile()
     sourceFile = fopen(sourceFileName, "w");
     fprintf(sourceFile, "/* source file that include's a header file */\n");
     fprintf(sourceFile, "\n");
-    fprintf(sourceFile, "#include \"sourceTest.h\"\n");
+    fprintf(sourceFile, "#include \"headerTest.h\"\n");
     fclose(sourceFile);
 
     /*  expected parameters for findFile */
@@ -2223,6 +2255,7 @@ static void testCase_successfullyIncludeHeaderFile()
     fclose(sourceFile);
     fclose(preProcessorFile);
 
+    remove(headerFileName);
     remove(sourceFileName);
     remove(preProcessorFileName);
 }
@@ -2257,7 +2290,6 @@ static void testCase_failFindingIncludeHeaderFile()
     sourceFile = fopen(sourceFileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    assert_int_equal(addPath(&getOptions()->general.includePathList, "./"), 0);
     assert_int_equal(initializePreProcessor(), 0);
     assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_INCLUDE_FILE_NOT_FOUND);
     destroyPreProcessor();
