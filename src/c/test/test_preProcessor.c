@@ -110,7 +110,7 @@ static void testCase_discardFullLineComments()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -165,7 +165,7 @@ static void testCase_discardBeginningOfLineComments()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -220,7 +220,7 @@ static void testCase_discardMiddleOfLineComments()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -275,7 +275,7 @@ static void testCase_discardEndOfLineComments()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -327,7 +327,7 @@ static void testCase_discardMultipleLinesComments()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -377,7 +377,7 @@ static void testCase_checkThreeCharactersCommentBug()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -427,7 +427,7 @@ static void testCase_discardEmptyLines()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -477,7 +477,7 @@ static void testCase_simpleMacroDefinitionBeginOfLine()
     will_return(__wrap_addMacro, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -517,7 +517,7 @@ static void testCase_simpleMacroDefinitionMiddleOfLine()
     will_return(__wrap_addMacro, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -557,7 +557,7 @@ static void testCase_simpleMacroDefinitionAfterTabsAndSpaces()
     will_return(__wrap_addMacro, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -597,7 +597,7 @@ static void testCase_simpleMacroDefinitionSpaceAfterPound()
     will_return(__wrap_addMacro, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -637,7 +637,7 @@ static void testCase_failAddingMacroToList()
     will_return(__wrap_addMacro, -1);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_INTERNAL_ERROR_ADDING_MACRO);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), PREPROC_INTERNAL_ERROR_ADDING_MACRO);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -677,7 +677,7 @@ static void testCase_valuedMacroDefinitionBeginOfLine()
     will_return(__wrap_addMacro, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -717,7 +717,7 @@ static void testCase_valuedMacroDefinitionSpacesInValue()
     will_return(__wrap_addMacro, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -758,7 +758,7 @@ static void testCase_valuedMacroDefinitionInMultipleLines()
     will_return(__wrap_addMacro, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -802,7 +802,7 @@ static void testCase_crazyMultipleLinesCommentAndMacro()
     will_return(__wrap_addMacro, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -859,7 +859,7 @@ static void testCase_ifdefOnExistingMacro()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -910,7 +910,7 @@ static void testCase_ifdefOnNonExistingMacro()
     will_return(__wrap_getMacro, -1);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -967,7 +967,7 @@ static void testCase_ifndefOnNotExistingMacro()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1018,7 +1018,7 @@ static void testCase_ifndefOnExistingMacro()
     will_return(__wrap_getMacro, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1078,7 +1078,7 @@ static void testCase_elseOnIfdefConditionalBlock()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1141,7 +1141,7 @@ static void testCase_multipleElsesOnIfdefConditionalBlock()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_MORE_THAN_ONE_ELSE_FOR_CONDITIONAL_BLOCK);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), PREPROC_MORE_THAN_ONE_ELSE_FOR_CONDITIONAL_BLOCK);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1201,7 +1201,7 @@ static void testCase_elseOnIfndefConditionalBlock()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1264,7 +1264,7 @@ static void testCase_multipleElsesOnIfndefConditionalBlock()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_MORE_THAN_ONE_ELSE_FOR_CONDITIONAL_BLOCK);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), PREPROC_MORE_THAN_ONE_ELSE_FOR_CONDITIONAL_BLOCK);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1298,7 +1298,7 @@ static void testCase_elseOutsideConditionalBlock()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_ELSE_OUTSIDE_CONDITIONAL_BLOCK);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), PREPROC_ELSE_OUTSIDE_CONDITIONAL_BLOCK);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1332,7 +1332,7 @@ static void testCase_endifOutsideConditionalBlock()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_ENDIF_OUTSIDE_CONDITIONAL_BLOCK);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), PREPROC_ENDIF_OUTSIDE_CONDITIONAL_BLOCK);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1381,7 +1381,7 @@ static void testCase_missingEndifForConditionalBlock()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_MISSING_ENDIF_FOR_CONDITIONAL_BLOCK);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), PREPROC_MISSING_ENDIF_FOR_CONDITIONAL_BLOCK);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1457,7 +1457,7 @@ static void testCaseNestedIfdefIntoIfdefConditionalBlock()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1526,7 +1526,7 @@ static void testCaseNestedIfndefIntoIfdefConditionalBlock()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1605,7 +1605,7 @@ static void testCaseNestedIfdefWithElseIntoIfdefConditionalBlock()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1684,7 +1684,7 @@ static void testCaseNestedIfndefWithElseIntoIfdefConditionalBlock()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -1885,7 +1885,7 @@ static void testCaseMaxNestedConditionalBlocks()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -2090,7 +2090,7 @@ static void testCaseExcessNestedConditionalBlocks()
     will_return(__wrap_getMacro, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_CONDITIONAL_BLOCKS_LIMIT_EXCEEDED);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), PREPROC_CONDITIONAL_BLOCKS_LIMIT_EXCEEDED);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -2151,7 +2151,7 @@ static void testCase_successfullyIncludeSystemHeaderFile()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -2192,7 +2192,7 @@ static void testCase_failFindingIncludeSystemHeaderFile()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_SYSTEM_INCLUDE_FILE_NOT_FOUND);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), PREPROC_SYSTEM_INCLUDE_FILE_NOT_FOUND);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -2249,7 +2249,7 @@ static void testCase_successfullyIncludeHeaderFile()
 
     assert_int_equal(addPath(&getOptions()->general.includePathList, "./"), 0);
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -2291,7 +2291,7 @@ static void testCase_failFindingIncludeHeaderFile()
     preProcessorFile = fopen(preProcessorFileName, "w");
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), PREPROC_INCLUDE_FILE_NOT_FOUND);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), PREPROC_INCLUDE_FILE_NOT_FOUND);
     destroyPreProcessor();
 
     fclose(sourceFile);
@@ -2339,7 +2339,7 @@ static void testCase_correctlyParseCRLFLineDelimitedFile()
     will_return(__wrap_replaceAllMacros, 0);
 
     assert_int_equal(initializePreProcessor(), 0);
-    assert_int_equal(preProcessor(sourceFile, preProcessorFile), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
     destroyPreProcessor();
 
     fclose(sourceFile);

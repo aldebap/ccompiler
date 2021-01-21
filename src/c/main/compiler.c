@@ -4,20 +4,16 @@
     oct-13-2020 by aldebap
 */
 
+#include <regex.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "environment.h"
 #include "options.h"
 #include "lexicalParser.h"
 #include "preProcessor.h"
-
-/*
-    constants
-*/
-
-#define INCLUDE_PATH_ENV_VARIABLE "CPATH"
 
 /*
     prototypes
@@ -168,6 +164,32 @@ int compiler(int _argc, char *_argv[])
 
 int compileSourceFile(char *_fileName)
 {
+    int result;
+
+    /*  compile the regex's to get the source file directory */
+    regex_t reSourceDirectory;
+
+    result = regcomp(&reSourceDirectory, "^(.*)[^/]+$", REG_EXTENDED);
+    if (0 != result)
+        return -1;
+
+    /*  get the source file directory */
+    regmatch_t match[2];
+    char sourceDirectory[1024];
+
+    if (0 == regexec(&reSourceDirectory, _fileName, 2, match, 0) && 0 < match[1].rm_eo - match[1].rm_so)
+    {
+        strncpy(sourceDirectory, _fileName + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
+        sourceDirectory[match[1].rm_eo - match[1].rm_so] = '\0';
+    }
+    else
+    {
+        strcpy(sourceDirectory, "./");
+    }
+
+    fprintf(stdout, "[debug] source directory: %s\n", sourceDirectory);
+    regfree(&reSourceDirectory);
+
     /*  the preprocessor file name replace the .c extention for .i */
     unsigned char preProcessorFileName[1024];
     unsigned int length = strlen(_fileName);
@@ -185,16 +207,15 @@ int compileSourceFile(char *_fileName)
     /*  preprocessor pass */
     FILE *sourceFile;
     FILE *preProcessorFile;
-    int result;
 
     result = initializePreProcessor();
     if (0 != result)
-        return -1;
+        return -2;
 
     sourceFile = fopen(_fileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
 
-    result = preProcessor(sourceFile, preProcessorFile);
+    result = preProcessor(sourceDirectory, sourceFile, preProcessorFile);
 
     fclose(sourceFile);
     fclose(preProcessorFile);

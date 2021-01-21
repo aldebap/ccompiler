@@ -26,7 +26,7 @@
 */
 
 int initializePreProcessor();
-int preProcessor(FILE *_fileInput, FILE *_fileOutput);
+int preProcessor(char *_sourceDirectory, FILE *_fileInput, FILE *_fileOutput);
 void destroyPreProcessor();
 
 #endif /* !defined( __PREPROCESSOR_H ) */

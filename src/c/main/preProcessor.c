@@ -40,7 +40,6 @@ static struct TPreProcessor
     regex_t reEndConditional;
     regex_t reIncludeSystemHeaderFile;
     regex_t reIncludeHeaderFile;
-    //  TODO: there's #include <filename> and #include "filename" so, more to implement here
 
     TMacroList macroList;
 
@@ -147,7 +146,7 @@ void destroyPreProcessor()
     the "C" preprocessor
 */
 
-int preProcessor(FILE *_fileInput, FILE *_fileOutput)
+int preProcessor(char *_sourceDirectory, FILE *_fileInput, FILE *_fileOutput)
 {
     unsigned char line[MAX_INPUT_LINE_SIZE];
     unsigned int i = 0;
@@ -409,7 +408,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     FILE *headerFile;
 
                     headerFile = fopen(includeFilePath, "r");
-                    preProcessor(headerFile, _fileOutput);
+                    preProcessor(_sourceDirectory, headerFile, _fileOutput);
                     fclose(headerFile);
 
                     if (getOptions()->general.trace)
@@ -443,7 +442,7 @@ int preProcessor(FILE *_fileInput, FILE *_fileOutput)
                     FILE *headerFile;
 
                     headerFile = fopen(includeFilePath, "r");
-                    preProcessor(headerFile, _fileOutput);
+                    preProcessor(_sourceDirectory, headerFile, _fileOutput);
                     fclose(headerFile);
 
                     if (getOptions()->general.trace)

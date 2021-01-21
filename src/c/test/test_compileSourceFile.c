@@ -33,8 +33,9 @@ int compileSourceFile(char *_fileName);
     wrap preprocessor function
 */
 
-void __wrap_preProcessor(FILE *_fileInput, FILE *_fileOutput)
+void __wrap_preProcessor(char *_sourceDirectory, FILE *_fileInput, FILE *_fileOutput)
 {
+    check_expected(_sourceDirectory);
     check_expected_ptr(_fileInput);
     check_expected_ptr(_fileOutput);
 
@@ -69,6 +70,7 @@ static void testCase_sourceFileNameDotC()
     fclose(sourceFile);
 
     /*  set the expected values for the wrap preProcessor and wrap lexicalParser() functions */
+    expect_string(__wrap_preProcessor, _sourceDirectory, "./");
     expect_any(__wrap_preProcessor, _fileInput);
     expect_any(__wrap_preProcessor, _fileOutput);
 
@@ -91,7 +93,7 @@ static void testCase_sourceFileNameDotC()
 
 static void testCase_sourceFileNameWithoutExtention()
 {
-    char *sourceFileName = "sourceFile";
+    char *sourceFileName = "./sourceFile";
 
     /*  generate a source file */
     FILE *sourceFile;
@@ -101,6 +103,7 @@ static void testCase_sourceFileNameWithoutExtention()
     fclose(sourceFile);
 
     /*  set the expected values for the wrap preProcessor and wrap lexicalParser() functions */
+    expect_string(__wrap_preProcessor, _sourceDirectory, "./");
     expect_any(__wrap_preProcessor, _fileInput);
     expect_any(__wrap_preProcessor, _fileOutput);
 
