@@ -169,7 +169,7 @@ int compileSourceFile(char *_fileName)
     /*  compile the regex's to get the source file directory */
     regex_t reSourceDirectory;
 
-    result = regcomp(&reSourceDirectory, "^(.*)[^/]+$", REG_EXTENDED);
+    result = regcomp(&reSourceDirectory, "^(.*/)[^/]+$", REG_EXTENDED);
     if (0 != result)
         return -1;
 
