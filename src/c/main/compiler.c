@@ -214,6 +214,7 @@ int compileSourceFile(char *_fileName)
 
     sourceFile = fopen(_fileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");
+    // TODO: both fopen calls may fail
 
     result = preProcessor(sourceDirectory, sourceFile, preProcessorFile);
 
@@ -231,7 +232,7 @@ int compileSourceFile(char *_fileName)
         return 0;
 
     /*  lexical parser pass */
-    sourceFile = fopen(_fileName, "r");
+    sourceFile = fopen(preProcessorFileName, "r");
     lexicalParser(sourceFile);
     fclose(sourceFile);
 

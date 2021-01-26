@@ -49,6 +49,12 @@ int __wrap_regexec(regex_t *__restrict__ _regex, char *__restrict__ _string, siz
     check_expected(_match);
     check_expected(_flags);
 
+    if (0 == strcmp(_string, "main/sourceFile"))
+    {
+        _match[1].rm_so = 0;
+        _match[1].rm_eo = 5;
+    }
+
     if (0 == strcmp(_string, "./sourceFile"))
     {
         _match[1].rm_so = 0;
@@ -65,6 +71,29 @@ int __wrap_regexec(regex_t *__restrict__ _regex, char *__restrict__ _string, siz
 void __wrap_regfree(regex_t *_regex)
 {
     check_expected(_regex);
+}
+
+/*
+    mock for fopen() function
+*/
+
+FILE *__wrap_fopen(char *__restrict__ _fileName, char *__restrict__ _modes)
+{
+    check_expected(_fileName);
+    check_expected(_modes);
+
+    return (FILE *)mock();
+}
+
+/*
+    mock for fclose() function
+*/
+
+int __wrap_fclose(FILE *_stream)
+{
+    check_expected(_stream);
+
+    return (int)mock();
 }
 
 /*
@@ -129,14 +158,7 @@ static void testCase_failInRegcomp()
 
 static void testCase_sourceFileWithDirectory()
 {
-    char *sourceFileName = "./sourceFile";
-
-    /*  generate a source file */
-    FILE *sourceFile;
-
-    sourceFile = fopen(sourceFileName, "w");
-    fprintf(sourceFile, "/* test file with just a comment */\n");
-    fclose(sourceFile);
+    char *sourceFileName = "main/sourceFile";
 
     /*  expected parameters for the regcomp */
     expect_any(__wrap_regcomp, _regex);
@@ -155,26 +177,45 @@ static void testCase_sourceFileWithDirectory()
     /*  expected parameters for the regfree */
     expect_any(__wrap_regfree, _regex);
 
-    /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
+    /*  set the expected values for the wrap initializePreProcessor */
     will_return(__wrap_initializePreProcessor, 0);
 
-    expect_string(__wrap_preProcessor, _sourceDirectory, "./");
+    /*  expected parameters for the fopen */
+    FILE input;
+    FILE output;
+
+    expect_string(__wrap_fopen, _fileName, sourceFileName);
+    expect_string(__wrap_fopen, _modes, "r");
+    will_return(__wrap_fopen, &input);
+
+    expect_string(__wrap_fopen, _fileName, "main/sourceFile.i");
+    expect_string(__wrap_fopen, _modes, "w");
+    will_return(__wrap_fopen, &output);
+
+    /*  set the expected values for the wrap preProcessor */
+    expect_string(__wrap_preProcessor, _sourceDirectory, "main/");
     expect_any(__wrap_preProcessor, _fileInput);
     expect_any(__wrap_preProcessor, _fileOutput);
     will_return(__wrap_preProcessor, 0);
 
+    /*  expected parameters for the fclose */
+    expect_any(__wrap_fclose, _stream);
+    will_return(__wrap_fclose, 0);
+
+    expect_any(__wrap_fclose, _stream);
+    will_return(__wrap_fclose, 0);
+
+    /*  set the expected values for the wrap lexicalParser() functions */
+    expect_string(__wrap_fopen, _fileName, "main/sourceFile.i");
+    expect_string(__wrap_fopen, _modes, "r");
+    will_return(__wrap_fopen, &output);
+
     expect_any(__wrap_lexicalParser, _fileInput);
 
-    /*  make sure preprocessor file doesn't exist prior to call compileSourceFile */
-    char preProcessorFileName[MAXPATHLEN];
-    struct stat preProcessorFileStatus;
-
-    strcpy(preProcessorFileName, "sourceFile.i");
-    assert_int_not_equal(stat(preProcessorFileName, &preProcessorFileStatus), 0);
+    expect_any(__wrap_fclose, _stream);
+    will_return(__wrap_fclose, 0);
 
     assert_int_equal(compileSourceFile(sourceFileName), 0);
-
-    remove(sourceFileName);
 }
 
 /*
