@@ -187,7 +187,6 @@ int compileSourceFile(char *_fileName)
         strcpy(sourceDirectory, "./");
     }
 
-    fprintf(stdout, "[debug] source directory: %s\n", sourceDirectory);
     regfree(&reSourceDirectory);
 
     /*  the preprocessor file name replace the .c extention for .i */
@@ -233,7 +232,9 @@ int compileSourceFile(char *_fileName)
 
     /*  lexical parser pass */
     sourceFile = fopen(preProcessorFileName, "r");
+    // TODO: fopen call may fail
     lexicalParser(sourceFile);
+    // TODO: should check the returned value from lexicalParser
     fclose(sourceFile);
 
     /*  remove intermediate files */
