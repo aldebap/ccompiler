@@ -17,12 +17,7 @@
 #include <cmocka.h>
 
 #include "options.h"
-
-/*
-    prototypes
-*/
-
-int compileSourceFile(char *_fileName);
+#include "sourceFileCompiler.h"
 
 /*
     mock for regcomp() function
@@ -144,7 +139,7 @@ static void testCase_failInRegcomp()
     will_return(__wrap_regcomp, REG_BADPAT);
 
     /*  expected result from compileSourceFile */
-    assert_int_equal(compileSourceFile(sourceFileName), -1);
+    assert_int_equal(sourceFileCompiler(sourceFileName), -1);
 }
 
 /*
@@ -211,7 +206,7 @@ static void testCase_sourceFileWithDirectory()
     will_return(__wrap_fclose, 0);
 
     /*  expected result from compileSourceFile */
-    assert_int_equal(compileSourceFile(sourceFileName), 0);
+    assert_int_equal(sourceFileCompiler(sourceFileName), 0);
 }
 
 /*
@@ -278,7 +273,7 @@ static void testCase_sourceFileWithoutDirectory()
     will_return(__wrap_fclose, 0);
 
     /*  expected result from compileSourceFile */
-    assert_int_equal(compileSourceFile(sourceFileName), 0);
+    assert_int_equal(sourceFileCompiler(sourceFileName), 0);
 }
 
 /*
@@ -345,7 +340,7 @@ static void testCase_sourceFileNameDotC()
     will_return(__wrap_fclose, 0);
 
     /*  expected result from compileSourceFile */
-    assert_int_equal(compileSourceFile(sourceFileName), 0);
+    assert_int_equal(sourceFileCompiler(sourceFileName), 0);
 }
 
 /*
@@ -412,7 +407,7 @@ static void testCase_sourceFileNameWithoutExtention()
     will_return(__wrap_fclose, 0);
 
     /*  expected result from compileSourceFile */
-    assert_int_equal(compileSourceFile(sourceFileName), 0);
+    assert_int_equal(sourceFileCompiler(sourceFileName), 0);
 }
 
 /*
@@ -444,7 +439,7 @@ static void testCase_failInInitializePreProcessor()
     will_return(__wrap_initializePreProcessor, -1);
 
     /*  expected result from compileSourceFile */
-    assert_int_equal(compileSourceFile(sourceFileName), -2);
+    assert_int_equal(sourceFileCompiler(sourceFileName), -2);
 }
 
 /*
@@ -501,7 +496,7 @@ static void testCase_failInPreProcessor()
     will_return(__wrap_fclose, 0);
 
     /*  expected result from compileSourceFile */
-    assert_int_equal(compileSourceFile(sourceFileName), -3);
+    assert_int_equal(sourceFileCompiler(sourceFileName), -3);
 }
 
 /*
@@ -561,7 +556,7 @@ static void testCase_preProcessorOnlyOption()
     getOptions()->general.preprocessOnly = 1;
 
     /*  expected result from compileSourceFile */
-    assert_int_equal(compileSourceFile(sourceFileName), 0);
+    assert_int_equal(sourceFileCompiler(sourceFileName), 0);
 }
 
 /*

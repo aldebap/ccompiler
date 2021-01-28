@@ -4,7 +4,6 @@
     oct-13-2020 by aldebap
 */
 
-#include <regex.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,20 +11,13 @@
 
 #include "environment.h"
 #include "options.h"
-#include "lexicalParser.h"
-#include "preProcessor.h"
-
-/*
-    prototypes
-*/
-
-int compileSourceFile(char *_fileName);
+#include "sourceFileCompiler.h"
 
 /*
     Parse command line arguments and run the compiler for selected source files
 */
 
-int compiler(int _argc, char *_argv[])
+int compilerCLI(int _argc, char *_argv[])
 {
     char *fileNameList[_argc];
     unsigned int fileNameListSize = 0;
@@ -152,93 +144,8 @@ int compiler(int _argc, char *_argv[])
     /* compile each input file */
     for (i = 0; i < fileNameListSize; i++)
     {
-        int compilationResult = compileSourceFile(fileNameList[i]);
+        int compilationResult = sourceFileCompiler(fileNameList[i]);
     }
-
-    return 0;
-}
-
-/*
-    Compile source code given it's file name
-*/
-
-int compileSourceFile(char *_fileName)
-{
-    int result;
-
-    /*  compile the regex's to get the source file directory */
-    regex_t reSourceDirectory;
-
-    result = regcomp(&reSourceDirectory, "^(.*/)[^/]+$", REG_EXTENDED);
-    if (0 != result)
-        return -1;
-
-    /*  get the source file directory */
-    regmatch_t match[2];
-    char sourceDirectory[1024];
-
-    if (0 == regexec(&reSourceDirectory, _fileName, 2, match, 0) && 0 < match[1].rm_eo - match[1].rm_so)
-    {
-        strncpy(sourceDirectory, _fileName + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
-        sourceDirectory[match[1].rm_eo - match[1].rm_so] = '\0';
-    }
-    else
-    {
-        strcpy(sourceDirectory, "./");
-    }
-
-    regfree(&reSourceDirectory);
-
-    /*  the preprocessor file name replace the .c extention for .i */
-    unsigned char preProcessorFileName[1024];
-    unsigned int length = strlen(_fileName);
-
-    strcpy(preProcessorFileName, _fileName);
-    if (2 < length && 0 == strcmp(preProcessorFileName + length - 2, ".c"))
-    {
-        preProcessorFileName[length - 1] = 'i';
-    }
-    else
-    {
-        strcat(preProcessorFileName, ".i");
-    }
-
-    /*  preprocessor pass */
-    FILE *sourceFile;
-    FILE *preProcessorFile;
-
-    result = initializePreProcessor();
-    if (0 != result)
-        return -2;
-
-    sourceFile = fopen(_fileName, "r");
-    preProcessorFile = fopen(preProcessorFileName, "w");
-    // TODO: both fopen calls may fail
-
-    result = preProcessor(sourceDirectory, sourceFile, preProcessorFile);
-
-    fclose(sourceFile);
-    fclose(preProcessorFile);
-
-    /*  destroy all preprocessor data */
-    destroyPreProcessor();
-
-    if (0 != result)
-        return result;
-
-    /*  stop here if preprocessor only option is on */
-    if (1 == getOptions()->general.preprocessOnly)
-        return 0;
-
-    /*  lexical parser pass */
-    sourceFile = fopen(preProcessorFileName, "r");
-    // TODO: fopen call may fail
-    lexicalParser(sourceFile);
-    // TODO: should check the returned value from lexicalParser
-    fclose(sourceFile);
-
-    /*  remove intermediate files */
-    remove(preProcessorFileName);
 
     return 0;
 }

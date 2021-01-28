@@ -18,7 +18,7 @@ include_directories($ENV{HOME_PATH}/$ENV{SOURCE_PATH})
 #set(TEST_FLAGS "-Wl,--wrap,fprintf -Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,compileSourceFile=__wrap_compileSourceFile")
 set(TEST_NAME "test_compiler")
 set(SOURCE_LIST ../main/compiler.c ../main/options.c ../main/preProcessor.c ../main/macro.c ../main/path.c ../main/lexicalParser.c ../main/escapeSequence.c)
-set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,addPath=__wrap_addPath -Wl,--defsym,compileSourceFile=__wrap_compileSourceFile")
+set(TEST_FLAGS "-Wl,--defsym,addMacro=__wrap_addMacro -Wl,--defsym,addPath=__wrap_addPath -Wl,--defsym,sourceFileCompiler=__wrap_sourceFileCompiler")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
@@ -46,8 +46,8 @@ target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arc
 add_test(${TEST_NAME} ${TEST_NAME})
 
 #   compileSourceFile unit tests
-set(TEST_NAME "test_compileSourceFile")
-set(SOURCE_LIST ../main/compiler.c ../main/preProcessor.c ../main/macro.c ../main/path.c ../main/options.c)
+set(TEST_NAME "test_sourceFileCompiler")
+set(SOURCE_LIST ../main/sourceFileCompiler.c ../main/preProcessor.c ../main/macro.c ../main/path.c ../main/options.c)
 set(TEST_FLAGS "-Wl,--wrap,regcomp -Wl,--wrap,regexec -Wl,--wrap,regfree -Wl,--wrap,fopen -Wl,--wrap,fclose -Wl,--defsym,initializePreProcessor=__wrap_initializePreProcessor -Wl,--defsym,preProcessor=__wrap_preProcessor -Wl,--defsym,destroyPreProcessor=__wrap_destroyPreProcessor -Wl,--defsym,lexicalParser=__wrap_lexicalParser")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})

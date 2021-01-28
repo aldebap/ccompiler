@@ -12,5 +12,5 @@
 
 int main(int _argc, char *_argv[])
 {
-    return compiler(_argc, _argv);
+    return compilerCLI(_argc, _argv);
 }

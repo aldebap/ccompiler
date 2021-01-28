@@ -100,13 +100,13 @@ int __wrap_addPath(TPathList *_pathList, char *_path)
     wrap compile source function
 */
 
-int __wrap_compileSourceFile(char *_fileName)
+int __wrap_sourceFileCompiler(char *_fileName)
 {
     check_expected(_fileName);
 
 #ifdef DEBUG
 
-    fprintf(stderr, "[debug] __wrap_compileSourceFile(%s, executionOptions)\n", _fileName);
+    fprintf(stderr, "[debug] __wrap_sourceFileCompiler(%s, executionOptions)\n", _fileName);
 #endif
     return (int)mock();
 }
@@ -126,7 +126,7 @@ static void testCase_help()
 
     stdoutFile = fopen(redirectStdoutFileName, "w");
     dup2(fileno(stdoutFile), STDOUT_FILENO);
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
     fclose(stdoutFile);
     dup2(originalStdout, STDOUT_FILENO);
 
@@ -174,9 +174,9 @@ static void testCase_macroOptionWithoutMacroName()
     expect_string(__wrap_addPath, _path, "/usr/include");
     will_return(__wrap_addPath, 0);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
     /*  redirect stderr to a file and call compiler() function */
     int originalStderr = dup(STDERR_FILENO);
@@ -185,7 +185,7 @@ static void testCase_macroOptionWithoutMacroName()
 
     stderrFile = fopen(redirectStderrFileName, "w");
     dup2(fileno(stderrFile), STDERR_FILENO);
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
     assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
     fclose(stderrFile);
     dup2(originalStderr, STDERR_FILENO);
@@ -220,9 +220,9 @@ static void testCase_macroOptionWithSimpleMacroDefinition()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
     /*  expected parameters for addMacro */
     expect_any(__wrap_addMacro, _macroList);
@@ -230,7 +230,7 @@ static void testCase_macroOptionWithSimpleMacroDefinition()
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
 
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
     //assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
 
     remove(argv[2]);
@@ -256,9 +256,9 @@ static void testCase_macroOptionWithEmptyValueMacroDefinition()
 
     //setDefaultOptions(&testOptions);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
     /*  expected parameters for addMacro */
     expect_any(__wrap_addMacro, _macroList);
@@ -266,7 +266,7 @@ static void testCase_macroOptionWithEmptyValueMacroDefinition()
     expect_string(__wrap_addMacro, _value, "");
     will_return(__wrap_addMacro, 0);
 
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
     //assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
 
     remove(argv[2]);
@@ -292,9 +292,9 @@ static void testCase_macroOptionWithValuedMacroDefinition()
 
     //setDefaultOptions(&testOptions);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
     /*  expected parameters for addMacro */
     expect_any(__wrap_addMacro, _macroList);
@@ -302,7 +302,7 @@ static void testCase_macroOptionWithValuedMacroDefinition()
     expect_string(__wrap_addMacro, _value, "65535");
     will_return(__wrap_addMacro, 0);
 
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
     //assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
 
     remove(argv[2]);
@@ -328,11 +328,11 @@ static void testCase_includeDirectoryOption()
     expect_string(__wrap_addPath, _path, argv[2]);
     will_return(__wrap_addPath, 0);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[3]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[3]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
 
     /*  check if the path from -I option exists in options pathList */
     /*
@@ -375,9 +375,9 @@ static void testCase_failAddingIncludeDirectoryOption()
     expect_string(__wrap_addPath, _path, argv[2]);
     will_return(__wrap_addPath, -2);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[3]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[3]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
     /*  redirect stderr to a file and call compiler() function */
     int originalStderr = dup(STDERR_FILENO);
@@ -386,7 +386,7 @@ static void testCase_failAddingIncludeDirectoryOption()
 
     stderrFile = fopen(redirectStderrFileName, "w");
     dup2(fileno(stderrFile), STDERR_FILENO);
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
 
     fclose(stderrFile);
     dup2(originalStderr, STDERR_FILENO);
@@ -420,11 +420,11 @@ static void testCase_preprocessorOnlyOption()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
     assert_int_equal(getOptions()->general.preprocessOnly, 1);
 
     remove(argv[2]);
@@ -445,11 +445,11 @@ static void testCase_traceOn()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
     assert_int_equal(getOptions()->general.trace, 1);
 
     remove(argv[2]);
@@ -470,7 +470,7 @@ static void testCase_invalidArgument()
 
     stderrFile = fopen(redirectStderrFileName, "w");
     dup2(fileno(stderrFile), STDERR_FILENO);
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), -1);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), -1);
     fclose(stderrFile);
     dup2(originalStderr, STDERR_FILENO);
 
@@ -502,7 +502,7 @@ static void testCase_noFileNames()
 
     stderrFile = fopen(redirectStderrFileName, "w");
     dup2(fileno(stderrFile), STDERR_FILENO);
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), -1);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), -1);
     fclose(stderrFile);
     dup2(originalStderr, STDERR_FILENO);
 
@@ -534,7 +534,7 @@ static void testCase_fileNotFound()
 
     stderrFile = fopen(redirectStderrFileName, "w");
     dup2(fileno(stderrFile), STDERR_FILENO);
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), -1);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), -1);
     fclose(stderrFile);
     dup2(originalStderr, STDERR_FILENO);
 
@@ -566,7 +566,7 @@ static void testCase_notRegularFile()
 
     stderrFile = fopen(redirectStderrFileName, "w");
     dup2(fileno(stderrFile), STDERR_FILENO);
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), -1);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), -1);
     fclose(stderrFile);
     dup2(originalStderr, STDERR_FILENO);
 
@@ -605,11 +605,11 @@ static void testCase_undefinedCPathEnv()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[1]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
 
     /*  set the include path variable back to it's original value */
     if (NULL != includePathEnv)
@@ -647,11 +647,11 @@ static void testCase_successfullyAddCPathEnvValue()
     expect_string(__wrap_addPath, _path, "/usr/include");
     will_return(__wrap_addPath, 0);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[1]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
 
     /*  set the include path variable back to it's original value */
     if (NULL != includePathEnv)
@@ -689,9 +689,9 @@ static void testCase_failAddingCPathEnvValue()
     expect_string(__wrap_addPath, _path, "/usr/include");
     will_return(__wrap_addPath, -2);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[1]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
     /*  redirect stderr to a file and call compiler() function */
     int originalStderr = dup(STDERR_FILENO);
@@ -700,7 +700,7 @@ static void testCase_failAddingCPathEnvValue()
 
     stderrFile = fopen(redirectStderrFileName, "w");
     dup2(fileno(stderrFile), STDERR_FILENO);
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
 
     fclose(stderrFile);
     dup2(originalStderr, STDERR_FILENO);
@@ -740,11 +740,11 @@ static void testCase_singleFileName()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[1]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
 
     remove(argv[1]);
 }
@@ -772,17 +772,17 @@ static void testCase_multipleFileNames()
     fprintf(sourceFile, "/* test file 3 with just a comment */\n");
     fclose(sourceFile);
 
-    /*  expected parameters for compileSourceFile */
-    expect_string(__wrap_compileSourceFile, _fileName, argv[1]);
-    will_return(__wrap_compileSourceFile, 0);
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[1]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
-    expect_string(__wrap_compileSourceFile, _fileName, argv[2]);
-    will_return(__wrap_compileSourceFile, 0);
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
-    expect_string(__wrap_compileSourceFile, _fileName, argv[3]);
-    will_return(__wrap_compileSourceFile, 0);
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[3]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
-    assert_int_equal(compiler(sizeof(argv) / sizeof(char *), argv), 0);
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
 
     remove(argv[1]);
     remove(argv[2]);

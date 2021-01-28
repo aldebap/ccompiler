@@ -12,6 +12,6 @@
     prototypes
 */
 
-int compiler(int _argc, char *_argv[]);
+int compilerCLI(int _argc, char *_argv[]);
 
 #endif /* !defined( __COMPILER_H ) */
