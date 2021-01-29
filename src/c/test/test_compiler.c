@@ -97,7 +97,24 @@ int __wrap_addPath(TPathList *_pathList, char *_path)
 }
 
 /*
-    wrap compile source function
+    wrap initializeSourceFileCompiler function
+*/
+
+int __wrap_initializeSourceFileCompiler()
+{
+    return (int)mock();
+}
+
+/*
+    wrap destroySourceFileCompiler function
+*/
+
+void __wrap_destroySourceFileCompiler()
+{
+}
+
+/*
+    wrap sourceFileCompiler function
 */
 
 int __wrap_sourceFileCompiler(char *_fileName)
@@ -174,6 +191,9 @@ static void testCase_macroOptionWithoutMacroName()
     expect_string(__wrap_addPath, _path, "/usr/include");
     will_return(__wrap_addPath, 0);
 
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
+
     /*  expected parameters for sourceFileCompiler() */
     expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
     will_return(__wrap_sourceFileCompiler, 0);
@@ -220,15 +240,18 @@ static void testCase_macroOptionWithSimpleMacroDefinition()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
-    /*  expected parameters for sourceFileCompiler() */
-    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
-    will_return(__wrap_sourceFileCompiler, 0);
-
     /*  expected parameters for addMacro */
     expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "__SIMPLE_MACRO_ONE_H");
     expect_value(__wrap_addMacro, _value, NULL);
     will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
+
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
     assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
     //assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
@@ -256,15 +279,18 @@ static void testCase_macroOptionWithEmptyValueMacroDefinition()
 
     //setDefaultOptions(&testOptions);
 
-    /*  expected parameters for sourceFileCompiler() */
-    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
-    will_return(__wrap_sourceFileCompiler, 0);
-
     /*  expected parameters for addMacro */
     expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "MAXSHORT");
     expect_string(__wrap_addMacro, _value, "");
     will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
+
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
     assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
     //assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
@@ -292,15 +318,18 @@ static void testCase_macroOptionWithValuedMacroDefinition()
 
     //setDefaultOptions(&testOptions);
 
-    /*  expected parameters for sourceFileCompiler() */
-    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
-    will_return(__wrap_sourceFileCompiler, 0);
-
     /*  expected parameters for addMacro */
     expect_any(__wrap_addMacro, _macroList);
     expect_string(__wrap_addMacro, _macro, "MAXINT");
     expect_string(__wrap_addMacro, _value, "65535");
     will_return(__wrap_addMacro, 0);
+
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
+
+    /*  expected parameters for sourceFileCompiler() */
+    expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
+    will_return(__wrap_sourceFileCompiler, 0);
 
     assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
     //assert_int_equal(checkOptions(getOptions(), &testOptions), 0);
@@ -327,6 +356,9 @@ static void testCase_includeDirectoryOption()
     expect_any(__wrap_addPath, _pathList);
     expect_string(__wrap_addPath, _path, argv[2]);
     will_return(__wrap_addPath, 0);
+
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
 
     /*  expected parameters for sourceFileCompiler() */
     expect_string(__wrap_sourceFileCompiler, _fileName, argv[3]);
@@ -375,6 +407,9 @@ static void testCase_failAddingIncludeDirectoryOption()
     expect_string(__wrap_addPath, _path, argv[2]);
     will_return(__wrap_addPath, -2);
 
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
+
     /*  expected parameters for sourceFileCompiler() */
     expect_string(__wrap_sourceFileCompiler, _fileName, argv[3]);
     will_return(__wrap_sourceFileCompiler, 0);
@@ -420,6 +455,9 @@ static void testCase_preprocessorOnlyOption()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
+
     /*  expected parameters for sourceFileCompiler() */
     expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
     will_return(__wrap_sourceFileCompiler, 0);
@@ -444,6 +482,9 @@ static void testCase_traceOn()
     sourceFile = fopen(argv[2], "w");
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
+
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
 
     /*  expected parameters for sourceFileCompiler() */
     expect_string(__wrap_sourceFileCompiler, _fileName, argv[2]);
@@ -593,9 +634,15 @@ static void testCase_undefinedCPathEnv()
 
     /*  set the include path variable to NULL */
     char testIncludePathEnv[1024] = "CPATH=";
+    char previousIncludePathEnv[1024];
     char *includePathEnv;
 
     includePathEnv = getenv("CPATH");
+    if (NULL == includePathEnv)
+        *previousIncludePathEnv = '\0';
+    else
+        strcpy(previousIncludePathEnv, includePathEnv);
+
     putenv(testIncludePathEnv);
 
     /*  generate a source file */
@@ -605,6 +652,9 @@ static void testCase_undefinedCPathEnv()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
+
     /*  expected parameters for sourceFileCompiler() */
     expect_string(__wrap_sourceFileCompiler, _fileName, argv[1]);
     will_return(__wrap_sourceFileCompiler, 0);
@@ -612,10 +662,7 @@ static void testCase_undefinedCPathEnv()
     assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
 
     /*  set the include path variable back to it's original value */
-    if (NULL != includePathEnv)
-    {
-        putenv(strcat(testIncludePathEnv, includePathEnv));
-    }
+    putenv(strcat(testIncludePathEnv, previousIncludePathEnv));
 
     remove(argv[1]);
 }
@@ -630,9 +677,15 @@ static void testCase_successfullyAddCPathEnvValue()
 
     /*  set the include path variable */
     char testIncludePathEnv[1024] = "CPATH=";
+    char previousIncludePathEnv[1024];
     char *includePathEnv;
 
     includePathEnv = getenv("CPATH");
+    if (NULL == includePathEnv)
+        *previousIncludePathEnv = '\0';
+    else
+        strcpy(previousIncludePathEnv, includePathEnv);
+
     putenv("CPATH=/usr/include");
 
     /*  generate a source file */
@@ -647,6 +700,9 @@ static void testCase_successfullyAddCPathEnvValue()
     expect_string(__wrap_addPath, _path, "/usr/include");
     will_return(__wrap_addPath, 0);
 
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
+
     /*  expected parameters for sourceFileCompiler() */
     expect_string(__wrap_sourceFileCompiler, _fileName, argv[1]);
     will_return(__wrap_sourceFileCompiler, 0);
@@ -654,10 +710,7 @@ static void testCase_successfullyAddCPathEnvValue()
     assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), 0);
 
     /*  set the include path variable back to it's original value */
-    if (NULL != includePathEnv)
-    {
-        putenv(strcat(testIncludePathEnv, includePathEnv));
-    }
+    putenv(strcat(testIncludePathEnv, previousIncludePathEnv));
 
     remove(argv[1]);
 }
@@ -672,9 +725,15 @@ static void testCase_failAddingCPathEnvValue()
 
     /*  set the include path variable */
     char testIncludePathEnv[1024] = "CPATH=";
+    char previousIncludePathEnv[1024];
     char *includePathEnv;
 
     includePathEnv = getenv("CPATH");
+    if (NULL == includePathEnv)
+        *previousIncludePathEnv = '\0';
+    else
+        strcpy(previousIncludePathEnv, includePathEnv);
+
     putenv("CPATH=/usr/include");
 
     /*  generate a source file */
@@ -688,6 +747,9 @@ static void testCase_failAddingCPathEnvValue()
     expect_any(__wrap_addPath, _pathList);
     expect_string(__wrap_addPath, _path, "/usr/include");
     will_return(__wrap_addPath, -2);
+
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
 
     /*  expected parameters for sourceFileCompiler() */
     expect_string(__wrap_sourceFileCompiler, _fileName, argv[1]);
@@ -716,17 +778,37 @@ static void testCase_failAddingCPathEnvValue()
     assert_string_equal(output, "compiler: error: fail attempting to add include path from env variable\n");
 
     /*  set the include path variable back to it's original value */
-    if (NULL != includePathEnv)
-    {
-        putenv(strcat(testIncludePathEnv, includePathEnv));
-    }
+    putenv(strcat(testIncludePathEnv, previousIncludePathEnv));
 
     remove(redirectStderrFileName);
     remove(argv[1]);
 }
 
 /*
-    test case 017 - single file name
+    test case 017 - fail initializing sourceFileCompiler
+*/
+
+static void testCase_failInitializingSourceFileCompiler()
+{
+    char *argv[] = {"compiler", "sourceFile.c"};
+
+    /*  generate a source file */
+    FILE *sourceFile;
+
+    sourceFile = fopen(argv[1], "w");
+    fprintf(sourceFile, "/* test file with just a comment */\n");
+    fclose(sourceFile);
+
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, -1);
+
+    assert_int_equal(compilerCLI(sizeof(argv) / sizeof(char *), argv), -2);
+
+    remove(argv[1]);
+}
+
+/*
+    test case 018 - single file name
 */
 
 static void testCase_singleFileName()
@@ -740,6 +822,9 @@ static void testCase_singleFileName()
     fprintf(sourceFile, "/* test file with just a comment */\n");
     fclose(sourceFile);
 
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
+
     /*  expected parameters for sourceFileCompiler() */
     expect_string(__wrap_sourceFileCompiler, _fileName, argv[1]);
     will_return(__wrap_sourceFileCompiler, 0);
@@ -750,7 +835,7 @@ static void testCase_singleFileName()
 }
 
 /*
-    test case 018 - multiple file names
+    test case 019 - multiple file names
 */
 
 static void testCase_multipleFileNames()
@@ -771,6 +856,9 @@ static void testCase_multipleFileNames()
     sourceFile = fopen(argv[3], "w");
     fprintf(sourceFile, "/* test file 3 with just a comment */\n");
     fclose(sourceFile);
+
+    /*  expected parameters for initializeSourceFileCompiler() */
+    will_return(__wrap_initializeSourceFileCompiler, 0);
 
     /*  expected parameters for sourceFileCompiler() */
     expect_string(__wrap_sourceFileCompiler, _fileName, argv[1]);
@@ -812,9 +900,10 @@ int runCompilerTests()
         {"test case 013 - not a regular file", testCase_notRegularFile, NULL, NULL},
         {"test case 014 - undefined CPATH env variable", testCase_undefinedCPathEnv, NULL, NULL},
         {"test case 015 - successfully add CPATH env variable value to include path list", testCase_successfullyAddCPathEnvValue, NULL, NULL},
-
-        {"test case 017 - single file name", testCase_singleFileName, NULL, NULL},
-        {"test case 018 - multiple file names", testCase_multipleFileNames, NULL, NULL},
+        {"test case 016 - fail adding CPATH env variable value to include path list", testCase_failAddingCPathEnvValue, NULL, NULL},
+        {"test case 017 - fail initializing sourceFileCompiler", testCase_failInitializingSourceFileCompiler, NULL, NULL},
+        {"test case 018 - single file name", testCase_singleFileName, NULL, NULL},
+        {"test case 019 - multiple file names", testCase_multipleFileNames, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("compiler.c tests", testCases, NULL, NULL);

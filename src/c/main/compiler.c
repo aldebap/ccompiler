@@ -141,11 +141,23 @@ int compilerCLI(int _argc, char *_argv[])
             fprintf(stderr, "%s: error: fail attempting to add include path from env variable\n", _argv[0]);
     }
 
+    /*  initialize the sourceFileCompiler */
+    int result;
+
+    result = initializeSourceFileCompiler();
+    if (0 != result)
+        return -2;
+
     /* compile each input file */
     for (i = 0; i < fileNameListSize; i++)
     {
-        int compilationResult = sourceFileCompiler(fileNameList[i]);
+        result = sourceFileCompiler(fileNameList[i]);
+        if (0 > result)
+            return -3;
     }
+
+    /*  destroy the sourceFileCompiler */
+    destroySourceFileCompiler();
 
     return 0;
 }
