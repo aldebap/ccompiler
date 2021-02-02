@@ -54,13 +54,6 @@ void destroySourceFileCompiler()
 
 int sourceFileCompiler(char *_fileName)
 {
-    int result;
-
-    /*  TODO: this should be moved to the compiler caller ! */
-    result = initializeSourceFileCompiler();
-    if (0 != result)
-        return -1;
-
     /*  get the source file directory */
     regmatch_t match[2];
     char sourceDirectory[1024];
@@ -74,9 +67,6 @@ int sourceFileCompiler(char *_fileName)
     {
         strcpy(sourceDirectory, "./");
     }
-
-    /*  TODO: this should be moved to the compiler caller ! */
-    destroySourceFileCompiler();
 
     /*  the preprocessor file name replace the .c extention for .i */
     unsigned char preProcessorFileName[1024];
@@ -96,10 +86,11 @@ int sourceFileCompiler(char *_fileName)
     /*  preprocessor pass */
     FILE *sourceFile;
     FILE *preProcessorFile;
+    int result;
 
     result = initializePreProcessor();
     if (0 != result)
-        return -2;
+        return -1;
 
     sourceFile = fopen(_fileName, "r");
     preProcessorFile = fopen(preProcessorFileName, "w");

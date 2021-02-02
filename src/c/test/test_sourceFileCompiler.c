@@ -20,19 +20,6 @@
 #include "sourceFileCompiler.h"
 
 /*
-    mock for regcomp() function
-*/
-
-int __wrap_regcomp(regex_t *_regex, const char *_pattern, int _cflags)
-{
-    check_expected(_regex);
-    check_expected(_pattern);
-    check_expected(_cflags);
-
-    return (int)mock();
-}
-
-/*
     mock for regexec() function
 */
 
@@ -51,15 +38,6 @@ int __wrap_regexec(regex_t *__restrict__ _regex, char *__restrict__ _string, siz
     }
 
     return (int)mock();
-}
-
-/*
-    mock for regfree() function
-*/
-
-void __wrap_regfree(regex_t *_regex)
-{
-    check_expected(_regex);
 }
 
 /*
@@ -125,36 +103,12 @@ void __wrap_lexicalParser(FILE *_fileInput)
 }
 
 /*
-    test case 001 - fail in the regcomp
-*/
-
-static void testCase_failInRegcomp()
-{
-    char *sourceFileName = "sourceFile.c";
-
-    /*  expected parameters for the regcomp */
-    expect_any(__wrap_regcomp, _regex);
-    expect_string(__wrap_regcomp, _pattern, "^(.*/)[^/]+$");
-    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
-    will_return(__wrap_regcomp, REG_BADPAT);
-
-    /*  expected result from compileSourceFile */
-    assert_int_equal(sourceFileCompiler(sourceFileName), -1);
-}
-
-/*
-    test case 002 - source file with a directory
+    test case 001 - source file with a directory
 */
 
 static void testCase_sourceFileWithDirectory()
 {
     char *sourceFileName = "main/sourceFile.c";
-
-    /*  expected parameters for the regcomp */
-    expect_any(__wrap_regcomp, _regex);
-    expect_string(__wrap_regcomp, _pattern, "^(.*/)[^/]+$");
-    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
-    will_return(__wrap_regcomp, 0);
 
     /*  expected parameters for the regexec */
     expect_any(__wrap_regexec, _regex);
@@ -163,9 +117,6 @@ static void testCase_sourceFileWithDirectory()
     expect_any(__wrap_regexec, _match);
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, 0);
-
-    /*  expected parameters for the regfree */
-    expect_any(__wrap_regfree, _regex);
 
     /*  set the expected values for the wrap initializePreProcessor */
     will_return(__wrap_initializePreProcessor, 0);
@@ -210,19 +161,13 @@ static void testCase_sourceFileWithDirectory()
 }
 
 /*
-    test case 003 - source file without a directory
+    test case 002 - source file without a directory
 */
 
 static void testCase_sourceFileWithoutDirectory()
 {
     char *sourceFileName = "sourceFile.c";
 
-    /*  expected parameters for the regcomp */
-    expect_any(__wrap_regcomp, _regex);
-    expect_string(__wrap_regcomp, _pattern, "^(.*/)[^/]+$");
-    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
-    will_return(__wrap_regcomp, 0);
-
     /*  expected parameters for the regexec */
     expect_any(__wrap_regexec, _regex);
     expect_string(__wrap_regexec, _string, sourceFileName);
@@ -230,9 +175,6 @@ static void testCase_sourceFileWithoutDirectory()
     expect_any(__wrap_regexec, _match);
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
-
-    /*  expected parameters for the regfree */
-    expect_any(__wrap_regfree, _regex);
 
     /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
     will_return(__wrap_initializePreProcessor, 0);
@@ -277,19 +219,13 @@ static void testCase_sourceFileWithoutDirectory()
 }
 
 /*
-    test case 004 - source file name with .c extention
+    test case 003 - source file name with .c extention
 */
 
 static void testCase_sourceFileNameDotC()
 {
     char *sourceFileName = "sourceFile.c";
 
-    /*  expected parameters for the regcomp */
-    expect_any(__wrap_regcomp, _regex);
-    expect_string(__wrap_regcomp, _pattern, "^(.*/)[^/]+$");
-    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
-    will_return(__wrap_regcomp, 0);
-
     /*  expected parameters for the regexec */
     expect_any(__wrap_regexec, _regex);
     expect_string(__wrap_regexec, _string, sourceFileName);
@@ -297,9 +233,6 @@ static void testCase_sourceFileNameDotC()
     expect_any(__wrap_regexec, _match);
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
-
-    /*  expected parameters for the regfree */
-    expect_any(__wrap_regfree, _regex);
 
     /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
     will_return(__wrap_initializePreProcessor, 0);
@@ -344,19 +277,13 @@ static void testCase_sourceFileNameDotC()
 }
 
 /*
-    test case 005 - source file name without .c extention
+    test case 004 - source file name without .c extention
 */
 
 static void testCase_sourceFileNameWithoutExtention()
 {
     char *sourceFileName = "sourceFile";
 
-    /*  expected parameters for the regcomp */
-    expect_any(__wrap_regcomp, _regex);
-    expect_string(__wrap_regcomp, _pattern, "^(.*/)[^/]+$");
-    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
-    will_return(__wrap_regcomp, 0);
-
     /*  expected parameters for the regexec */
     expect_any(__wrap_regexec, _regex);
     expect_string(__wrap_regexec, _string, sourceFileName);
@@ -364,9 +291,6 @@ static void testCase_sourceFileNameWithoutExtention()
     expect_any(__wrap_regexec, _match);
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
-
-    /*  expected parameters for the regfree */
-    expect_any(__wrap_regfree, _regex);
 
     /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
     will_return(__wrap_initializePreProcessor, 0);
@@ -411,19 +335,13 @@ static void testCase_sourceFileNameWithoutExtention()
 }
 
 /*
-    test case 006 - fail in the initializeProcessor
+    test case 005 - fail in the initializeProcessor
 */
 
 static void testCase_failInInitializePreProcessor()
 {
     char *sourceFileName = "sourceFile.c";
 
-    /*  expected parameters for the regcomp */
-    expect_any(__wrap_regcomp, _regex);
-    expect_string(__wrap_regcomp, _pattern, "^(.*/)[^/]+$");
-    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
-    will_return(__wrap_regcomp, 0);
-
     /*  expected parameters for the regexec */
     expect_any(__wrap_regexec, _regex);
     expect_string(__wrap_regexec, _string, sourceFileName);
@@ -432,30 +350,21 @@ static void testCase_failInInitializePreProcessor()
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
 
-    /*  expected parameters for the regfree */
-    expect_any(__wrap_regfree, _regex);
-
     /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
     will_return(__wrap_initializePreProcessor, -1);
 
     /*  expected result from compileSourceFile */
-    assert_int_equal(sourceFileCompiler(sourceFileName), -2);
+    assert_int_equal(sourceFileCompiler(sourceFileName), -1);
 }
 
 /*
-    test case 007 - fail in the preProcessor
+    test case 006 - fail in the preProcessor
 */
 
 static void testCase_failInPreProcessor()
 {
     char *sourceFileName = "sourceFile.c";
 
-    /*  expected parameters for the regcomp */
-    expect_any(__wrap_regcomp, _regex);
-    expect_string(__wrap_regcomp, _pattern, "^(.*/)[^/]+$");
-    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
-    will_return(__wrap_regcomp, 0);
-
     /*  expected parameters for the regexec */
     expect_any(__wrap_regexec, _regex);
     expect_string(__wrap_regexec, _string, sourceFileName);
@@ -463,9 +372,6 @@ static void testCase_failInPreProcessor()
     expect_any(__wrap_regexec, _match);
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
-
-    /*  expected parameters for the regfree */
-    expect_any(__wrap_regfree, _regex);
 
     /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
     will_return(__wrap_initializePreProcessor, 0);
@@ -500,18 +406,12 @@ static void testCase_failInPreProcessor()
 }
 
 /*
-    test case 008 - preProcessor only option on
+    test case 007 - preProcessor only option on
 */
 
 static void testCase_preProcessorOnlyOption()
 {
     char *sourceFileName = "sourceFile.c";
-
-    /*  expected parameters for the regcomp */
-    expect_any(__wrap_regcomp, _regex);
-    expect_string(__wrap_regcomp, _pattern, "^(.*/)[^/]+$");
-    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
-    will_return(__wrap_regcomp, 0);
 
     /*  expected parameters for the regexec */
     expect_any(__wrap_regexec, _regex);
@@ -520,9 +420,6 @@ static void testCase_preProcessorOnlyOption()
     expect_any(__wrap_regexec, _match);
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
-
-    /*  expected parameters for the regfree */
-    expect_any(__wrap_regfree, _regex);
 
     /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
     will_return(__wrap_initializePreProcessor, 0);
@@ -566,14 +463,13 @@ static void testCase_preProcessorOnlyOption()
 int runCompileSourceFileTests()
 {
     const struct CMUnitTest testCases[] = {
-        {"test case 001 - fail in the regcomp", testCase_failInRegcomp, NULL, NULL},
-        {"test case 002 - source file with a directory", testCase_sourceFileWithDirectory, NULL, NULL},
-        {"test case 003 - source file without a directory", testCase_sourceFileWithDirectory, NULL, NULL},
-        {"test case 004 - source file name with .c extention", testCase_sourceFileNameDotC, NULL, NULL},
-        {"test case 005 - source file name without .c extention", testCase_sourceFileNameWithoutExtention, NULL, NULL},
-        {"test case 006 - fail in the initializeProcessor", testCase_failInInitializePreProcessor, NULL, NULL},
-        {"test case 007 - fail in the preProcessor", testCase_failInPreProcessor, NULL, NULL},
-        {"test case 008 - preProcessor only option on", testCase_preProcessorOnlyOption, NULL, NULL},
+        {"test case 001 - source file with a directory", testCase_sourceFileWithDirectory, NULL, NULL},
+        {"test case 002 - source file without a directory", testCase_sourceFileWithDirectory, NULL, NULL},
+        {"test case 003 - source file name with .c extention", testCase_sourceFileNameDotC, NULL, NULL},
+        {"test case 004 - source file name without .c extention", testCase_sourceFileNameWithoutExtention, NULL, NULL},
+        {"test case 005 - fail in the initializeProcessor", testCase_failInInitializePreProcessor, NULL, NULL},
+        {"test case 006 - fail in the preProcessor", testCase_failInPreProcessor, NULL, NULL},
+        {"test case 007 - preProcessor only option on", testCase_preProcessorOnlyOption, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("compileSourceFile.c tests", testCases, NULL, NULL);

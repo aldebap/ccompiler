@@ -45,10 +45,20 @@ target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
 target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
 add_test(${TEST_NAME} ${TEST_NAME})
 
-#   compileSourceFile unit tests
+#   initialize sourceFileCompiler unit tests
+set(TEST_NAME "test_initializeSourceFileCompiler")
+set(SOURCE_LIST ../main/sourceFileCompiler.c ../main/options.c ../main/preProcessor.c ../main/macro.c ../main/path.c ../main/lexicalParser.c ../main/escapeSequence.c)
+set(TEST_FLAGS "-Wl,--wrap,regcomp")
+
+add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
+target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)
+target_link_libraries(${TEST_NAME} ${CMOCKA_LIBRARY} ${TEST_FLAGS} -fprofile-arcs -ftest-coverage)
+add_test(${TEST_NAME} ${TEST_NAME})
+
+#   sourceFileCompiler unit tests
 set(TEST_NAME "test_sourceFileCompiler")
 set(SOURCE_LIST ../main/sourceFileCompiler.c ../main/preProcessor.c ../main/macro.c ../main/path.c ../main/options.c)
-set(TEST_FLAGS "-Wl,--wrap,regcomp -Wl,--wrap,regexec -Wl,--wrap,regfree -Wl,--wrap,fopen -Wl,--wrap,fclose -Wl,--defsym,initializePreProcessor=__wrap_initializePreProcessor -Wl,--defsym,preProcessor=__wrap_preProcessor -Wl,--defsym,destroyPreProcessor=__wrap_destroyPreProcessor -Wl,--defsym,lexicalParser=__wrap_lexicalParser")
+set(TEST_FLAGS "-Wl,--wrap,regexec -Wl,--wrap,fopen -Wl,--wrap,fclose -Wl,--defsym,initializePreProcessor=__wrap_initializePreProcessor -Wl,--defsym,preProcessor=__wrap_preProcessor -Wl,--defsym,destroyPreProcessor=__wrap_destroyPreProcessor -Wl,--defsym,lexicalParser=__wrap_lexicalParser")
 
 add_executable(${TEST_NAME} ${TEST_NAME}.c ${SOURCE_LIST})
 target_compile_definitions(${TEST_NAME} PUBLIC -D UNIT_TEST)

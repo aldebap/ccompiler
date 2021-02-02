@@ -807,6 +807,8 @@ static void testCase_failInitializingSourceFileCompiler()
     remove(argv[1]);
 }
 
+//  TODO: add test case for fail in sourceFileCompiler()
+
 /*
     test case 018 - single file name
 */
