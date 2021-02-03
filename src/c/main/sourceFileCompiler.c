@@ -20,6 +20,7 @@
 static struct TSourceCompiler
 {
     regex_t reSourceDirectory;
+    regex_t reCExtention;
 } srcCompiler;
 
 /*
@@ -35,6 +36,11 @@ int initializeSourceFileCompiler()
     if (0 != result)
         return -1;
 
+    /*  compile the regex's to match .c file name extention */
+    result = regcomp(&srcCompiler.reCExtention, "[.]c$", REG_EXTENDED);
+    if (0 != result)
+        return -1;
+
     return 0;
 }
 
@@ -46,6 +52,7 @@ void destroySourceFileCompiler()
 {
     /*  release the memory for every regex for preprocessor syntax */
     regfree(&srcCompiler.reSourceDirectory);
+    regfree(&srcCompiler.reCExtention);
 }
 
 /*
@@ -73,8 +80,8 @@ int sourceFileCompiler(char *_fileName)
     unsigned int length = strlen(_fileName);
 
     strcpy(preProcessorFileName, _fileName);
-    /*  TODO: replace this strcmp by a regex */
-    if (2 < length && 0 == strcmp(preProcessorFileName + length - 2, ".c"))
+
+    if (0 == regexec(&srcCompiler.reCExtention, preProcessorFileName, 1, match, 0))
     {
         preProcessorFileName[length - 1] = 'i';
     }

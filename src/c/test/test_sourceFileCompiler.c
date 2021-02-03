@@ -118,6 +118,14 @@ static void testCase_sourceFileWithDirectory()
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, 0);
 
+    /*  expected parameters for the regexec */
+    expect_any(__wrap_regexec, _regex);
+    expect_string(__wrap_regexec, _string, sourceFileName);
+    expect_value(__wrap_regexec, _nmatch, 1);
+    expect_any(__wrap_regexec, _match);
+    expect_value(__wrap_regexec, _flags, 0);
+    will_return(__wrap_regexec, 0);
+
     /*  set the expected values for the wrap initializePreProcessor */
     will_return(__wrap_initializePreProcessor, 0);
 
@@ -175,6 +183,14 @@ static void testCase_sourceFileWithoutDirectory()
     expect_any(__wrap_regexec, _match);
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
+
+    /*  expected parameters for the regexec */
+    expect_any(__wrap_regexec, _regex);
+    expect_string(__wrap_regexec, _string, sourceFileName);
+    expect_value(__wrap_regexec, _nmatch, 1);
+    expect_any(__wrap_regexec, _match);
+    expect_value(__wrap_regexec, _flags, 0);
+    will_return(__wrap_regexec, 0);
 
     /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
     will_return(__wrap_initializePreProcessor, 0);
@@ -234,6 +250,14 @@ static void testCase_sourceFileNameDotC()
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
 
+    /*  expected parameters for the regexec */
+    expect_any(__wrap_regexec, _regex);
+    expect_string(__wrap_regexec, _string, sourceFileName);
+    expect_value(__wrap_regexec, _nmatch, 1);
+    expect_any(__wrap_regexec, _match);
+    expect_value(__wrap_regexec, _flags, 0);
+    will_return(__wrap_regexec, 0);
+
     /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
     will_return(__wrap_initializePreProcessor, 0);
 
@@ -288,6 +312,14 @@ static void testCase_sourceFileNameWithoutExtention()
     expect_any(__wrap_regexec, _regex);
     expect_string(__wrap_regexec, _string, sourceFileName);
     expect_value(__wrap_regexec, _nmatch, 2);
+    expect_any(__wrap_regexec, _match);
+    expect_value(__wrap_regexec, _flags, 0);
+    will_return(__wrap_regexec, -1);
+
+    /*  expected parameters for the regexec */
+    expect_any(__wrap_regexec, _regex);
+    expect_string(__wrap_regexec, _string, sourceFileName);
+    expect_value(__wrap_regexec, _nmatch, 1);
     expect_any(__wrap_regexec, _match);
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
@@ -350,6 +382,14 @@ static void testCase_failInInitializePreProcessor()
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
 
+    /*  expected parameters for the regexec */
+    expect_any(__wrap_regexec, _regex);
+    expect_string(__wrap_regexec, _string, sourceFileName);
+    expect_value(__wrap_regexec, _nmatch, 1);
+    expect_any(__wrap_regexec, _match);
+    expect_value(__wrap_regexec, _flags, 0);
+    will_return(__wrap_regexec, 0);
+
     /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
     will_return(__wrap_initializePreProcessor, -1);
 
@@ -372,6 +412,14 @@ static void testCase_failInPreProcessor()
     expect_any(__wrap_regexec, _match);
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
+
+    /*  expected parameters for the regexec */
+    expect_any(__wrap_regexec, _regex);
+    expect_string(__wrap_regexec, _string, sourceFileName);
+    expect_value(__wrap_regexec, _nmatch, 1);
+    expect_any(__wrap_regexec, _match);
+    expect_value(__wrap_regexec, _flags, 0);
+    will_return(__wrap_regexec, 0);
 
     /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
     will_return(__wrap_initializePreProcessor, 0);
@@ -420,6 +468,14 @@ static void testCase_preProcessorOnlyOption()
     expect_any(__wrap_regexec, _match);
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
+
+    /*  expected parameters for the regexec */
+    expect_any(__wrap_regexec, _regex);
+    expect_string(__wrap_regexec, _string, sourceFileName);
+    expect_value(__wrap_regexec, _nmatch, 1);
+    expect_any(__wrap_regexec, _match);
+    expect_value(__wrap_regexec, _flags, 0);
+    will_return(__wrap_regexec, 0);
 
     /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
     will_return(__wrap_initializePreProcessor, 0);
