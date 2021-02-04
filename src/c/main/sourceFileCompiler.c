@@ -90,26 +90,30 @@ int sourceFileCompiler(char *_fileName)
         strcat(preProcessorFileName, ".i");
     }
 
-    /*  preprocessor pass */
+    /*  open the source file and create preprocessor output file */
     FILE *sourceFile;
     FILE *preProcessorFile;
     int result;
 
+    sourceFile = fopen(_fileName, "r");
+    if (NULL == sourceFile)
+        return -1;
+    preProcessorFile = fopen(preProcessorFileName, "w");
+    if (NULL == preProcessorFile)
+        return -2;
+
+    /*  preprocessor pass */
     result = initializePreProcessor();
     if (0 != result)
-        return -1;
-
-    sourceFile = fopen(_fileName, "r");
-    preProcessorFile = fopen(preProcessorFileName, "w");
-    // TODO: both fopen calls may fail
+        return -3;
 
     result = preProcessor(sourceDirectory, sourceFile, preProcessorFile);
 
-    fclose(sourceFile);
-    fclose(preProcessorFile);
-
     /*  destroy all preprocessor data */
     destroyPreProcessor();
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
 
     if (0 != result)
         return result;
