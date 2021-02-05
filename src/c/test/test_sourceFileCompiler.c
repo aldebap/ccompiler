@@ -97,9 +97,11 @@ void __wrap_destroyPreProcessor()
     wrap lexical parser function
 */
 
-void __wrap_lexicalParser(FILE *_fileInput)
+int __wrap_lexicalParser(FILE *_fileInput)
 {
     check_expected_ptr(_fileInput);
+
+    return (int)mock();
 }
 
 /*
@@ -154,15 +156,20 @@ static void testCase_sourceFileWithDirectory()
     expect_any(__wrap_fclose, _stream);
     will_return(__wrap_fclose, 0);
 
-    /*  set the expected values for the wrap lexicalParser() functions */
+    /*  expected parameters for the fopen */
     expect_string(__wrap_fopen, _fileName, "main/sourceFile.i");
     expect_string(__wrap_fopen, _modes, "r");
     will_return(__wrap_fopen, &output);
 
+    /*  set the expected values for the wrap lexicalParser */
     expect_any(__wrap_lexicalParser, _fileInput);
+    will_return(__wrap_lexicalParser, 0);
 
     expect_any(__wrap_fclose, _stream);
     will_return(__wrap_fclose, 0);
+
+    /*  set preprocessor only option off */
+    getOptions()->general.preprocessOnly = 0;
 
     /*  expected result from compileSourceFile */
     assert_int_equal(sourceFileCompiler(sourceFileName), 0);
@@ -192,7 +199,7 @@ static void testCase_sourceFileWithoutDirectory()
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, 0);
 
-    /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
+    /*  set the expected values for the wrap initializePreProcessor */
     will_return(__wrap_initializePreProcessor, 0);
 
     /*  expected parameters for the fopen */
@@ -220,15 +227,20 @@ static void testCase_sourceFileWithoutDirectory()
     expect_any(__wrap_fclose, _stream);
     will_return(__wrap_fclose, 0);
 
-    /*  set the expected values for the wrap lexicalParser() functions */
+    /*  expected parameters for the fopen */
     expect_string(__wrap_fopen, _fileName, "sourceFile.i");
     expect_string(__wrap_fopen, _modes, "r");
     will_return(__wrap_fopen, &output);
 
+    /*  set the expected values for the wrap lexicalParser */
     expect_any(__wrap_lexicalParser, _fileInput);
+    will_return(__wrap_lexicalParser, 0);
 
     expect_any(__wrap_fclose, _stream);
     will_return(__wrap_fclose, 0);
+
+    /*  set preprocessor only option off */
+    getOptions()->general.preprocessOnly = 0;
 
     /*  expected result from compileSourceFile */
     assert_int_equal(sourceFileCompiler(sourceFileName), 0);
@@ -258,7 +270,7 @@ static void testCase_sourceFileNameDotC()
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, 0);
 
-    /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
+    /*  set the expected values for the wrap initializePreProcessor */
     will_return(__wrap_initializePreProcessor, 0);
 
     /*  expected parameters for the fopen */
@@ -286,15 +298,20 @@ static void testCase_sourceFileNameDotC()
     expect_any(__wrap_fclose, _stream);
     will_return(__wrap_fclose, 0);
 
-    /*  set the expected values for the wrap lexicalParser() functions */
+    /*  expected parameters for the fopen */
     expect_string(__wrap_fopen, _fileName, "sourceFile.i");
     expect_string(__wrap_fopen, _modes, "r");
     will_return(__wrap_fopen, &output);
 
+    /*  set the expected values for the wrap lexicalParser */
     expect_any(__wrap_lexicalParser, _fileInput);
+    will_return(__wrap_lexicalParser, 0);
 
     expect_any(__wrap_fclose, _stream);
     will_return(__wrap_fclose, 0);
+
+    /*  set preprocessor only option off */
+    getOptions()->general.preprocessOnly = 0;
 
     /*  expected result from compileSourceFile */
     assert_int_equal(sourceFileCompiler(sourceFileName), 0);
@@ -324,7 +341,7 @@ static void testCase_sourceFileNameWithoutExtention()
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, -1);
 
-    /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
+    /*  set the expected values for the wrap initializePreProcessor */
     will_return(__wrap_initializePreProcessor, 0);
 
     /*  expected parameters for the fopen */
@@ -352,15 +369,20 @@ static void testCase_sourceFileNameWithoutExtention()
     expect_any(__wrap_fclose, _stream);
     will_return(__wrap_fclose, 0);
 
-    /*  set the expected values for the wrap lexicalParser() functions */
+    /*  expected parameters for the fopen */
     expect_string(__wrap_fopen, _fileName, "sourceFile.i");
     expect_string(__wrap_fopen, _modes, "r");
     will_return(__wrap_fopen, &output);
 
+    /*  set the expected values for the wrap lexicalParser */
     expect_any(__wrap_lexicalParser, _fileInput);
+    will_return(__wrap_lexicalParser, 0);
 
     expect_any(__wrap_fclose, _stream);
     will_return(__wrap_fclose, 0);
+
+    /*  set preprocessor only option off */
+    getOptions()->general.preprocessOnly = 0;
 
     /*  expected result from compileSourceFile */
     assert_int_equal(sourceFileCompiler(sourceFileName), 0);
@@ -474,7 +496,7 @@ static void testCase_failInInitializePreProcessor()
     expect_string(__wrap_fopen, _modes, "w");
     will_return(__wrap_fopen, &output);
 
-    /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
+    /*  set the expected values for the wrap initializePreProcessor */
     will_return(__wrap_initializePreProcessor, -1);
 
     /*  expected result from compileSourceFile */
@@ -517,14 +539,14 @@ static void testCase_failInPreProcessor()
     expect_string(__wrap_fopen, _modes, "w");
     will_return(__wrap_fopen, &output);
 
-    /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
+    /*  set the expected values for the wrap initializePreProcessor */
     will_return(__wrap_initializePreProcessor, 0);
 
     /*  set the expected values for the wrap preProcessor */
     expect_string(__wrap_preProcessor, _sourceDirectory, "./");
     expect_any(__wrap_preProcessor, _fileInput);
     expect_any(__wrap_preProcessor, _fileOutput);
-    will_return(__wrap_preProcessor, -3);
+    will_return(__wrap_preProcessor, -1);
 
     /*  expected parameters for the fclose */
     expect_any(__wrap_fclose, _stream);
@@ -534,7 +556,7 @@ static void testCase_failInPreProcessor()
     will_return(__wrap_fclose, 0);
 
     /*  expected result from compileSourceFile */
-    assert_int_equal(sourceFileCompiler(sourceFileName), -3);
+    assert_int_equal(sourceFileCompiler(sourceFileName), -4);
 }
 
 /*
@@ -561,7 +583,7 @@ static void testCase_preProcessorOnlyOption()
     expect_value(__wrap_regexec, _flags, 0);
     will_return(__wrap_regexec, 0);
 
-    /*  set the expected values for the wrap initializePreProcessor, preProcessor and wrap lexicalParser() functions */
+    /*  set the expected values for the wrap initializePreProcessor */
     will_return(__wrap_initializePreProcessor, 0);
 
     /*  expected parameters for the fopen */
@@ -597,6 +619,142 @@ static void testCase_preProcessorOnlyOption()
 }
 
 /*
+    test case 010 - fail opening preprocessor file
+*/
+
+static void testCase_failOpeningPreProcessor()
+{
+    char *sourceFileName = "sourceFile.c";
+
+    /*  expected parameters for the regexec */
+    expect_any(__wrap_regexec, _regex);
+    expect_string(__wrap_regexec, _string, sourceFileName);
+    expect_value(__wrap_regexec, _nmatch, 2);
+    expect_any(__wrap_regexec, _match);
+    expect_value(__wrap_regexec, _flags, 0);
+    will_return(__wrap_regexec, -1);
+
+    /*  expected parameters for the regexec */
+    expect_any(__wrap_regexec, _regex);
+    expect_string(__wrap_regexec, _string, sourceFileName);
+    expect_value(__wrap_regexec, _nmatch, 1);
+    expect_any(__wrap_regexec, _match);
+    expect_value(__wrap_regexec, _flags, 0);
+    will_return(__wrap_regexec, 0);
+
+    /*  set the expected values for the wrap initializePreProcessor */
+    will_return(__wrap_initializePreProcessor, 0);
+
+    /*  expected parameters for the fopen */
+    FILE input;
+    FILE output;
+
+    expect_string(__wrap_fopen, _fileName, sourceFileName);
+    expect_string(__wrap_fopen, _modes, "r");
+    will_return(__wrap_fopen, &input);
+
+    expect_string(__wrap_fopen, _fileName, "sourceFile.i");
+    expect_string(__wrap_fopen, _modes, "w");
+    will_return(__wrap_fopen, &output);
+
+    /*  set the expected values for the wrap preProcessor */
+    expect_string(__wrap_preProcessor, _sourceDirectory, "./");
+    expect_any(__wrap_preProcessor, _fileInput);
+    expect_any(__wrap_preProcessor, _fileOutput);
+    will_return(__wrap_preProcessor, 0);
+
+    /*  expected parameters for the fclose */
+    expect_any(__wrap_fclose, _stream);
+    will_return(__wrap_fclose, 0);
+
+    expect_any(__wrap_fclose, _stream);
+    will_return(__wrap_fclose, 0);
+
+    /*  expected parameters for the fopen */
+    expect_string(__wrap_fopen, _fileName, "sourceFile.i");
+    expect_string(__wrap_fopen, _modes, "r");
+    will_return(__wrap_fopen, NULL);
+
+    /*  set preprocessor only option off */
+    getOptions()->general.preprocessOnly = 0;
+
+    /*  expected result from compileSourceFile */
+    assert_int_equal(sourceFileCompiler(sourceFileName), -5);
+}
+
+/*
+    test case 011 - fail in lexical parser
+*/
+
+static void testCase_failInLexicalParser()
+{
+    char *sourceFileName = "sourceFile.c";
+
+    /*  expected parameters for the regexec */
+    expect_any(__wrap_regexec, _regex);
+    expect_string(__wrap_regexec, _string, sourceFileName);
+    expect_value(__wrap_regexec, _nmatch, 2);
+    expect_any(__wrap_regexec, _match);
+    expect_value(__wrap_regexec, _flags, 0);
+    will_return(__wrap_regexec, -1);
+
+    /*  expected parameters for the regexec */
+    expect_any(__wrap_regexec, _regex);
+    expect_string(__wrap_regexec, _string, sourceFileName);
+    expect_value(__wrap_regexec, _nmatch, 1);
+    expect_any(__wrap_regexec, _match);
+    expect_value(__wrap_regexec, _flags, 0);
+    will_return(__wrap_regexec, 0);
+
+    /*  set the expected values for the wrap initializePreProcessor */
+    will_return(__wrap_initializePreProcessor, 0);
+
+    /*  expected parameters for the fopen */
+    FILE input;
+    FILE output;
+
+    expect_string(__wrap_fopen, _fileName, sourceFileName);
+    expect_string(__wrap_fopen, _modes, "r");
+    will_return(__wrap_fopen, &input);
+
+    expect_string(__wrap_fopen, _fileName, "sourceFile.i");
+    expect_string(__wrap_fopen, _modes, "w");
+    will_return(__wrap_fopen, &output);
+
+    /*  set the expected values for the wrap preProcessor */
+    expect_string(__wrap_preProcessor, _sourceDirectory, "./");
+    expect_any(__wrap_preProcessor, _fileInput);
+    expect_any(__wrap_preProcessor, _fileOutput);
+    will_return(__wrap_preProcessor, 0);
+
+    /*  expected parameters for the fclose */
+    expect_any(__wrap_fclose, _stream);
+    will_return(__wrap_fclose, 0);
+
+    expect_any(__wrap_fclose, _stream);
+    will_return(__wrap_fclose, 0);
+
+    /*  expected parameters for the fopen */
+    expect_string(__wrap_fopen, _fileName, "sourceFile.i");
+    expect_string(__wrap_fopen, _modes, "r");
+    will_return(__wrap_fopen, &input);
+
+    /*  set the expected values for the wrap lexicalParser */
+    expect_any(__wrap_lexicalParser, _fileInput);
+    will_return(__wrap_lexicalParser, -1);
+
+    /*  expected parameters for the fclose */
+    expect_any(__wrap_fclose, _stream);
+    will_return(__wrap_fclose, 0);
+
+    /*  set preprocessor only option off */
+    getOptions()->general.preprocessOnly = 0;
+
+    /*  expected result from compileSourceFile */
+    assert_int_equal(sourceFileCompiler(sourceFileName), -6);
+}
+
+/*
     run all test cases
 */
 
@@ -612,6 +770,8 @@ int runCompileSourceFileTests()
         {"test case 007 - fail in the initializeProcessor", testCase_failInInitializePreProcessor, NULL, NULL},
         {"test case 008 - fail in the preProcessor", testCase_failInPreProcessor, NULL, NULL},
         {"test case 009 - preProcessor only option on", testCase_preProcessorOnlyOption, NULL, NULL},
+        {"test case 010 - fail opening preprocessor file", testCase_failOpeningPreProcessor, NULL, NULL},
+        {"test case 011 - fail in lexical parser", testCase_failInLexicalParser, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("compileSourceFile.c tests", testCases, NULL, NULL);

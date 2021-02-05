@@ -116,7 +116,7 @@ int sourceFileCompiler(char *_fileName)
     fclose(preProcessorFile);
 
     if (0 != result)
-        return result;
+        return -4;
 
     /*  stop here if preprocessor only option is on */
     if (1 == getOptions()->general.preprocessOnly)
@@ -124,10 +124,15 @@ int sourceFileCompiler(char *_fileName)
 
     /*  lexical parser pass */
     sourceFile = fopen(preProcessorFileName, "r");
-    // TODO: fopen call may fail
-    lexicalParser(sourceFile);
-    // TODO: should check the returned value from lexicalParser
+    if (NULL == sourceFile)
+        return -5;
+
+    result = lexicalParser(sourceFile);
+
     fclose(sourceFile);
+
+    if (0 != result)
+        return -6;
 
     /*  remove intermediate files */
     remove(preProcessorFileName);

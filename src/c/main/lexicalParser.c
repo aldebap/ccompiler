@@ -13,7 +13,7 @@
     Lexical parser
 */
 
-void lexicalParser(FILE *_fileInput)
+int lexicalParser(FILE *_fileInput)
 {
     int inputByte;
     unsigned char delimitedChar = 0;
@@ -137,4 +137,6 @@ void lexicalParser(FILE *_fileInput)
         }
         previousByte = byte;
     }
+
+    return 0;
 }
