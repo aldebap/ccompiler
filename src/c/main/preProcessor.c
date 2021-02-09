@@ -40,6 +40,8 @@ static struct TPreProcessor
     regex_t reEndConditional;
     regex_t reIncludeSystemHeaderFile;
     regex_t reIncludeHeaderFile;
+    regex_t reWarning;
+    regex_t reError;
 
     TMacroList macroList;
 
@@ -104,6 +106,14 @@ int initializePreProcessor()
     if (0 != result)
         return -1;
 
+    result = regcomp(&preProc.reWarning, "^[ \t]*#[ \t]*warning[ \t]+(.*)[ \t]*\n$", REG_EXTENDED);
+    if (0 != result)
+        return -1;
+
+    result = regcomp(&preProc.reError, "^[ \t]*#[ \t]*error[ \t]+(.*)[ \t]*\n$", REG_EXTENDED);
+    if (0 != result)
+        return -1;
+
     /*  initialize macro list */
     result = initializeMacroList(&preProc.macroList);
     if (0 != result)
@@ -137,6 +147,8 @@ void destroyPreProcessor()
     regfree(&preProc.reEndConditional);
     regfree(&preProc.reIncludeSystemHeaderFile);
     regfree(&preProc.reIncludeHeaderFile);
+    regfree(&preProc.reWarning);
+    regfree(&preProc.reError);
 
     /*  destroy macro list */
     destroyMacroList(&preProc.macroList);
@@ -450,6 +462,35 @@ int preProcessor(char *_sourceDirectory, FILE *_fileInput, FILE *_fileOutput)
 
                     i = 0;
                     continue;
+                }
+
+                /*  check if the line syntax is of a preprocessor warning */
+                if (0 == regexec(&preProc.reWarning, line, 2, match, 0))
+                {
+                    char warningMsg[MAX_WARNING_MSG_SIZE];
+                    int result;
+
+                    strncpy(warningMsg, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
+                    warningMsg[match[1].rm_eo - match[1].rm_so] = '\0';
+
+                    fprintf(stderr, "warning: %s\n", warningMsg);
+
+                    i = 0;
+                    continue;
+                }
+
+                /*  check if the line syntax is of a preprocessor error */
+                if (0 == regexec(&preProc.reError, line, 2, match, 0))
+                {
+                    char errorMsg[MAX_WARNING_MSG_SIZE];
+                    int result;
+
+                    strncpy(errorMsg, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
+                    errorMsg[match[1].rm_eo - match[1].rm_so] = '\0';
+
+                    fprintf(stderr, "error: %s\n", errorMsg);
+
+                    return PREPROC_ERROR_MESSAGE;
                 }
 
                 /*  if it's not a comment nor a preprocessor syntax, replace all macros in the line and output it */

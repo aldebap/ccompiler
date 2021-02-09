@@ -2302,7 +2302,121 @@ static void testCase_failFindingIncludeHeaderFile()
 }
 
 /*
-    test case 038 - correctly parse CR + LF line delimited file
+    test case 038 - successfully show a warning message
+*/
+
+static void testCase_successfullyShowWarningMessage()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* source file that include's a header file */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#warning \"This is a warning message\"\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  redirect stderr to a file and call preprocessor() function */
+    int originalStderr = dup(STDERR_FILENO);
+    char redirectStderrFileName[] = "redirectStderr";
+    FILE *stderrFile;
+
+    stderrFile = fopen(redirectStderrFileName, "w");
+    dup2(fileno(stderrFile), STDERR_FILENO);
+    assert_int_equal(addPath(&getOptions()->general.includePathList, "./"), 0);
+    assert_int_equal(initializePreProcessor(), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
+    destroyPreProcessor();
+
+    fclose(stderrFile);
+    dup2(originalStderr, STDERR_FILENO);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    stderrFile = fopen(redirectStderrFileName, "r");
+    fgets(output, sizeof(output), stderrFile);
+    fclose(stderrFile);
+
+    assert_string_equal(output, "warning: \"This is a warning message\"\n");
+
+    remove(redirectStderrFileName);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 039 - successfully show an error message
+*/
+
+static void testCase_successfullyShowErrorMessage()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* source file that include's a header file */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#error \"This is an error message\"\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    /*  redirect stderr to a file and call preprocessor() function */
+    int originalStderr = dup(STDERR_FILENO);
+    char redirectStderrFileName[] = "redirectStderr";
+    FILE *stderrFile;
+
+    stderrFile = fopen(redirectStderrFileName, "w");
+    dup2(fileno(stderrFile), STDERR_FILENO);
+    assert_int_equal(addPath(&getOptions()->general.includePathList, "./"), 0);
+    assert_int_equal(initializePreProcessor(), 0);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), PREPROC_ERROR_MESSAGE);
+    destroyPreProcessor();
+
+    fclose(stderrFile);
+    dup2(originalStderr, STDERR_FILENO);
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    stderrFile = fopen(redirectStderrFileName, "r");
+    fgets(output, sizeof(output), stderrFile);
+    fclose(stderrFile);
+
+    assert_string_equal(output, "error: \"This is an error message\"\n");
+
+    remove(redirectStderrFileName);
+
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 040 - correctly parse CR + LF line delimited file
 */
 
 static void testCase_correctlyParseCRLFLineDelimitedFile()
@@ -2393,7 +2507,9 @@ int runPreProcessorTests()
         {"test case 035 - fail finding for include system header file", testCase_failFindingIncludeSystemHeaderFile, NULL, NULL},
         {"test case 036 - successfully include header file", testCase_successfullyIncludeHeaderFile, NULL, NULL},
         {"test case 037 - fail finding for include header file", testCase_failFindingIncludeHeaderFile, NULL, NULL},
-        {"test case 038 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
+        {"test case 038 - successfully show a warning message", testCase_successfullyShowWarningMessage, NULL, NULL},
+        {"test case 039 - successfully show an error message", testCase_successfullyShowErrorMessage, NULL, NULL},
+        {"test case 040 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
     };
 
     /*  set the test options */

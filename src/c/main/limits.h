@@ -31,4 +31,7 @@
 
 #define MAX_INCLUDE_FILENAME_SIZE 1024
 
+#define MAX_WARNING_MSG_SIZE 1024
+#define MAX_ERROR_MSG_SIZE 1024
+
 #endif /* !defined(__LIMITS_H) */
