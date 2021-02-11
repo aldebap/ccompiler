@@ -42,6 +42,7 @@ static struct TPreProcessor
     regex_t reIncludeHeaderFile;
     regex_t reWarning;
     regex_t reError;
+    regex_t rePragma;
 
     TMacroList macroList;
 
@@ -114,6 +115,10 @@ int initializePreProcessor()
     if (0 != result)
         return -1;
 
+    result = regcomp(&preProc.rePragma, "^[ \t]*#[ \t]*pragma[ \t]+(.*)[ \t]*\n$", REG_EXTENDED);
+    if (0 != result)
+        return -1;
+
     /*  initialize macro list */
     result = initializeMacroList(&preProc.macroList);
     if (0 != result)
@@ -149,6 +154,7 @@ void destroyPreProcessor()
     regfree(&preProc.reIncludeHeaderFile);
     regfree(&preProc.reWarning);
     regfree(&preProc.reError);
+    regfree(&preProc.rePragma);
 
     /*  destroy macro list */
     destroyMacroList(&preProc.macroList);
@@ -482,13 +488,28 @@ int preProcessor(char *_sourceDirectory, FILE *_fileInput, FILE *_fileOutput)
                 /*  check if the line syntax is of a preprocessor error */
                 if (0 == regexec(&preProc.reError, line, 2, match, 0))
                 {
-                    char errorMsg[MAX_WARNING_MSG_SIZE];
+                    char errorMsg[MAX_ERROR_MSG_SIZE];
                     int result;
 
                     strncpy(errorMsg, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
                     errorMsg[match[1].rm_eo - match[1].rm_so] = '\0';
 
                     fprintf(stderr, "error: %s\n", errorMsg);
+
+                    return PREPROC_ERROR_MESSAGE;
+                }
+
+                /*  check if the line syntax is of a preprocessor pragma */
+                if (0 == regexec(&preProc.rePragma, line, 2, match, 0))
+                {
+                    char pragma[MAX_PRAGMA_SIZE];
+                    int result;
+
+                    strncpy(pragma, line + match[1].rm_so, match[1].rm_eo - match[1].rm_so);
+                    pragma[match[1].rm_eo - match[1].rm_so] = '\0';
+
+                    if (getOptions()->general.trace)
+                        fprintf(stdout, "[trace] compiler pragma: %s", pragma);
 
                     return PREPROC_ERROR_MESSAGE;
                 }

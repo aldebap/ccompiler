@@ -147,6 +147,12 @@ static void testCase_success()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, 0);
 
+    /*  expected parameters for pragma */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*pragma[ \t]+(.*)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
     /*  expected parameters for macro list initialization */
     expect_any(__wrap_initializeMacroList, _macroList);
     will_return(__wrap_initializeMacroList, 0);
@@ -823,7 +829,100 @@ static void testCase_failInThirteenthRegex()
 }
 
 /*
-    test case 015 - initialize the preprocessor with fail in the macroList initialization
+    test case 015 - initialize the preprocessor with fail in the fourteenth regex
+*/
+
+static void testCase_failInFoureenthRegex()
+{
+    /*  expected parameters for comment begin */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "(/[*])$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for comment end */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "([*]/)$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for continue next line indicator */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "[\\][ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for simple macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for valued macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*define[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]+([^ ^\t].*[^ ^\t])[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for valued macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*ifdef[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for valued macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*ifndef[ \t]+([_a-zA-Z][_a-zA-Z0-9]+)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for valued macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*else[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for valued macro definition */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*endif[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for include system header file */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*include[ \t]+<[ \t]*([^ ^\t]+)[ \t]*>[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for include header file */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*include[ \t]+\"[ \t]*([^ ^\t]+)[ \t]*\"[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for warning message */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*warning[ \t]+(.*)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for error message */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*error[ \t]+(.*)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
+    /*  expected parameters for pragma */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*pragma[ \t]+(.*)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, REG_BADPAT);
+
+    assert_int_equal(initializePreProcessor(), -1);
+}
+
+/*
+    test case 016 - initialize the preprocessor with fail in the macroList initialization
 */
 
 static void testCase_failInMacroListInitialization()
@@ -906,6 +1005,12 @@ static void testCase_failInMacroListInitialization()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, 0);
 
+    /*  expected parameters for pragma */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*pragma[ \t]+(.*)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
     /*  expected parameters for macro name list allocation */
     expect_any(__wrap_initializeMacroList, _macroList);
     will_return(__wrap_initializeMacroList, -1);
@@ -914,7 +1019,7 @@ static void testCase_failInMacroListInitialization()
 }
 
 /*
-    test case 016 - initialize the preprocessor with fail in the copy macro list
+    test case 017 - initialize the preprocessor with fail in the copy macro list
 */
 
 static void testCase_failInCopyMacroList()
@@ -997,6 +1102,12 @@ static void testCase_failInCopyMacroList()
     expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
     will_return(__wrap_regcomp, 0);
 
+    /*  expected parameters for pragma */
+    expect_any(__wrap_regcomp, _regex);
+    expect_string(__wrap_regcomp, _pattern, "^[ \t]*#[ \t]*pragma[ \t]+(.*)[ \t]*\n$");
+    expect_value(__wrap_regcomp, _cflags, REG_EXTENDED);
+    will_return(__wrap_regcomp, 0);
+
     /*  expected parameters for macro name list allocation */
     expect_any(__wrap_initializeMacroList, _macroList);
     will_return(__wrap_initializeMacroList, 0);
@@ -1030,8 +1141,9 @@ int runInitializePreProcessorTests()
         {"test case 012 - initialize the preprocessor with fail in the eleventh regex", testCase_failInEleventhRegex, NULL, NULL},
         {"test case 013 - initialize the preprocessor with fail in the twelveth regex", testCase_failInTwelvethRegex, NULL, NULL},
         {"test case 014 - initialize the preprocessor with fail in the thirteenth regex", testCase_failInThirteenthRegex, NULL, NULL},
-        {"test case 015 - initialize the preprocessor with fail in the macroList initialization", testCase_failInMacroListInitialization, NULL, NULL},
-        {"test case 016 - initialize the preprocessor with fail in the copy macro list", testCase_failInCopyMacroList, NULL, NULL},
+        {"test case 015 - initialize the preprocessor with fail in the fourteenth regex", testCase_failInFoureenthRegex, NULL, NULL},
+        {"test case 016 - initialize the preprocessor with fail in the macroList initialization", testCase_failInMacroListInitialization, NULL, NULL},
+        {"test case 017 - initialize the preprocessor with fail in the copy macro list", testCase_failInCopyMacroList, NULL, NULL},
     };
 
     return cmocka_run_group_tests_name("initializePreProcessor.c tests", testCases, NULL, NULL);
