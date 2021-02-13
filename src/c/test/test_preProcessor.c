@@ -2416,7 +2416,68 @@ static void testCase_successfullyShowErrorMessage()
 }
 
 /*
-    test case 040 - correctly parse CR + LF line delimited file
+    test case 040 - successfully parse the compiler pragma
+*/
+
+static void testCase_successfullyParseCompilerPragma()
+{
+    /*  generate a source file */
+    char sourceFileName[] = "sourceTest.c";
+    FILE *sourceFile;
+
+    sourceFile = fopen(sourceFileName, "w");
+    fprintf(sourceFile, "/* source file that include's a header file */\n");
+    fprintf(sourceFile, "\n");
+    fprintf(sourceFile, "#pragma GCC once\n");
+    fclose(sourceFile);
+
+    /*  preprocessor pass */
+    char preProcessorFileName[] = "sourceTest.i";
+    FILE *preProcessorFile;
+
+    sourceFile = fopen(sourceFileName, "r");
+    preProcessorFile = fopen(preProcessorFileName, "w");
+
+    assert_int_equal(addPath(&getOptions()->general.includePathList, "./"), 0);
+    assert_int_equal(initializePreProcessor(), 0);
+
+    /*  redirect stdout to a file and call preProcessor() function */
+    int originalStdout = dup(STDOUT_FILENO);
+    char redirectStdoutFileName[] = "redirectStdout";
+    FILE *stdoutFile;
+
+    stdoutFile = fopen(redirectStdoutFileName, "w");
+    dup2(fileno(stdoutFile), STDOUT_FILENO);
+    assert_int_equal(preProcessor("./", sourceFile, preProcessorFile), 0);
+    fclose(stdoutFile);
+    dup2(originalStdout, STDOUT_FILENO);
+
+    /*  check the results from redirected file */
+    char output[1024];
+    size_t outputSize;
+
+    stdoutFile = fopen(redirectStdoutFileName, "r");
+    fgets(output, sizeof(output), stdoutFile);
+    fgets(output, sizeof(output), stdoutFile);
+    fclose(stdoutFile);
+
+    fprintf(stdout, "[debug] output line: %s", output);
+    assert_string_equal(output, "[trace] compiler pragma: GCC once\n");
+
+    destroyPreProcessor();
+
+    //TODO: make sure the pragma was ignores from source file
+
+    fclose(sourceFile);
+    fclose(preProcessorFile);
+
+    remove(redirectStdoutFileName);
+    remove(sourceFileName);
+    remove(preProcessorFileName);
+}
+
+/*
+    test case 041 - correctly parse CR + LF line delimited file
 */
 
 static void testCase_correctlyParseCRLFLineDelimitedFile()
@@ -2509,7 +2570,8 @@ int runPreProcessorTests()
         {"test case 037 - fail finding for include header file", testCase_failFindingIncludeHeaderFile, NULL, NULL},
         {"test case 038 - successfully show a warning message", testCase_successfullyShowWarningMessage, NULL, NULL},
         {"test case 039 - successfully show an error message", testCase_successfullyShowErrorMessage, NULL, NULL},
-        {"test case 040 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
+        //        {"test case 040 - successfully parse the compiler pragma", testCase_successfullyParseCompilerPragma, NULL, NULL},
+        {"test case 041 - correctly parse CR + LF line delimited file", testCase_correctlyParseCRLFLineDelimitedFile, NULL, NULL},
     };
 
     /*  set the test options */

@@ -20,7 +20,14 @@ then
     ctest --output-on-failure
 else
     #   execute all unit tests using ctest
-    ctest --quiet
+    #   ctest --quiet --interactive-debug-mode 0 --output-log test_execution.out
+    ctest
+    if [ 0 -eq $? ]
+    then
+        echo ">>>>> All unit tests successfully executed"
+    else
+        echo ">>>>> Fail in execution of unit tests"
+    fi
 fi
 
 cd "${CURRENT_DIRECTORY}"

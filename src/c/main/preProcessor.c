@@ -509,9 +509,10 @@ int preProcessor(char *_sourceDirectory, FILE *_fileInput, FILE *_fileOutput)
                     pragma[match[1].rm_eo - match[1].rm_so] = '\0';
 
                     if (getOptions()->general.trace)
-                        fprintf(stdout, "[trace] compiler pragma: %s", pragma);
+                        fprintf(stdout, "[trace] compiler pragma: %s\n", pragma);
 
-                    return PREPROC_ERROR_MESSAGE;
+                    i = 0;
+                    continue;
                 }
 
                 /*  if it's not a comment nor a preprocessor syntax, replace all macros in the line and output it */
